@@ -1,5 +1,6 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools>=40.8.0", "wheel", "jupyter_packaging~=0.7.0", "jupyterlab<3.*"]
+build-backend = "setuptools.build_meta"
 
 [tool.black]
 line-length = 120
