@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # project template
-# Copyright(C) 2010 Red Hat, Inc.
+# Copyright(C) 2020 Red Hat, Inc.
 #
 # This program is free software: you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,9 +15,25 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""This is the main script of the template project."""
+"""Dependency manager for JupyterLab notebook."""
 
-from template.version import __version__
 
-if __name__ == "__main__":
-    print(f"A template project with Thoth integration, v{__version__}.")
+__all__ = ['__version__']
+
+def _fetchVersion():
+    import json
+    import os
+
+    HERE = os.path.abspath(os.path.dirname(__file__))
+
+    for d, _, _ in os.walk(HERE): 
+        try:
+            with open(os.path.join(d, 'package.json')) as f:
+                return json.load(f)['version']
+        except FileNotFoundError:
+            pass
+
+    raise FileNotFoundError('Could not find package.json under dir {}'.format(HERE))
+
+__version__ = _fetchVersion()
+

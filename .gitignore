@@ -1,3 +1,11 @@
+*.bundle.*
+lib/
+node_modules/
+*.egg-info/
+.ipynb_checkpoints
+*.tsbuildinfo
+jupyterlab-requirements/labextension
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
