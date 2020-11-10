@@ -33,4 +33,6 @@ def _jupyter_labextension_paths():
     }]
 
 
-
+def _jupyter_server_extension_paths():
+    """Declare the Jupyter server extension paths."""
+    return [{"module": "jupyterlab_requirements"}]
