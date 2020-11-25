@@ -20,6 +20,5 @@
     "target": "es2017",  // Specify ECMAScript target version
     "types": []
   },
-  "include": ["src/*"]  // *** The files TypeScript should type check ***
-
+  "include": ["src/*", "src/*/*", "src/*/*/*"]  // *** The files TypeScript should type check ***
 }
