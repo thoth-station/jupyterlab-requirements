@@ -9,11 +9,11 @@ ipython = "*"
 invectio = "*"
 thamos = "*"
 thoth-python = "*"
+thoth-common = "*"
+jupyterlab =">3.*"
 
 [dev-packages]
-jupyter = "*"
-nbconvert = "==5.6.1"
-jupyterlab =">3.*"
+jupyter-packaging = "*"
 pytest = "*"
 pytest-timeout = "*"
 pytest-cov = "*"
@@ -24,7 +24,7 @@ mypy = "*"
 pre-commit = "==2.0.1"
 
 [requires]
-python_version = "3.6"
+python_version = "3.8"
 
 [pipenv]
 allow_prereleases = true
