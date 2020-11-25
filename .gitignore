@@ -5,6 +5,7 @@ node_modules/
 .ipynb_checkpoints
 *.tsbuildinfo
 jupyterlab-requirements/labextension
+binder/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
