@@ -42,8 +42,7 @@ data_files_spec = [
     ("share/jupyter/lab/extensions%s" % labext_name, lab_path, "**"),
     ("share/jupyter/lab/extensions%s" % labext_name, HERE, "install.json"),
     ("etc/jupyter/jupyter_server_config.d", "jupyter-config/jupyter_server_config.d", "jupyterlab_requirements.json"),
-    # ('etc/jupyter/jupyter_notebook_config.d',
-    #  'jupyter-config', 'jupyterlab_requirements.json')
+    ("etc/jupyter/jupyter_notebook_config.d", 'jupyter-config/jupyter_notebook_config.d', 'jupyterlab_requirements.json')
 ]
 
 # To deploy simultaneously the frontend and the backend,
