@@ -94,6 +94,6 @@ export async function store_dependencies (
       });
       return message;
     } catch (reason) {
-      console.error(`Error on GET /jupyterlab-requirements/thoth.\n${reason}`);
+      console.error(`Error on GET /jupyterlab-requirements/dependencies.\n${reason}`);
     }
   }
