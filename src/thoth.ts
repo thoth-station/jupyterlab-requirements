@@ -9,7 +9,7 @@
  * @since  0.0.1
  */
 
-import { requestAPI } from './handler'; 
+import { requestAPI } from './handler';
 import { Advise, ThothConfig } from './types/thoth';
 
 
@@ -69,6 +69,3 @@ export async function lock_requirements_with_pipenv (
     console.error(`Error on POST /jupyterlab-requirements/thoth.\n${reason}`);
   }
 }
-
-
-

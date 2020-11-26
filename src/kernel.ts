@@ -12,7 +12,7 @@
 // import { NotebookPanel } from '@jupyterlab/notebook';
 // import { Session } from '@jupyterlab/services';
 
-import { requestAPI } from './handler'; 
+import { requestAPI } from './handler';
 
 
 export async function install_packages (
@@ -79,14 +79,14 @@ export async function store_dependencies (
     requirement_lock: string,
     init: RequestInit = {},
   ): Promise<string> {
-  
+
     // POST request
     const dataToSend = {
       notebook_path: notebook_path,
       requirements: requirements,
       requirement_lock: requirement_lock
     };
-  
+
     try {
       const message = await requestAPI<any>('dependencies', {
         body: JSON.stringify(dataToSend),
@@ -97,4 +97,3 @@ export async function store_dependencies (
       console.error(`Error on GET /jupyterlab-requirements/thoth.\n${reason}`);
     }
   }
-  

@@ -36,7 +36,7 @@ export function get_kernel_spec( notebook: NotebookPanel ): string {
 export function get_python_version( notebook: NotebookPanel ): string {
     const kernel_info = get_kernel_spec( notebook )
     console.log('kernel info:', kernel_info)
-    const python_version: string = "3.8" || kernel_info // TODO: Parse kernel info 
+    const python_version: string = "3.8" || kernel_info // TODO: Parse kernel info
 
     console.log('python version identified:', python_version)
     const match = python_version.match( /\d.\d/ )
@@ -161,15 +161,15 @@ export function get_thoth_configuration( notebook: NotebookPanel ): Object | nul
 
 export function set_thoth_configuration( notebook: NotebookPanel, config_file: ThothConfig ): void {
     const metadata = notebook.model.metadata
-  
+
     if ( metadata.has("thoth_config") == false ) {
         metadata.set('thoth_config', JSON.stringify(config_file) )
-  
+
     } else {
         console.debug( "Notebook Thoth config already exist. Updating." )
         // update the notebook metadata
         metadata.set('thoth_config', JSON.stringify(config_file) )
     }
-  
+
     console.log( "Notebook Thoth config have been set successfully." )
   }
