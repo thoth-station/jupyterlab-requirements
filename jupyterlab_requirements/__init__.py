@@ -19,8 +19,6 @@
 import json
 import os.path as osp
 
-from ._version import __version__
-
 from jupyter_server.utils import url_path_join
 
 from .dependency_management import DependenciesHandler
@@ -32,11 +30,13 @@ HERE = osp.abspath(osp.dirname(__file__))
 with open(osp.join(HERE, 'labextension', 'package.json')) as fid:
     data = json.load(fid)
 
+
 def _jupyter_labextension_paths():
     return [{
         'src': 'labextension',
         'dest': data['name']
     }]
+
 
 def _jupyter_server_extension_paths():
     return [{
@@ -45,13 +45,7 @@ def _jupyter_server_extension_paths():
 
 
 def _load_jupyter_server_extension(server_app):
-    """Registers the API handler to receive HTTP requests from the frontend extension.
-
-    Parameters
-    ----------
-    lab_app: jupyterlab.labapp.LabApp
-        JupyterLab application instance
-    """
+    """Register the API handler to receive HTTP requests from the frontend extension."""
     web_app = server_app.web_app
     host_pattern = ".*$"
 

@@ -20,16 +20,17 @@ import json
 import logging
 
 from jupyter_server.base.handlers import APIHandler
-import tornado
+from tornado import web
 
 from ipykernel.kernelspec import install
 
 _LOGGER = logging.getLogger("jupyterlab_requirements.customized_kernel")
 
+
 class CustomizedKernelHandler(APIHandler):
     """Customized Kernel handler to create new kernel for jupyter."""
 
-    @tornado.web.authenticated
+    @web.authenticated
     def post(self):
         """Install packages using selected package manager."""
         input_data = self.get_json_body()

@@ -21,3 +21,11 @@ from .dependencies import DependenciesHandler
 from .customized_kernel import CustomizedKernelHandler
 from .thoth import ThothAdviseHandler
 from .environment import DependencyManagementHandler
+
+__all__ = [
+    "ThothConfigHandler",
+    "DependenciesHandler",
+    "CustomizedKernelHandler",
+    "ThothAdviseHandler",
+    "DependencyManagementHandler"
+]

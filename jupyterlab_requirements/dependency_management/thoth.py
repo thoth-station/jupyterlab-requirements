@@ -24,20 +24,21 @@ from pathlib import Path
 from typing import Tuple, Optional
 
 from jupyter_server.base.handlers import APIHandler
-import tornado
+from tornado import web
 
-import thamos
 from thamos.lib import advise as thoth_advise
 from thoth.python import Project
 from thoth.common import ThothAdviserIntegrationEnum
 
 _LOGGER = logging.getLogger("jupyterlab_requirements.thoth")
 
+
 class ThothAdviseHandler(APIHandler):
     """Thoth handler to receive optimized software stack."""
 
-    @tornado.web.authenticated
+    @web.authenticated
     async def post(self):
+        """Lock dependencies using Thoth service."""
         initial_path = Path.cwd()
         input_data = self.get_json_body()
 

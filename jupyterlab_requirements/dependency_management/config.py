@@ -20,26 +20,27 @@ import json
 import logging
 
 from jupyter_server.base.handlers import APIHandler
-import tornado
+from tornado import web
 
 from thamos.config import _Configuration
 
 _LOGGER = logging.getLogger("jupyterlab_requirements.config")
 
+
 class ThothConfigHandler(APIHandler):
     """Thoth config handler to create new kernel for jupyter."""
 
-    @tornado.web.authenticated
+    @web.authenticated
     def get(self):
         """Get or create thoth config file."""
-        THOTH_YAML_CONFIG = _Configuration()
+        config = _Configuration()
 
-        if not THOTH_YAML_CONFIG.config_file_exists():
+        if not config.config_file_exists():
             _LOGGER.info("Thoth config does not exist, creating it...")
-            THOTH_YAML_CONFIG.create_default_config()
+            config.create_default_config()
 
-        THOTH_YAML_CONFIG.load_config()
+        config.load_config()
 
-        thoth_config = THOTH_YAML_CONFIG._configuration
+        thoth_config = config._configuration
         _LOGGER.info("Thoth config:", thoth_config)
         self.finish(json.dumps(thoth_config))

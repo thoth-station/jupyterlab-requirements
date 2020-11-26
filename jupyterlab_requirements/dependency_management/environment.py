@@ -22,14 +22,15 @@ import os
 from pathlib import Path
 
 from jupyter_server.base.handlers import APIHandler
-import tornado
+from tornado import web
 
 from thamos.cli import install
+
 
 class DependencyManagementHandler(APIHandler):
     """Dependency management handler to handle dependencies."""
 
-    @tornado.web.authenticated
+    @web.authenticated
     def get(self):
         """Get list of packages installed."""
         packages_installed = list_installed_packages()
@@ -37,7 +38,7 @@ class DependencyManagementHandler(APIHandler):
             "data": packages_installed
         }))
 
-    @tornado.web.authenticated
+    @web.authenticated
     def post(self):
         """Install packages using selected package manager."""
         initial_path = Path.cwd()

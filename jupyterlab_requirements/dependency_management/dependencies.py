@@ -22,10 +22,9 @@ import logging
 
 from pathlib import Path
 from jupyter_server.base.handlers import APIHandler
-import tornado
+from tornado import web
 
 from thoth.python import Project
-from thoth.python import Pipfile
 
 _LOGGER = logging.getLogger("jupyterlab_requirements.dependencies")
 
@@ -33,10 +32,9 @@ _LOGGER = logging.getLogger("jupyterlab_requirements.dependencies")
 class DependenciesHandler(APIHandler):
     """Dependencies handler to receive optimized software stack."""
 
-    @tornado.web.authenticated
+    @web.authenticated
     def get(self):
-        pipfile_path: str = "Pipfile"
-
+        """Retrieve requirements files from local disk."""
         dependencies = {
             "error": False,
             "requirements": "",
@@ -44,7 +42,7 @@ class DependenciesHandler(APIHandler):
         }
 
         try:
-            project = Project.from_files(pipfile_path=pipfile_path)
+            project = Project.from_files()
             requirements = project.pipfile.to_dict()
             requirements_lock = project.pipfile_lock.to_dict()
 
@@ -52,12 +50,14 @@ class DependenciesHandler(APIHandler):
             dependencies['requirements_lock'] = requirements_lock
 
         except Exception as e:
+            _LOGGER.warning(e)
             dependencies["error"] = True
 
         self.finish(json.dumps(dependencies))
 
-    @tornado.web.authenticated
+    @web.authenticated
     def post(self):
+        """Store requirements file to disk."""
         initial_path = Path.cwd()
         input_data = self.get_json_body()
 
