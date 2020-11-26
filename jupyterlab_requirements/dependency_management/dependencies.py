@@ -70,8 +70,8 @@ class DependenciesHandler(APIHandler):
         requirements_format = "pipenv"
 
         _write_files(
-            requirements=requirements,
-            requirements_lock=requirements_lock,
+            requirements=json.loads(requirements),
+            requirements_lock=json.loads(requirements_lock),
             requirements_format=requirements_format
         )
 

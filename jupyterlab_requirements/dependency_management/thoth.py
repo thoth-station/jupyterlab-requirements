@@ -26,7 +26,7 @@ from typing import Tuple, Optional
 from jupyter_server.base.handlers import APIHandler
 from tornado import web
 
-from thamos.lib import advise as thoth_advise
+from thamos.lib import advise_using_config
 from thoth.python import Project
 from thoth.common import ThothAdviserIntegrationEnum
 
@@ -42,12 +42,10 @@ class ThothAdviseHandler(APIHandler):
         initial_path = Path.cwd()
         input_data = self.get_json_body()
 
-        recommendation_type: str = input_data["recommendation_type"]
+        config: str = input_data["thoth_config"]
         notebook_path: str = input_data["notebook_path"]
 
         os.chdir(os.path.dirname(notebook_path))
-
-        _LOGGER.info(f"Asking Thoth for advise with recommendation: {recommendation_type}")
 
         requirements_format = 'pipenv'
 
@@ -60,41 +58,46 @@ class ThothAdviseHandler(APIHandler):
         advise = {"requirements": "", "requirement_lock": "", "error": False}
 
         # TODO: Handle all errors
-        response = thoth_advise(
-            pipfile=pipfile,
-            pipfile_lock=pipfile_lock,
-            recommendation_type=recommendation_type,
-            nowait=False,
-            source_type=ThothAdviserIntegrationEnum.JUPYTER_NOTEBOOK,
-            no_static_analysis=True
-        )
+        try:
+            response = advise_using_config(
+                pipfile=pipfile,
+                pipfile_lock=pipfile_lock,
+                config=config,
+                nowait=False,
+                source_type=ThothAdviserIntegrationEnum.JUPYTER_NOTEBOOK,
+                no_static_analysis=True
+            )
 
-        if not response:
-            raise Exception("Analysis was not successful.")
+            if not response:
+                raise Exception("Analysis was not successful.")
 
-        result, error_result = response
+            result, error_result = response
 
-        if error_result:
+            if error_result:
+                advise['error'] = True
+
+            else:
+                # Print report of the best one - thus index zero.
+                if result["report"] and result["report"]["products"]:
+                    justifications = result["report"]["products"][0]["justification"]
+                    _LOGGER.info(f"Justification: {justifications}")
+
+                    stack_info = result["report"]["stack_info"]
+                    _LOGGER.debug(f"Stack info {stack_info}")
+
+                    pipfile = result["report"]["products"][0]["project"]["requirements"]
+                    pipfile_lock = result["report"]["products"][0]["project"][
+                        "requirements_locked"
+                    ]
+
+                    advise['requirements'] = pipfile
+                    advise['requirement_lock'] = pipfile_lock
+
+        except Exception as api_error:
+            _LOGGER.warning(f"error talking to Thoth {api_error}")
             advise['error'] = True
 
-        else:
-            # Print report of the best one - thus index zero.
-            if result["report"] and result["report"]["products"]:
-                justifications = result["report"]["products"][0]["justification"]
-                _LOGGER.info(f"Justification: {justifications}")
-
-                stack_info = result["report"]["stack_info"]
-                _LOGGER.debug(f"Stack info {stack_info}")
-
-                pipfile = result["report"]["products"][0]["project"]["requirements"]
-                pipfile_lock = result["report"]["products"][0]["project"][
-                    "requirements_locked"
-                ]
-
-                advise['requirements'] = pipfile
-                advise['requirement_lock'] = pipfile_lock
-
-        _LOGGER.debug("advise received", advise)
+        _LOGGER.debug(f"advise received {advise}")
 
         os.chdir(initial_path)
         self.finish(json.dumps(advise))
