@@ -28,13 +28,14 @@ export async function get_config_file (
 
 export async function lock_requirements_with_thoth (
   notebook_path: string,
+  thoth_config: string,
   init: RequestInit = {},
 ): Promise<Advise> {
 
   // POST request
   const dataToSend = {
-    recommendation_type: 'latest',
-    notebook_path: notebook_path
+    notebook_path: notebook_path,
+    thoth_config: thoth_config
   };
 
   try {
