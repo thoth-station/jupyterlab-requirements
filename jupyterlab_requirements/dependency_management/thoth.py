@@ -77,7 +77,7 @@ class ThothAdviseHandler(APIHandler):
                 advise['error'] = True
 
             else:
-                # Print report of the best one - thus index zero.
+                # Use report of the best one, therefore index 0
                 if result["report"] and result["report"]["products"]:
                     justifications = result["report"]["products"][0]["justification"]
                     _LOGGER.info(f"Justification: {justifications}")
