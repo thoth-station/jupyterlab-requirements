@@ -20,20 +20,21 @@
 
 __all__ = ['__version__']
 
-def _fetchVersion():
+
+def _fetch_version():
     import json
     import os
 
-    HERE = os.path.abspath(os.path.dirname(__file__))
+    local_path = os.path.abspath(os.path.dirname(__file__))
 
-    for d, _, _ in os.walk(HERE): 
+    for d, _, _ in os.walk(local_path):
         try:
             with open(os.path.join(d, 'package.json')) as f:
                 return json.load(f)['version']
         except FileNotFoundError:
             pass
 
-    raise FileNotFoundError('Could not find package.json under dir {}'.format(HERE))
+    raise FileNotFoundError('Could not find package.json under dir {}'.format(local_path))
 
-__version__ = _fetchVersion()
 
+__version__ = _fetch_version()

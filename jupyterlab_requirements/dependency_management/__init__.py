@@ -1,5 +1,5 @@
 # jupyterlab-requirements
-# Copyright(C) 2020 Red Hat, Inc.
+# Copyright(C) 2020 Francesco Murdaca
 #
 # This program is free software: you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,25 +14,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""Dependency manager for JupyterLab notebook."""
+"""Dependency Management APIs for jupyter server."""
 
-import json
-import os.path as osp
+from .config import ThothConfigHandler
+from .dependencies import DependenciesHandler
+from .customized_kernel import CustomizedKernelHandler
+from .thoth import ThothAdviseHandler
+from .environment import DependencyManagementHandler
 
-from ._version import __version__
-
-HERE = osp.abspath(osp.dirname(__file__))
-
-with open(osp.join(HERE, 'labextension', 'package.json')) as fid:
-    data = json.load(fid)
-
-def _jupyter_labextension_paths():
-    return [{
-        'src': 'labextension',
-        'dest': data['name']
-    }]
-
-
-def _jupyter_server_extension_paths():
-    """Declare the Jupyter server extension paths."""
-    return [{"module": "jupyterlab_requirements"}]
+__all__ = [
+    "ThothConfigHandler",
+    "DependenciesHandler",
+    "CustomizedKernelHandler",
+    "ThothAdviseHandler",
+    "DependencyManagementHandler"
+]
