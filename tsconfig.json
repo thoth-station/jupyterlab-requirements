@@ -1,24 +1,24 @@
 {
   "compilerOptions": {
-    "allowSyntheticDefaultImports": true,  // Allow default imports from modules with no default export
+    "allowSyntheticDefaultImports": true,
     "composite": true,
-    "declaration": true,  // Generate corresponding .d.ts file
-    "esModuleInterop": true,  // Disables namespace imports (import * as fs from "fs") and enables CJS/AMD/UMD style imports (import fs from "fs")
-    "incremental": true,  // Enable incremental compilation by reading/writing information from prior compilations to a file on disk
-    "jsx": "react",  // Support JSX in .tsx files
-    "module": "esnext",  // Specify module code generation
-    "moduleResolution": "node",  // Resolve modules using Node.js style
+    "declaration": true,
+    "esModuleInterop": true,
+    "incremental": true,
+    "jsx": "react",
+    "module": "esnext",
+    "moduleResolution": "node",
     "noEmitOnError": true,
     "noImplicitAny": true,
-    "noUnusedLocals": true,   // Report errors on unused locals
+    "noUnusedLocals": true,
     "preserveWatchOutput": true,
-    "resolveJsonModule": true,  // Include modules imported with .json extension
+    "resolveJsonModule": true,
     "outDir": "lib",
     "rootDir": "src",
     "strict": true,
     "strictNullChecks": false,
-    "target": "es2017",  // Specify ECMAScript target version
+    "target": "es2017",
     "types": []
   },
-  "include": ["src/*", "src/*/*", "src/*/*/*"]  // *** The files TypeScript should type check ***
+  "include": ["src/*", "src/*/*", "src/*/*/*"]
 }
