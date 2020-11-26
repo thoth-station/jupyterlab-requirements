@@ -1,0 +1,7 @@
+{
+  "NotebookApp": {
+    "jpserver_extensions": {
+      "jupyterlab_requirements": true
+    }
+  }
+}
