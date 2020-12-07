@@ -47,7 +47,7 @@
     "watch:labextension": "jupyter labextension watch ."
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.0.0-rc.10",
+    "@jupyterlab/application": "^3.0.0-rc.11",
     "@jupyterlab/launcher": "^3.0.0-rc.11",
     "@jupyterlab/mainmenu": "^3.0.0-rc.11",
     "@jupyterlab/nbformat": "^3.0.0-rc.11",
