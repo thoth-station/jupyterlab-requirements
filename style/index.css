@@ -1,16 +1,144 @@
-.jp-tutorial-view {
-    background-color: AliceBlue;
-  }
-  
-.jp-tutorial-button {
-  background-color: red;
+
+.thoth-new-package-button {
+  background-color: rgb(255, 187, 0);
   border-radius: 12px;
   border: none;
-  color: white;
-  padding: 15px 32px;
+  color: rgb(2, 1, 1);
+  padding: 10px 16px;
   margin: 30px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
   font-size: 16px;
 }
+
+.thoth-new-package-button:hover {
+  background-color: #7a5d0e;
+  color: white;
+}
+
+.thoth-save-button {
+  background-color: rgb(19, 139, 19);
+  border-radius: 12px;
+  border: none;
+  color: white;
+  padding: 10px 16px;
+  margin: 30px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}
+
+.thoth-save-button:hover {
+  background-color: #10da1a;
+  color: white;
+}
+
+.thoth-install-button {
+  background-color: rgb(174, 0, 255);
+  border-radius: 12px;
+  border: none;
+  color: white;
+  padding: 10px 16px;
+  margin: 30px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}
+
+.thoth-install-button:hover {
+  background-color: #b421ad;
+  color: white;
+}
+
+.thoth-ok-button {
+  background-color: rgb(255, 187, 0);
+  border-radius: 12px;
+  border: none;
+  color: rgb(2, 1, 1);
+  padding: 10px 16px;
+  margin: 30px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}
+
+.thoth-ok-button:hover {
+  background-color: #7a5d0e;
+  color: white;
+}
+
+
+ /* Table */
+
+.thoth-table {
+  width: 100%;
+}
+
+.thoth-table th {
+  color: rgb(212, 151, 19);
+  background-color: rgb(255, 255, 255);
+}
+
+
+.thoth-row-button {
+  background-color: rgb(255, 187, 0);
+  border-radius: 12px;
+  border: none;
+  color: rgb(2, 1, 1);
+  padding: 10px 16px;
+  margin: 30px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}
+
+.thoth-row-button:hover {
+  background-color: #7a5d0e;
+  color: white;
+}
+
+.thoth-row-button-deactivated {
+  background-color: rgb(54, 54, 52);
+  border-radius: 12px;
+  border: none;
+  color: rgb(245, 245, 245);
+  padding: 10px 16px;
+  margin: 30px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}
+
+.thoth-package-name-input {
+  background-color: rgb(255, 255, 255);
+  border-radius: 12px;
+  width: 70%;
+  color: rgb(0, 0, 0);
+  padding: 10px 16px;
+  margin: 30px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}
+
+.thoth-constraint-input {
+  background-color: rgb(255, 255, 255);
+  border-radius: 12px;
+  width: 40%;
+  color: rgb(0, 0, 0);
+  padding: 10px 16px;
+  margin: 30px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}
+
+
