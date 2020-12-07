@@ -12,10 +12,6 @@
 
 // Requirements
 
-export interface PythonPackage {
-    [ name: string ]: string
-}
-
 export interface Requires {
     python_version: string
 }
@@ -27,8 +23,7 @@ export interface SourcesEntity {
 }
 
 export interface Requirements {
-    aliases: { [ name: string ]: string }
-    packages: Array<PythonPackage>
+    packages: { [ name: string ]: string }
     requires: Requires
     sources: ( SourcesEntity )[] | null
     "dev-packages"?: any
@@ -53,7 +48,7 @@ export interface LockedPackageVersion {
     markers?: string | null
 }
 
-export interface RequirementLock {
+export interface RequirementsLock {
     _meta: Meta
     default: { [ name: string ]: LockedPackageVersion }
     develop: { [ name: string ]: LockedPackageVersion }

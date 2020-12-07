@@ -14,7 +14,7 @@ import _ from "lodash"
 import { NotebookPanel } from '@jupyterlab/notebook';
 // import { KernelSpec } from '@jupyterlab/services';
 
-import { Source, Requirements, RequirementLock, PythonPackage } from './types/requirements';
+import { Source, Requirements, RequirementsLock } from './types/requirements';
 import { ThothConfig } from "./types/thoth";
 
 
@@ -52,31 +52,50 @@ export function get_python_version( notebook: NotebookPanel ): string {
 /**
  * Function: Get Python requirements from notebook metadata.
  */
-export function get_requirements( notebook: NotebookPanel ):  Promise<Requirements | null> {
+export function get_requirements( notebook: NotebookPanel ):  Promise<Requirements> {
     return new Promise( async ( resolve, reject ) => {
-        console.log( "Reading notebook requirements." )
-
-        let notebookMetadataRequirements: Requirements | {} = notebook.model.metadata.get("requirements") || {}
-
-        const aliases = _.get( notebookMetadataRequirements, "aliases" ) || {}
-        const python_packages: Array<PythonPackage> = []
-        const requires = { python_version: get_python_version( notebook ) }
-
-        if (notebookMetadataRequirements == null) {
-            console.log("requirements key is not in notebook metadata!")
-            const notebookMetadataRequirements: Requirements = {
-                aliases: aliases,
-                packages: python_packages,
-                requires: requires,
-                sources: [
-                    new Source()
-                ]
-            }
-            resolve( notebookMetadataRequirements )
-        }
 
         try {
-            resolve( notebookMetadataRequirements as Requirements )
+            const retrieved = notebook.model.metadata.get("requirements")
+
+            if (typeof retrieved == "undefined") {
+                console.log("requirements key is not in notebook metadata! Initialize requirements for user...")
+                const python_packages: { [ name: string ]: string } = {}
+                const requires = { python_version: get_python_version( notebook ) }
+
+                var requirements: Requirements = {
+                    packages: python_packages,
+                    requires: requires,
+                    sources: [
+                        new Source()
+                    ]
+                }
+                return resolve( requirements )
+
+            }
+
+            let notebookMetadataRequirements: Requirements = JSON.parse(retrieved.toString())
+
+            if (_.size(notebookMetadataRequirements) == 0) {
+                console.log("requirements key is not in notebook metadata! Initialize requirements for user...")
+
+                const python_packages: { [ name: string ]: string } = {}
+                const requires = { python_version: get_python_version( notebook ) }
+
+                var requirements: Requirements = {
+                    packages: python_packages,
+                    requires: requires,
+                    sources: [
+                        new Source()
+                    ]
+                }
+                return resolve( requirements )
+            }
+
+            else {
+                console.log("requirements key is in notebook metadata!")
+                return resolve (notebookMetadataRequirements)
+            }
 
         } catch ( err ) {
             reject( err )
@@ -93,14 +112,23 @@ export function set_requirements( notebook: NotebookPanel, requirements: Require
 
     if ( metadata.has("requirements") == false ) {
         metadata.set('requirements', JSON.stringify(requirements) )
+        console.log( "Notebook requirements have been set successfully." )
 
     } else {
-        console.debug( "Notebook requirements already exist. Updating." )
-        // update the notebook metadata
-        metadata.set('requirements', JSON.stringify(requirements) )
-    }
+        console.log( "Notebook requirements already exist. Updating..." )
 
-    console.log( "Notebook requirements have been set successfully." )
+        // update the notebook metadata
+
+        console.log()
+        // Insert empty requirements if no packages are present.
+        if  (typeof requirements.packages === 'undefined')  {
+            metadata.set('requirements', {} )
+            return
+        }
+
+        metadata.set('requirements', JSON.stringify(requirements) )
+        return
+    }
 }
 
 /**
@@ -108,51 +136,61 @@ export function set_requirements( notebook: NotebookPanel, requirements: Require
  */
 
 // TODO: Adjust method to receive Promise<Requirements | null>
-export function get_requirement_lock( notebook: NotebookPanel ): Object | null {
+export function get_requirement_lock( notebook: NotebookPanel ): Promise<RequirementsLock|null> {
+    return new Promise( async ( resolve, reject ) => {
 
-    let notebookMetadataRequirementsLock = notebook.model.metadata.get("requirement_lock")
+        try {
+            const retrieved = notebook.model.metadata.get("requirements_lock")
 
-    if (notebookMetadataRequirementsLock == null) {
-        console.log("requirement_lock key is not in notebook metadata!")
-        return null
-    }
+            if (typeof retrieved == "undefined") {
+                console.log("requirement_lock key is not in notebook metadata!")
+                resolve( null )
+            }
 
-    return notebookMetadataRequirementsLock
+            var notebookMetadataRequirementsLock: RequirementsLock = JSON.parse(retrieved.toString())
+
+            console.log("requirements_lock key is in notebook metadata!")
+            resolve ( notebookMetadataRequirementsLock )
+
+        } catch ( err ) {
+            reject( err )
+        }
+    })
 }
 
 /**
  * Function: Set Python requirements into notebook metadata.
  */
 
-export function set_requirement_lock( notebook: NotebookPanel, requirements_lock: RequirementLock ): void {
+export function set_requirement_lock( notebook: NotebookPanel, requirements_lock: RequirementsLock ): void {
     const metadata = notebook.model.metadata
 
-    if ( metadata.has("requirement_lock") == false ) {
-        metadata.set('requirement_lock', JSON.stringify(requirements_lock) )
+    if ( metadata.has("requirements_lock") == false ) {
+        metadata.set('requirements_lock', JSON.stringify(requirements_lock) )
 
     } else {
         console.debug( "Notebook requirement_lock already exist. Updating." )
         // update the notebook metadata
-        metadata.set('requirement_lock', JSON.stringify(requirements_lock) )
+        metadata.set('requirements_lock', JSON.stringify(requirements_lock) )
     }
 
-    console.log( "Notebook requirement_lock have been set successfully." )
+    console.log( "Notebook requirements_lock have been set successfully." )
 }
 
 
 /**
  * Function: Get Thoth configuration from notebook metadata.
  */
-export function get_thoth_configuration( notebook: NotebookPanel ): Object | null {
+export function get_thoth_configuration( notebook: NotebookPanel ): ThothConfig | null {
 
-    let notebookMetadataThothConfig = notebook.model.metadata.get("thoth_config")
+    let retrieved = notebook.model.metadata.get("thoth_config")
 
-    if (notebookMetadataThothConfig == null) {
+    if (retrieved == null) {
         console.log("thoth_config key is not in notebook metadata!")
         return null
     }
 
-    return notebookMetadataThothConfig
+    return  JSON.parse(JSON.stringify(retrieved))
 }
 
 /**
