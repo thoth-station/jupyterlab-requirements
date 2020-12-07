@@ -9,11 +9,12 @@
  * @since  0.0.1
  */
 
-// import { NotebookPanel } from '@jupyterlab/notebook';
-// import { Session } from '@jupyterlab/services';
 
 import { requestAPI } from './handler';
 
+/**
+ * Function: Install dependencies in the new kernel.
+ */
 
 export async function install_packages (
   notebook_path: string,
@@ -28,50 +29,73 @@ export async function install_packages (
   };
 
   try {
-    const message = await requestAPI<any>('dependencies', {
+    const message = await requestAPI<any>('kernel/install', {
       body: JSON.stringify(dataToSend),
       method: 'POST'
     });
     return message;
   } catch (reason) {
-    console.error(`Error on GET /jupyterlab-requirements/thoth.\n${reason}`);
+    console.error(`Error on POST /jupyterlab-requirements/kernel/install.\n${reason}`);
   }
 }
 
-export async function get_installed_packages (
-  init: RequestInit = {}
+/**
+ * Function: Discover installed packages in the kernel.
+ */
+
+export async function discover_installed_packages (
+  notebook_path: string,
+  kernel_name?: string,
+  init: RequestInit = {},
 ): Promise<string> {
 
-  // GET request
+  // POST request
+  const dataToSend = {
+    notebook_path: notebook_path,
+    kernel_name: kernel_name || ""
+  };
+
   try {
-    const configfile = await requestAPI<any>('environment');
-    console.log(configfile);
-    return configfile;
+    const packages = await requestAPI<any>('kernel/packages', {
+      body: JSON.stringify(dataToSend),
+      method: 'POST'
+    });
+    return JSON.parse(JSON.stringify(packages));
   } catch (reason) {
-    console.error(`Error on GET /jupyterlab-requirements/environment.\n${reason}`);
+    console.error(`Error on POST /jupyterlab-requirements/kernel/packages.\n${reason}`);
   }
 }
 
+/**
+ * Function: Create new kernel.
+ */
+
 export async function create_new_kernel (
+  notebook_path: string,
   kernel_name: string,
   init: RequestInit = {}
 ): Promise<string> {
 
   // POST request
   const dataToSend = {
+    notebook_path: notebook_path,
     kernel_name: kernel_name
   };
 
   try {
-    const message = await requestAPI<any>('customized_kernel', {
+    const message = await requestAPI<any>('kernel/create', {
       body: JSON.stringify(dataToSend),
       method: 'POST'
     });
     return message;
   } catch (reason) {
-    console.error(`Error on GET /jupyterlab-requirements/customized_kernel.\n${reason}`);
+    console.error(`Error on POST /jupyterlab-requirements/kernel/create.\n${reason}`);
   }
 }
+
+/**
+ * Function: Store dependencies locally.
+ */
 
 export async function store_dependencies (
     notebook_path: string,
@@ -88,12 +112,12 @@ export async function store_dependencies (
     };
 
     try {
-      const message = await requestAPI<any>('dependencies', {
+      const message = await requestAPI<any>('file/dependencies', {
         body: JSON.stringify(dataToSend),
         method: 'POST'
       });
       return message;
     } catch (reason) {
-      console.error(`Error on GET /jupyterlab-requirements/dependencies.\n${reason}`);
+      console.error(`Error on POST /jupyterlab-requirements/file/dependencies.\n${reason}`);
     }
   }

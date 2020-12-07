@@ -9,13 +9,18 @@
  * @since  0.0.1
  */
 
-import { Requirements, RequirementLock } from "./requirements";
+import { Requirements, RequirementsLock } from "./requirements";
 
 
 export interface Advise {
     error: boolean,
     requirements: Requirements,
-    requirement_lock: RequirementLock
+    requirement_lock: RequirementsLock
+}
+
+export interface PipenvResult {
+    error: boolean,
+    requirements_lock: RequirementsLock
 }
 
 // Thoth config
@@ -37,5 +42,5 @@ export interface ThothConfig {
     host: string,
     tls_verify: boolean,
     requirements_format: string,
-    runtime_environments: [ RuntimeEnvornment ]
+    runtime_environments: Array<RuntimeEnvornment>
 }
