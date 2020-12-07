@@ -21,13 +21,13 @@ import os
 import logging
 
 from pathlib import Path
-from typing import Tuple, Optional
 
 from jupyter_server.base.handlers import APIHandler
 from tornado import web
 
-from thamos.lib import advise_using_config
-from thoth.python import Project
+from thamos.lib import advise_here, advise_using_config
+from thamos.lib import advise as thamos_advise
+from thoth.python import Project, Pipfile
 from thoth.common import ThothAdviserIntegrationEnum
 
 _LOGGER = logging.getLogger("jupyterlab_requirements.thoth")
@@ -44,29 +44,32 @@ class ThothAdviseHandler(APIHandler):
 
         config: str = input_data["thoth_config"]
         notebook_path: str = input_data["notebook_path"]
+        requirements: dict = json.loads(input_data["requirements"])
 
-        os.chdir(os.path.dirname(notebook_path))
+        print("Starting using thoth...")
+        pipfile_string = Pipfile.from_dict(requirements).to_string()
 
-        requirements_format = 'pipenv'
+        complete_path = initial_path.joinpath(Path(notebook_path).parent)
+        os.chdir(os.path.dirname(complete_path))
 
-        pipfile, pipfile_lock = _load_files(
-            requirements_format=requirements_format
-        )
-        _LOGGER.info(f"Input Pipfile: \n{pipfile}")
-        _LOGGER.info(f"Input Pipfile.lock: \n{pipfile_lock}")
+        _LOGGER.info(f"Current path: {Path(notebook_path).parent}")
+        _LOGGER.info(f"Input Pipfile: \n{pipfile_string}")
 
         advise = {"requirements": "", "requirement_lock": "", "error": False}
 
         # TODO: Handle all errors
         try:
             response = advise_using_config(
-                pipfile=pipfile,
-                pipfile_lock=pipfile_lock,
+                pipfile=pipfile_string,
+                pipfile_lock="",
+                force=True,
                 config=config,
                 nowait=False,
                 source_type=ThothAdviserIntegrationEnum.JUPYTER_NOTEBOOK,
                 no_static_analysis=True
             )
+
+            print(f"Response: {response}")
 
             if not response:
                 raise Exception("Analysis was not successful.")
@@ -101,21 +104,3 @@ class ThothAdviseHandler(APIHandler):
 
         os.chdir(initial_path)
         self.finish(json.dumps(advise))
-
-
-def _load_files(requirements_format: str) -> Tuple[str, Optional[str]]:
-    """Load Pipfile/Pipfile.lock or requirements.in/txt from the current directory."""
-    if requirements_format == "pipenv":
-        project = Project.from_files(
-            without_pipfile_lock=not os.path.exists("Pipfile.lock")
-        )
-    elif requirements_format in ("pip", "pip-tools", "pip-compile"):
-        project = Project.from_pip_compile_files(allow_without_lock=True)
-    else:
-        raise ValueError(
-            f"Unknown configuration option for requirements format: {requirements_format!r}"
-        )
-    return (
-        project.pipfile.to_string(),
-        project.pipfile_lock.to_string() if project.pipfile_lock else None,
-    )

@@ -17,15 +17,18 @@
 """Dependency Management APIs for jupyter server."""
 
 from .config import ThothConfigHandler
-from .dependencies import DependenciesHandler
-from .customized_kernel import CustomizedKernelHandler
+from .customized_kernel import JupyterKernelHandler
+from .dependencies_files import DependenciesFilesHandler
+from .dependencies_handler import DependencyInstallHandler, DependencyInstalledHandler
 from .thoth import ThothAdviseHandler
-from .environment import DependencyManagementHandler
+from .pipenv import PipenvHandler
 
 __all__ = [
-    "ThothConfigHandler",
-    "DependenciesHandler",
-    "CustomizedKernelHandler",
+    "DependenciesFilesHandler",
+    "DependencyInstallHandler",
+    "DependencyInstalledHandler",
+    "JupyterKernelHandler",
+    "PipenvHandler",
     "ThothAdviseHandler",
-    "DependencyManagementHandler"
+    "ThothConfigHandler",
 ]
