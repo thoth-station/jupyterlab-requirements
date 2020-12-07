@@ -443,9 +443,6 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
           const message = await create_new_kernel( notebook_path, this.state.kernel_name );
           console.log("Kernel message", message);
-          
-          // TODO: make this automatic for user
-          // this.props.panel.sessionContext.session.changeKernel()
 
           this.changeUIstate(
             "ready",
