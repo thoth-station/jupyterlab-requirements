@@ -21,16 +21,17 @@ import os
 import logging
 
 from pathlib import Path
+
 from jupyter_server.base.handlers import APIHandler
 from tornado import web
 
-from thoth.python import Project
+from thamos.cli import _load_files, _write_files
 
-_LOGGER = logging.getLogger("jupyterlab_requirements.dependencies")
+_LOGGER = logging.getLogger("jupyterlab_requirements.dependencies_files")
 
 
-class DependenciesHandler(APIHandler):
-    """Dependencies handler to receive optimized software stack."""
+class DependenciesFilesHandler(APIHandler):
+    """Dependencies files handler to store, extract software stack."""
 
     @web.authenticated
     def get(self):
@@ -41,8 +42,10 @@ class DependenciesHandler(APIHandler):
             "requirements_lock": ""
         }
 
+        requirements_format = "pipenv"
+
         try:
-            project = Project.from_files()
+            project = _load_files(requirements_format=requirements_format)
             requirements = project.pipfile.to_dict()
             requirements_lock = project.pipfile_lock.to_dict()
 
@@ -79,21 +82,3 @@ class DependenciesHandler(APIHandler):
         self.finish(json.dumps({
             "message": f"Successfully stored requirements at {notebook_path}!"
         }))
-
-
-def _write_files(
-    requirements: str, requirements_lock: str, requirements_format: str
-) -> None:
-    """Write content of Pipfile/Pipfile.lock or requirements.in/txt to the current directory."""
-    project = Project.from_strings(requirements, requirements_lock)
-    if requirements_format == "pipenv":
-        _LOGGER.debug("Writing to Pipfile/Pipfile.lock in %r", os.getcwd())
-        project.to_files()
-    elif requirements_format in ("pip", "pip-tools", "pip-compile"):
-        _LOGGER.debug("Writing to requirements.in/requirements.txt in %r", os.getcwd())
-        project.to_pip_compile_files()
-        _LOGGER.debug("No changes to Pipfile to write")
-    else:
-        raise ValueError(
-            f"Unknown requirements format, supported are 'pipenv' and 'pip': {requirements_format!r}"
-        )

@@ -21,11 +21,13 @@ import os.path as osp
 
 from jupyter_server.utils import url_path_join
 
-from .dependency_management import DependenciesHandler
+from .dependency_management import DependenciesFilesHandler, PipenvHandler
 from .dependency_management import ThothConfigHandler, ThothAdviseHandler
-from .dependency_management import CustomizedKernelHandler, DependencyManagementHandler
+from .dependency_management import JupyterKernelHandler, DependencyInstalledHandler, DependencyInstallHandler
 
 HERE = osp.abspath(osp.dirname(__file__))
+
+__version__ = "0.0.1"
 
 with open(osp.join(HERE, 'labextension', 'package.json')) as fid:
     data = json.load(fid)
@@ -55,11 +57,13 @@ def _load_jupyter_server_extension(server_app):
 
     # Prepend the base_url so that it works in a jupyterhub setting
     handlers = [
-        (url_path_join(base_url, f"{url_path}/dependencies"), DependenciesHandler),
-        (url_path_join(base_url, f"{url_path}/config"), ThothConfigHandler),
-        (url_path_join(base_url, f"{url_path}/thoth"), ThothAdviseHandler),
-        (url_path_join(base_url, f"{url_path}/environment"), DependencyManagementHandler),
-        (url_path_join(base_url, f"{url_path}/customized_kernel"), CustomizedKernelHandler),
+        (url_path_join(base_url, f"{url_path}/thoth/config"), ThothConfigHandler),
+        (url_path_join(base_url, f"{url_path}/thoth/resolution"), ThothAdviseHandler),
+        (url_path_join(base_url, f"{url_path}/pipenv"), PipenvHandler),
+        (url_path_join(base_url, f"{url_path}/kernel/packages"), DependencyInstalledHandler),
+        (url_path_join(base_url, f"{url_path}/kernel/install"), DependencyInstallHandler),
+        (url_path_join(base_url, f"{url_path}/kernel/create"), JupyterKernelHandler),
+        (url_path_join(base_url, f"{url_path}/file/dependencies"), DependenciesFilesHandler),
     ]
     web_app.add_handlers(host_pattern, handlers)
 

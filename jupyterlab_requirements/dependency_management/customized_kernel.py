@@ -16,33 +16,59 @@
 
 """Create new kernel API for jupyterlab requirements."""
 
+import os
 import json
 import logging
+import subprocess
+
+from pathlib import Path
 
 from jupyter_server.base.handlers import APIHandler
 from tornado import web
 
-from ipykernel.kernelspec import install
 
 _LOGGER = logging.getLogger("jupyterlab_requirements.customized_kernel")
 
 
-class CustomizedKernelHandler(APIHandler):
-    """Customized Kernel handler to create new kernel for jupyter."""
+class JupyterKernelHandler(APIHandler):
+    """Jupyter Kernel handler to create new kernel for notebooks."""
 
     @web.authenticated
     def post(self):
-        """Install packages using selected package manager."""
+        """Create kernel using new virtual environment."""
+        initial_path = Path.cwd()
         input_data = self.get_json_body()
 
+        notebook_path: str = input_data["notebook_path"]
         kernel_name: str = input_data["kernel_name"]
 
-        # TODO: Check if ipykernel is installed
+        complete_path = initial_path.joinpath(Path(notebook_path).parent)
+        os.chdir(os.path.dirname(complete_path))
+
+        # TODO: Check if ipykernel is installed, otherwise install it
+        _ = subprocess.run(
+            f". {kernel_name}/bin/activate && pip show ipykernel",
+            shell=True,
+            capture_output=True,
+            cwd=complete_path
+        )
+
+        _ = subprocess.run(f". {kernel_name}/bin/activate && pip install ipykernel", shell=True, cwd=complete_path)
 
         _LOGGER.debug(f"Installing kernelspec called {kernel_name}." )
-        kernel_path = install(kernel_name=kernel_name, user=True)
 
+        try:
+            process_output = subprocess.run(
+                f". {kernel_name}/bin/activate && ipython kernel install --user"
+                f" --name={kernel_name} --display-name 'Python ({kernel_name})'",
+                shell=True,
+                cwd=complete_path
+            )
+            _LOGGER.info(process_output.stdout.decode("utf-8"))
+        except Exception as e :
+            _LOGGER.error(f"Could not enter environment {e}")
+
+        os.chdir(initial_path)
         self.finish(json.dumps({
-            "data": f"installed kernel {kernel_name} at {kernel_path}"
+            "data": f"installed kernel {kernel_name} at {complete_path}"
         }))
-        self.flush()
