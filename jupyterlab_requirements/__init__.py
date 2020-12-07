@@ -27,6 +27,9 @@ from .dependency_management import JupyterKernelHandler, DependencyInstalledHand
 
 HERE = osp.abspath(osp.dirname(__file__))
 
+__name__ = "jupyterlab-requirements"
+__version__ = "0.0.1"
+
 with open(osp.join(HERE, 'labextension', 'package.json')) as fid:
     data = json.load(fid)
 
