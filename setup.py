@@ -15,9 +15,18 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 # The name of the project
 name="jupyterlab_requirements"
 
-# Get our version
-with open(os.path.join(HERE, 'package.json')) as f:
-    version = json.load(f)['version']
+# Get version
+def _get_version():
+    with open(os.path.join("jupyterlab_requirements", "__init__.py")) as f:
+        content = f.readlines()
+
+    for line in content:
+        if line.startswith("__version__ ="):
+            # dirty, remove trailing and leading chars
+            return line.split(" = ")[1][1:-2]
+    raise ValueError("No version identifier found")
+
+version = _get_version()
 
 lab_path = os.path.join(HERE, name, "labextension")
 
