@@ -61,6 +61,7 @@ class DependencyInstalledHandler(APIHandler):
         os.chdir(initial_path)
         self.finish(json.dumps(packages))
 
+
 class DependencyInstallHandler(APIHandler):
     """Dependency management handler to install dependencies."""
 
@@ -79,14 +80,15 @@ class DependencyInstallHandler(APIHandler):
         env_path = complete_path.joinpath(env_name)
 
         package_manager: str = 'micropipenv'
+
         # TODO: Check if micropipenv is installed
-        print(f"Installing requirements using {package_manager}." )
+        _LOGGER.info(f"Installing requirements using {package_manager}." )
 
         #1. Creating new environment
         cli_run([str(env_path)])
 
         #2. Install using micropipenv
-        process_output = subprocess.call(f". {env_name}/bin/activate && micropipenv install --dev", shell=True, cwd=complete_path)
+        _ = subprocess.call(f". {env_name}/bin/activate && micropipenv install --dev", shell=True, cwd=complete_path)
 
         os.chdir(initial_path)
         self.finish(json.dumps({

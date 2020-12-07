@@ -27,8 +27,6 @@ from .dependency_management import JupyterKernelHandler, DependencyInstalledHand
 
 HERE = osp.abspath(osp.dirname(__file__))
 
-__name__ = "jupyterlab-requirements"
-__version__ = "0.0.1"
 
 with open(osp.join(HERE, 'labextension', 'package.json')) as fid:
     data = json.load(fid)
@@ -64,7 +62,7 @@ def _load_jupyter_server_extension(server_app):
         (url_path_join(base_url, f"{url_path}/kernel/packages"), DependencyInstalledHandler),
         (url_path_join(base_url, f"{url_path}/kernel/install"), DependencyInstallHandler),
         (url_path_join(base_url, f"{url_path}/kernel/create"), JupyterKernelHandler),
-        (url_path_join(base_url, f"{url_path}/file/dependencies"), JupyterKernelHandler),
+        (url_path_join(base_url, f"{url_path}/file/dependencies"), DependenciesFilesHandler),
     ]
     web_app.add_handlers(host_pattern, handlers)
 

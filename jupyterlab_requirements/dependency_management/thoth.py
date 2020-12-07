@@ -25,9 +25,8 @@ from pathlib import Path
 from jupyter_server.base.handlers import APIHandler
 from tornado import web
 
-from thamos.lib import advise_here, advise_using_config
-from thamos.lib import advise as thamos_advise
-from thoth.python import Project, Pipfile
+from thamos.lib import advise_using_config
+from thoth.python import Pipfile
 from thoth.common import ThothAdviserIntegrationEnum
 
 _LOGGER = logging.getLogger("jupyterlab_requirements.thoth")
@@ -46,7 +45,7 @@ class ThothAdviseHandler(APIHandler):
         notebook_path: str = input_data["notebook_path"]
         requirements: dict = json.loads(input_data["requirements"])
 
-        print("Starting using thoth...")
+        _LOGGER.info("Starting using thoth...")
         pipfile_string = Pipfile.from_dict(requirements).to_string()
 
         complete_path = initial_path.joinpath(Path(notebook_path).parent)
@@ -69,7 +68,7 @@ class ThothAdviseHandler(APIHandler):
                 no_static_analysis=True
             )
 
-            print(f"Response: {response}")
+            _LOGGER.info(f"Response: {response}")
 
             if not response:
                 raise Exception("Analysis was not successful.")

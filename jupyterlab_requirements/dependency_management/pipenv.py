@@ -27,7 +27,6 @@ from jupyter_server.base.handlers import APIHandler
 from tornado import web
 
 from thoth.python import Pipfile, PipfileLock
-from thamos.cli import _write_files, _load_files
 
 _LOGGER = logging.getLogger("jupyterlab_requirements.pipenv")
 
@@ -45,7 +44,7 @@ class PipenvHandler(APIHandler):
         requirements: dict = json.loads(input_data["requirements"])
 
         pipfile_string = Pipfile.from_dict(requirements).to_string()
-        print("Starting using pipenv...")
+        _LOGGER.info("Starting using pipenv...")
 
         complete_path = initial_path.joinpath(Path(notebook_path).parent)
         os.chdir(os.path.dirname(complete_path))
@@ -54,8 +53,8 @@ class PipenvHandler(APIHandler):
         with open(pipfile_path, "w") as pipfile_file:
             pipfile_file.write(pipfile_string)
 
-        print(f"Current path: {complete_path}")
-        print(f"Input Pipfile: \n{pipfile_string}")
+        _LOGGER.info(f"Current path: {complete_path}")
+        _LOGGER.info(f"Input Pipfile: \n{pipfile_string}")
 
         result = {"requirements_lock": "", "error": False}
 

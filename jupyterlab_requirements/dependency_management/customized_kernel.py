@@ -22,12 +22,10 @@ import logging
 import subprocess
 
 from pathlib import Path
-from daiquiri import output
 
 from jupyter_server.base.handlers import APIHandler
 from tornado import web
 
-from ipykernel.kernelspec import install
 
 _LOGGER = logging.getLogger("jupyterlab_requirements.customized_kernel")
 
@@ -48,22 +46,27 @@ class JupyterKernelHandler(APIHandler):
         os.chdir(os.path.dirname(complete_path))
 
         # TODO: Check if ipykernel is installed, otherwise install it
-        process_output = subprocess.run(f". {kernel_name}/bin/activate && pip show ipykernel", shell=True, capture_output=True, cwd=complete_path)
-        print(process_output.stdout)
-        process_output = subprocess.run(f". {kernel_name}/bin/activate && pip install ipykernel", shell=True, cwd=complete_path)
+        _ = subprocess.run(
+            f". {kernel_name}/bin/activate && pip show ipykernel",
+            shell=True,
+            capture_output=True,
+            cwd=complete_path
+        )
+
+        _ = subprocess.run(f". {kernel_name}/bin/activate && pip install ipykernel", shell=True, cwd=complete_path)
 
         _LOGGER.debug(f"Installing kernelspec called {kernel_name}." )
 
         try:
-            # Create new kernel
-            # process_output = subprocess.call(
-            #     f". {kernel_name}/bin/activate && ./{kernel_name}/bin/python3"
-            #     f" -m ipykernel install --user --name={kernel_name} --display-name 'Python ({kernel_name})'", shell=True, cwd=complete_path)
-            process_output = subprocess.run(f". {kernel_name}/bin/activate && ipython kernel install --user --name={kernel_name} --display-name 'Python ({kernel_name})'", shell=True, cwd=complete_path)
-
+            process_output = subprocess.run(
+                f". {kernel_name}/bin/activate && ipython kernel install --user"
+                f" --name={kernel_name} --display-name 'Python ({kernel_name})'",
+                shell=True,
+                cwd=complete_path
+            )
+            _LOGGER.info(process_output.stdout.decode("utf-8"))
         except Exception as e :
-            print(f"Could not enter environment {e}")
-
+            _LOGGER.error(f"Could not enter environment {e}")
 
         os.chdir(initial_path)
         self.finish(json.dumps({
