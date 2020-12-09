@@ -53,11 +53,14 @@ class ThothConfigHandler(APIHandler):
 
         if not config.config_file_exists():
             _LOGGER.info("Thoth config does not exist, creating it...")
-            config.create_default_config()
+            try:
+                config.create_default_config()
+            except Exception:
+                raise Exception("Thoth config file could not be created!")
 
         config.load_config()
 
-        thoth_config = config._configuration
+        thoth_config = config.content
         _LOGGER.info("Thoth config:", thoth_config)
         os.chdir(initial_path)
         self.finish(json.dumps(thoth_config))
