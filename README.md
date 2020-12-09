@@ -46,6 +46,10 @@ jupyter labextension list
 
 ## Usage
 
+Virtualenv created to run your notebook according to your requirements is created in:
+
+`~/.local/share/thoth/kernels/{kernel_name}`
+
 Current development efforts are focused on creating first UI.
 
 ## Contributing

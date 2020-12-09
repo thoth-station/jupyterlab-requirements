@@ -17,15 +17,13 @@ import { requestAPI } from './handler';
  */
 
 export async function install_packages (
-  notebook_path: string,
   kernel_name?: string,
   init: RequestInit = {},
 ): Promise<string> {
 
   // POST request
   const dataToSend = {
-    notebook_path: notebook_path,
-    kernel_name: kernel_name || ""
+    kernel_name: kernel_name
   };
 
   try {
@@ -44,15 +42,13 @@ export async function install_packages (
  */
 
 export async function discover_installed_packages (
-  notebook_path: string,
-  kernel_name?: string,
+  kernel_name: string,
   init: RequestInit = {},
 ): Promise<string> {
 
   // POST request
   const dataToSend = {
-    notebook_path: notebook_path,
-    kernel_name: kernel_name || ""
+    kernel_name: kernel_name
   };
 
   try {
@@ -71,14 +67,12 @@ export async function discover_installed_packages (
  */
 
 export async function create_new_kernel (
-  notebook_path: string,
   kernel_name: string,
   init: RequestInit = {}
 ): Promise<string> {
 
   // POST request
   const dataToSend = {
-    notebook_path: notebook_path,
     kernel_name: kernel_name
   };
 

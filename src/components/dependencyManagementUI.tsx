@@ -29,7 +29,7 @@ import { Source, Requirements, RequirementsLock } from '../types/requirements';
 
 import { ThothConfig } from '../types/thoth';
 
-import { 
+import {
   discover_installed_packages,
   store_dependencies,
   install_packages,
@@ -43,6 +43,7 @@ import {
 } from '../thoth';
 
 import {
+  get_kernel_name,
   set_requirements,
   set_requirement_lock,
   set_thoth_configuration
@@ -77,7 +78,8 @@ export interface IState {
   packages: { [ name: string ]: string },
   installed_packages: { [ name: string ]: string },
   initial_packages: { [ name: string ]: string },
-  requirements: Requirements
+  requirements: Requirements,
+  error_msg: string
 }
 
 /**
@@ -97,8 +99,10 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       this.deleteSavedRow = this.deleteSavedRow.bind(this),
       this.onSave = this.onSave.bind(this),
       this.checkInstalledPackages = this.checkInstalledPackages.bind(this),
+      this.lock_using_thoth = this.lock_using_thoth.bind(this),
+      this.lock_using_pipenv = this.lock_using_pipenv.bind(this),
       this.install = this.install.bind(this),
-      this.install_backup = this.install_backup.bind(this),
+      this.setKernel = this.setKernel.bind(this),
       this.createConfig = this.createConfig.bind(this),
       this.setKernelName = this.setKernelName.bind(this)
 
@@ -112,7 +116,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           packages: {},
           requires: { python_version: get_python_version( this.props.panel ) },
           sources: [new Source()]
-        }
+        },
+        error_msg: undefined
       }
     }
 
@@ -121,11 +126,13 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
      */
 
     changeUIstate(
-      status: string, 
-      packages?: { [ name: string ]: string },
-      initial_packages?: { [ name: string ]: string },
-      installed_packages?: { [ name: string ]: string },
-      requirements?: Requirements
+      status: string,
+      packages: { [ name: string ]: string },
+      initial_packages: { [ name: string ]: string },
+      installed_packages: { [ name: string ]: string },
+      requirements: Requirements,
+      kernel_name: string,
+      error_msg?: string,
     ) {
 
       var new_state: IState = this.state
@@ -140,6 +147,10 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       _.set(new_state, "installed_packages", installed_packages)
 
       _.set(new_state, "requirements", requirements)
+
+      _.set(new_state, "kernel_name", kernel_name)
+
+      _.set(new_state, "error_msg", error_msg)
 
       console.log("new", new_state)
       this.setState(new_state);
@@ -177,7 +188,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         packages,
         this.state.initial_packages,
         this.state.installed_packages,
-        this.state.requirements
+        this.state.requirements,
+        this.state.kernel_name
       )
     }
 
@@ -201,7 +213,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         packages,
         initial_packages,
         this.state.installed_packages,
-        this.state.requirements
+        this.state.requirements,
+        this.state.kernel_name
       )
 
     }
@@ -223,7 +236,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         packages,
         this.state.initial_packages,
         this.state.installed_packages,
-        this.state.requirements
+        this.state.requirements,
+        this.state.kernel_name
       )
 
     }
@@ -245,7 +259,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         this.state.packages,
         saved_packages,
         this.state.installed_packages,
-        this.state.requirements
+        this.state.requirements,
+        this.state.kernel_name
       )
     }
 
@@ -275,7 +290,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         new_dict,
         this.state.initial_packages,
         this.state.installed_packages,
-        this.state.requirements
+        this.state.requirements,
+        this.state.kernel_name
       )
 
     }
@@ -319,7 +335,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             this.state.packages,
             this.state.initial_packages,
             this.state.installed_packages,
-            this.state.requirements
+            this.state.requirements,
+            this.state.kernel_name
           )
           return
 
@@ -334,12 +351,12 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             requires: notebookMetadataRequirements.requires,
             sources: notebookMetadataRequirements.sources
           }
-  
+
           console.log("Requirements before installing are: ", finalRequirements)
-  
+
           // Set requirements in notebook;
           set_requirements( this.props.panel , finalRequirements )
-  
+
           // Save all changes to disk.
           this.props.panel.context.save()
 
@@ -348,10 +365,11 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             {},
             total_packages,
             this.state.installed_packages,
-            finalRequirements
+            finalRequirements,
+            this.state.kernel_name
           )
 
-          return 
+          return
         }
 
       }
@@ -373,7 +391,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           new_packages,
           this.state.initial_packages,
           this.state.installed_packages,
-          this.state.requirements
+          this.state.requirements,
+          this.state.kernel_name
         )
         return
       }
@@ -381,12 +400,85 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
     async install() {
 
+      try {
+          // Create new virtual environment and install dependencies using selected dependency manager (micropipenv by default)
+          const install_message = await install_packages( this.state.kernel_name );
+          console.log("Install message", install_message);
+
+          this.changeUIstate(
+            "setting_kernel",
+            {},
+            this.state.initial_packages,
+            this.state.initial_packages,
+            this.state.requirements,
+            this.state.kernel_name
+          )
+
+          return
+
+      } catch ( error ) {
+
+        console.log("Error installing requirements", error)
+
+        this.changeUIstate(
+          "failed",
+          this.state.packages,
+          this.state.initial_packages,
+          this.state.installed_packages,
+          this.state.requirements,
+          this.state.kernel_name,
+          "Error install dependencies in the new virtual environment, please contact Thoth team."
+        )
+      }
+
+    }
+
+    async setKernel() {
+
+      try {
+          // Add new virtualenv to jupyter kernel so that it can be assigned to notebook.
+          const message = await create_new_kernel( this.state.kernel_name );
+          console.log("Kernel message", message);
+
+          this.changeUIstate(
+            "ready",
+            {},
+            this.state.initial_packages,
+            this.state.initial_packages,
+            this.state.requirements,
+            this.state.kernel_name
+          )
+
+          return
+
+        } catch ( error ) {
+
+          console.log("Error creating jupyter kernel", error)
+
+          this.changeUIstate(
+            "failed",
+            this.state.packages,
+            this.state.initial_packages,
+            this.state.installed_packages,
+            this.state.requirements,
+            this.state.kernel_name,
+            "Error setting new environment in a jupyter kernel, please contact Thoth team."
+          )
+
+          return
+
+        }
+    }
+
+    async lock_using_thoth() {
+
       this.changeUIstate(
         "locking_requirements",
         this.state.packages,
         this.state.initial_packages,
         this.state.installed_packages,
-        this.state.requirements
+        this.state.requirements,
+        this.state.kernel_name
       )
 
       const notebook_path = this.props.panel.context.path.toString();
@@ -400,7 +492,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       try {
 
         const advise: Advise = await lock_requirements_with_thoth(
-          notebook_path,
+          this.state.kernel_name,
           JSON.stringify(thothConfig),
           JSON.stringify(notebookMetadataRequirements)
         );
@@ -426,68 +518,44 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             {},
             this.state.initial_packages,
             this.state.installed_packages,
-            advise.requirements
+            advise.requirements,
+            this.state.kernel_name
           )
 
-          // Install dependencies in the kernel using selected resolution engine
-          const install_message = await install_packages( notebook_path );
-          console.log("Install message", install_message);
-
-          this.changeUIstate(
-            "setting_kernel",
-            {},
-            this.state.initial_packages,
-            this.state.initial_packages,
-            advise.requirements
-          )
-
-          const message = await create_new_kernel( notebook_path, this.state.kernel_name );
-          console.log("Kernel message", message);
-
-          this.changeUIstate(
-            "ready",
-            {},
-            this.state.initial_packages,
-            this.state.initial_packages,
-            advise.requirements
-          )
-
-          this.changeUIstate( "ready" )
         }
         else {
 
-          this.install_backup()
+          this.lock_using_pipenv()
         }
 
       } catch ( error ) {
 
-        console.log(error)
+        console.log("Error locking requirements with Thoth", error)
 
-        this.install_backup()
+        this.lock_using_pipenv()
       }
 
     }
 
-    async install_backup () {
+    async lock_using_pipenv () {
 
       this.changeUIstate(
-        "installing_requirements_using_pipenv",
+        "locking_requirements_using_pipenv",
         this.state.packages,
         this.state.initial_packages,
         this.state.installed_packages,
-        this.state.requirements
+        this.state.requirements,
+        this.state.kernel_name
       )
-
-      const notebook_path = this.props.panel.context.path.toString();
 
       const notebookMetadataRequirements = this.state.requirements;
       console.log("Requirements for pipenv", JSON.stringify(notebookMetadataRequirements));
 
       try {
-        
+
         // TODO: Add check to avoid relocking if dependencies are already locked.
         const result = await lock_requirements_with_pipenv(
-          notebook_path,
+          this.state.kernel_name,
           JSON.stringify(notebookMetadataRequirements)
         )
         console.log("Result received", result);
@@ -497,38 +565,15 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           set_requirement_lock( this.props.panel , result.requirements_lock )
 
           this.changeUIstate(
-            "setting_kernel",
-            {},
-            this.state.initial_packages,
-            this.state.initial_packages,
-            notebookMetadataRequirements
-          )
-
-          this.changeUIstate(
             "installing_requirements",
             {},
             this.state.initial_packages,
             this.state.installed_packages,
-            notebookMetadataRequirements
+            notebookMetadataRequirements,
+            this.state.kernel_name
           )
 
-          const is_installed = await install_packages( notebook_path, this.state.kernel_name );
-          console.log("installed packages message", is_installed);
-
-          const is_created = await create_new_kernel( notebook_path, this.state.kernel_name );
-          console.log("Kernel message", is_created);
-          
-          // TODO: make this automatic for user
-          // this.props.panel.sessionContext.session.changeKernel()
-
-          this.changeUIstate(
-            "ready",
-            {},
-            this.state.initial_packages,
-            this.state.initial_packages,
-            notebookMetadataRequirements
-          )
-          return 
+          return
         }
 
         else {
@@ -538,26 +583,31 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             this.state.packages,
             this.state.initial_packages,
             this.state.installed_packages,
-            this.state.requirements
+            this.state.requirements,
+            this.state.kernel_name,
+            "No resolution engine was able to install dependendices, please contact Thoth team."
           )
+
           return
         }
 
       } catch ( error ) {
 
-        console.log(error)
-    
+        console.log("Error locking requirements with pipenv", error)
+
         this.changeUIstate(
           "failed",
           this.state.packages,
           this.state.initial_packages,
           this.state.installed_packages,
-          this.state.requirements
+          this.state.requirements,
+          this.state.kernel_name,
+          "No resolution engine was able to install dependendices, please contact Thoth team."
         )
-        return 
+        return
 
       }
-    } 
+    }
 
     async onStart(panel: NotebookPanel) {
 
@@ -573,7 +623,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             this.state.packages,
             initial_packages,
             this.state.installed_packages,
-            initial_requirements
+            initial_requirements,
+            this.state.kernel_name
           )
           return
         }
@@ -590,7 +641,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             this.state.packages,
             initial_packages,
             this.state.installed_packages,
-            initial_requirements
+            initial_requirements,
+            this.state.kernel_name
           )
           return
         }
@@ -604,8 +656,11 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         })
         console.log(initial_locked_packages)
 
+        // Retrieve kernel name from metadata
+        const kernel_name = get_kernel_name( this.props.panel)
+
         // check if all requirements locked are also installed in the current kernel
-        const are_installed: boolean = await this.checkInstalledPackages(initial_locked_packages)
+        const are_installed: boolean = await this.checkInstalledPackages(kernel_name, initial_locked_packages)
 
         // if locked requirments are present in the kernel (match packages installed), go to stable state
         if ( are_installed == true ) {
@@ -615,7 +670,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             this.state.packages,
             initial_packages,
             initial_packages,
-            initial_requirements
+            initial_requirements,
+            kernel_name
             )
 
           return
@@ -628,17 +684,17 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             this.state.packages,
             initial_packages,
             this.state.installed_packages,
-            initial_requirements
+            initial_requirements,
+            kernel_name
             )
           return
         }
     }
 
-    async checkInstalledPackages(packages: {}): Promise<boolean> {
+    async checkInstalledPackages(kernel_name:string, packages: {}): Promise<boolean> {
 
       // Check installed packages
-      const notebook_path = this.props.panel.context.path.toString();
-      const retrieved_packages = await discover_installed_packages( notebook_path, this.state.kernel_name );
+      const retrieved_packages = await discover_installed_packages( kernel_name )
 
       console.log("packages installed (pip list)", retrieved_packages);
       const installed_packages = {}
@@ -691,28 +747,13 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
         return (
           <div>
-            <div>
-              <DependencyManagementForm
-              initial_packages={this.state.initial_packages}
-              installed_packages={this.state.installed_packages}
-              packages={this.state.packages}
-              storeRow={this.storeRow}
-              deleteRow={this.deleteRow}
-              editSavedRow={this.editSavedRow}
-              deleteSavedRow={this.deleteSavedRow}/>
-            </div>
             <div className={styles} >
               <DependencyManagementNewPackageButton addNewRow={this.addNewRow} />
-            </div>
-            <div className={styles} >
-              <DependencyManagementSaveButton
-              onSave={this.onSave}
-              changeUIstate={this.changeUIstate} />
             </div>
             <div>
               <p> No dependencies found! Click New to add package. </p>
             </div>
-            
+
           </div>
         );
       }
@@ -762,9 +803,9 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
               <DependencyManagementNewPackageButton addNewRow={this.addNewRow} />
             </div>
             <div>
-              <DependencyManagementInstallButton 
+              <DependencyManagementInstallButton
               changeUIstate={this.changeUIstate}
-              install={this.install_backup} />
+              install={this.lock_using_thoth} />
             </div>
 
             <div>
@@ -773,7 +814,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
             <br></br> OPTIONS
 
-            <div> 
+            <div>
             Kernel name <input title="Kernel name"
                 className={THOTH_KERNEL_NAME_INPUT}
                 type="text"
@@ -829,9 +870,9 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
               <DependencyManagementNewPackageButton addNewRow={this.addNewRow} />
             </div>
             <div>
-              <DependencyManagementInstallButton 
+              <DependencyManagementInstallButton
               changeUIstate={this.changeUIstate}
-              install={this.install} />
+              install={this.lock_using_thoth} />
             </div>
 
             OPTIONS
@@ -868,50 +909,10 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         );
       }
 
-      if ( this.state.status == "installing_requirements" )
-      return (
-        <div>
-          <div>
-            <DependencyManagementForm
-            initial_packages={this.state.initial_packages}
-            installed_packages={this.state.installed_packages}
-            packages={this.state.packages}
-            storeRow={this.storeRow}
-            deleteRow={this.deleteRow}
-            editSavedRow={this.editSavedRow}
-            deleteSavedRow={this.deleteSavedRow}/>
-          </div>
-          <fieldset>
-          <p>Requirements locked and saved!<br></br>
-          Installing new requirements...
-          </p>
-          </fieldset>
-        </div>
-      );
+      if ( this.state.status == "installing_requirements" ) {
 
-      if ( this.state.status == "setting_kernel" )
-      return (
-        <div>
-          <div>
-            <DependencyManagementForm
-            initial_packages={this.state.initial_packages}
-            installed_packages={this.state.installed_packages}
-            packages={this.state.packages}
-            storeRow={this.storeRow}
-            deleteRow={this.deleteRow}
-            editSavedRow={this.editSavedRow}
-            deleteSavedRow={this.deleteSavedRow}/>
-          </div>
-          <fieldset>
-            <p>Requirements locked and saved!<br></br>
-            Requirements installed!<br></br>
-            Setting new kernel for your notebook...
-            </p>
-          </fieldset>
-        </div>
-      );
+        this.install()
 
-      if ( this.state.status == "failed_no_reqs" )
         return (
           <div>
             <div>
@@ -924,16 +925,57 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
               editSavedRow={this.editSavedRow}
               deleteSavedRow={this.deleteSavedRow}/>
             </div>
+            <fieldset>
+            <p>Requirements locked and saved!<br></br>
+            Installing new requirements...
+            </p>
+            </fieldset>
+          </div>
+        );
+      }
+
+      if ( this.state.status == "setting_kernel" ) {
+
+        this.setKernel()
+
+        return (
+          <div>
+            <div>
+              <DependencyManagementForm
+              initial_packages={this.state.initial_packages}
+              installed_packages={this.state.installed_packages}
+              packages={this.state.packages}
+              storeRow={this.storeRow}
+              deleteRow={this.deleteRow}
+              editSavedRow={this.editSavedRow}
+              deleteSavedRow={this.deleteSavedRow}/>
+            </div>
+            <fieldset>
+              <p>Requirements locked and saved!<br></br>
+              Requirements installed!<br></br>
+              Setting new kernel for your notebook...
+              </p>
+            </fieldset>
+          </div>
+        );
+
+      }
+
+      if ( this.state.status == "failed_no_reqs" ) {
+
+        return (
+          <div>
             <div className={styles}>
               <button
                 title='Add requirements.'
                 className={OK_BUTTON_CLASS}
-                onClick={() => this.changeUIstate( 
+                onClick={() => this.changeUIstate(
                   "loading",
                   this.state.packages,
                   this.state.initial_packages,
                   this.state.installed_packages,
-                  this.state.requirements
+                  this.state.requirements,
+                  this.state.kernel_name
                 )
                 }
                 >
@@ -945,15 +987,21 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             </div>
           </div>
       );
-      
-      if ( this.state.status == "installing_requirements_using_pipenv" )
+        
+    }
+
+      if ( this.state.status == "locking_requirements_using_pipenv" ) {
+
         return (
           <div>
             <p>Thoth resolution engine failed... pipenv will be used to lock and install dependencies!</p>
           </div>
       );
+        
+      }
 
-      if ( this.state.status == "failed" )
+      if ( this.state.status == "failed" ) {
+
         return (
           <div>
             <div>
@@ -970,12 +1018,13 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
               <button
                 title='Finish.'
                 className={OK_BUTTON_CLASS}
-                onClick={() => this.changeUIstate( 
+                onClick={() => this.changeUIstate(
                   "loading",
                   this.state.packages,
                   this.state.initial_packages,
                   this.state.installed_packages,
-                  this.state.requirements
+                  this.state.requirements,
+                  this.state.kernel_name
                 )
                 }
                 >
@@ -983,14 +1032,14 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
               </button>
             </div>
             <div>
-                <p>pipenv resolution engine failed... please contact Thoth team!</p>
+              <p>{this.state.error_msg}</p>
             </div>
           </div>
       );
+        
+      }
 
       if ( this.state.status == "stable" ) {
-
-        this.props.panel.sessionContext.session.changeKernel({"name": this.state.kernel_name})
 
         return (
           <div>
@@ -1006,13 +1055,16 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
               <DependencyManagementNewPackageButton addNewRow={this.addNewRow} />
             </div>
             <div>
-                <p> Everything installed and ready to use!</p> 
+                <p> Everything installed and ready to use!</p>
             </div>
           </div>
         );
       }
 
       if ( this.state.status == "ready" )
+
+        this.props.panel.sessionContext.session.changeKernel({"name": this.state.kernel_name})
+
         return (
           <div>
             <DependencyManagementForm
@@ -1027,12 +1079,13 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
                 <button
                   title='Reload Page and assign kernel.'
                   className={OK_BUTTON_CLASS}
-                  onClick={() => this.changeUIstate( 
+                  onClick={() => this.changeUIstate(
                     "stable",
                     this.state.packages,
                     this.state.initial_packages,
                     this.state.installed_packages,
-                    this.state.requirements
+                    this.state.requirements,
+                    this.state.kernel_name
                   )
                   }
                   >
@@ -1044,7 +1097,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
                   <p>Requirements locked and saved!<br></br>
                   Requirements installed!<br></br>
                   New kernel created!<br></br>
-                  Click ok to shutdown current kernel and start new one.<br></br>
+                  Click ok to start working on your notebook.<br></br>
                   </p>
                 </fieldset>
             </div>

@@ -16,7 +16,6 @@
 
 """Create new kernel API for jupyterlab requirements."""
 
-import os
 import json
 import logging
 import subprocess
@@ -36,22 +35,22 @@ class JupyterKernelHandler(APIHandler):
     @web.authenticated
     def post(self):
         """Create kernel using new virtual environment."""
-        initial_path = Path.cwd()
         input_data = self.get_json_body()
 
-        notebook_path: str = input_data["notebook_path"]
         kernel_name: str = input_data["kernel_name"]
 
-        complete_path = initial_path.joinpath(Path(notebook_path).parent)
-        os.chdir(os.path.dirname(complete_path))
+        home = Path.home()
+        complete_path = home.joinpath(".local/share/thoth/kernels")
+
+        _LOGGER.info(f"Setting new jupyter kernel {kernel_name} from {complete_path}/{kernel_name}." )
 
         # TODO: Check if ipykernel is installed, otherwise install it
-        _ = subprocess.run(
-            f". {kernel_name}/bin/activate && pip show ipykernel",
-            shell=True,
-            capture_output=True,
-            cwd=complete_path
-        )
+        # _ = subprocess.run(
+        #     f". {kernel_name}/bin/activate && pip show ipykernel",
+        #     shell=True,
+        #     capture_output=True,
+        #     cwd=complete_path
+        # )
 
         _ = subprocess.run(f". {kernel_name}/bin/activate && pip install ipykernel", shell=True, cwd=complete_path)
 
@@ -65,10 +64,10 @@ class JupyterKernelHandler(APIHandler):
                 cwd=complete_path
             )
             _LOGGER.info(process_output.stdout.decode("utf-8"))
+            print(process_output)
         except Exception as e :
             _LOGGER.error(f"Could not enter environment {e}")
 
-        os.chdir(initial_path)
         self.finish(json.dumps({
             "data": f"installed kernel {kernel_name} at {complete_path}"
         }))

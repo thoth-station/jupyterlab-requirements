@@ -16,6 +16,9 @@ const THOTH_PACKAGE_NAME_INPUT = "thoth-package-name-input";
 const THOTH_CONSTRAINT_INPUT = "thoth-constraint-input";
 const THOTH_ROW_BUTTON = "thoth-row-button";
 const THOTH_ROW_BUTTON_DEACTIVATED = "thoth-row-button-deactivated";
+// const THOTH_INSTALLED_PACKAGE = "thoth-installed-package"
+// const THOTH_NOT_INSTALLED_PACKAGE = "thoth-not-installed-package"
+
 
 /**
  * Class: Holds properties for DependencyManagementTable.

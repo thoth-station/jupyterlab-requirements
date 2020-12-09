@@ -18,28 +18,12 @@ import { ThothConfig } from "./types/thoth";
 
 
 /**
- * Function: Get Kernel info.
- */
-export function get_kernel_spec( notebook: NotebookPanel ): string {
-
-    const kernelspec = notebook.content.model.metadata.get( 'kernelspec' )
-
-    const json: string = JSON.stringify( kernelspec )
-    if ( _.isUndefined( json ) ) {
-        throw Error( "Unable to retrieve Kernel info" )
-    }
-
-    return json
-}
-
-/**
- * Function: Get Python version from kernel spec.
+ * Function: Get Python version from language information.
  */
 export function get_python_version( notebook: NotebookPanel ): string {
-    const kernelspec = get_kernel_spec( notebook )
-    console.log('kernel info:', kernelspec)
+    const language_info = notebook.content.model.metadata.get( 'language_info' )
+    console.log('language_info:', language_info)
 
-    const language_info = _.get(kernelspec, "language_info")
     const python_version: string = _.get(language_info, "version")
 
     console.log('python version identified:', python_version)
@@ -51,6 +35,20 @@ export function get_python_version( notebook: NotebookPanel ): string {
     }
 
     return match[ 0 ]
+}
+
+/**
+ * Function: Get kernel name from kernel spec.
+ */
+export function get_kernel_name( notebook: NotebookPanel ): string {
+    const kernelspec = notebook.content.model.metadata.get( 'kernelspec' )
+    console.log('kernel info:', kernelspec)
+
+    const kernel_name = _.get(kernelspec, "name")
+
+    console.log('kernel_name identified:', kernel_name)
+
+    return kernel_name
 }
 
 /**
