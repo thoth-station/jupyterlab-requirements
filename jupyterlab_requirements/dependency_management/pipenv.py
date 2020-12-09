@@ -17,7 +17,6 @@
 """Thoth API for jupyterlab requirements."""
 
 import json
-import os
 import logging
 import subprocess
 
@@ -37,36 +36,38 @@ class PipenvHandler(APIHandler):
     @web.authenticated
     async def post(self):
         """Lock and install dependencies using pipenv."""
-        initial_path = Path.cwd()
         input_data = self.get_json_body()
 
-        notebook_path: str = input_data["notebook_path"]
+        kernel_name: str = input_data["kernel_name"]
         requirements: dict = json.loads(input_data["requirements"])
 
+        home = Path.home()
+        complete_path = home.joinpath(".local/share/thoth/kernels")
+        env_path = complete_path.joinpath(kernel_name)
+        env_path.mkdir(parents=True, exist_ok=True)
+
+        pipfile_path = env_path.joinpath("Pipfile")
+
         pipfile_string = Pipfile.from_dict(requirements).to_string()
-        _LOGGER.info("Starting using pipenv...")
+        _LOGGER.info("Resolution engine used: pipenv")
 
-        complete_path = initial_path.joinpath(Path(notebook_path).parent)
-        os.chdir(os.path.dirname(complete_path))
-
-        pipfile_path = complete_path.joinpath("Pipfile")
         with open(pipfile_path, "w") as pipfile_file:
             pipfile_file.write(pipfile_string)
 
-        _LOGGER.info(f"Current path: {complete_path}")
+        _LOGGER.info(f"Current path: {env_path}")
         _LOGGER.info(f"Input Pipfile: \n{pipfile_string}")
 
         result = {"requirements_lock": "", "error": False}
 
         try:
-            subprocess.run(["pipenv", "lock"], cwd=complete_path)
+            subprocess.run(["pipenv", "lock"], cwd=env_path)
 
         except Exception as pipenv_error:
-            _LOGGER.warning(f"error locking using pipenv {pipenv_error}")
+            _LOGGER.warning(f"error locking using pipenv: {pipenv_error}")
             result['error'] = True
 
         if not result['error']:
-            pipfile_lock_path = complete_path.joinpath("Pipfile.lock")
+            pipfile_lock_path = env_path.joinpath("Pipfile.lock")
 
             with open(pipfile_lock_path, "r") as pipfile_lock_file:
                 pipfile_lock_str = pipfile_lock_file.read()
@@ -76,7 +77,6 @@ class PipenvHandler(APIHandler):
 
             result["requirements_lock"] = pipfile_lock_str.to_dict()
 
-            _LOGGER.debug(f"result from pipenv received {result}")
+            _LOGGER.debug(f"result from pipenv received: {result}")
 
-        os.chdir(initial_path)
         self.finish(json.dumps(result))

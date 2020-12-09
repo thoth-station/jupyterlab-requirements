@@ -36,14 +36,12 @@ class DependencyInstalledHandler(APIHandler):
     @web.authenticated
     def post(self):
         """Discover list of packages installed."""
-        initial_path = Path.cwd()
         input_data = self.get_json_body()
-        notebook_path: str = input_data["notebook_path"]
+
         kernel_name: str = input_data["kernel_name"]
 
-        complete_path = initial_path.joinpath(Path(notebook_path).parent)
-
-        os.chdir(os.path.dirname(complete_path))
+        home = Path.home()
+        complete_path = home.joinpath(".local/share/thoth/kernels")
 
         process_output = subprocess.run(
             f". {kernel_name}/bin/activate && pip list",
@@ -51,6 +49,7 @@ class DependencyInstalledHandler(APIHandler):
             capture_output=True,
             cwd=complete_path
         )
+        print(process_output)
         processed_list = process_output.stdout.decode("utf-8").split('\n')[2:]
         packages = {}
         for processed_package in processed_list:
@@ -58,7 +57,6 @@ class DependencyInstalledHandler(APIHandler):
                 package_version = [el for el in processed_package.split(' ') if el != '']
                 packages[package_version[0]] = package_version[1]
 
-        os.chdir(initial_path)
         self.finish(json.dumps(packages))
 
 
@@ -70,25 +68,27 @@ class DependencyInstallHandler(APIHandler):
         """Install packages using selected package manager."""
         initial_path = Path.cwd()
         input_data = self.get_json_body()
-        notebook_path: str = input_data["notebook_path"]
         kernel_name: str = input_data["kernel_name"]
+        _LOGGER.info(f"kernel_name selected: {kernel_name}")
 
-        complete_path = initial_path.joinpath(Path(notebook_path).parent)
+        home = Path.home()
+        complete_path = home.joinpath(".local/share/thoth/kernels")
 
         os.chdir(os.path.dirname(complete_path))
         env_name = kernel_name
         env_path = complete_path.joinpath(env_name)
+        env_path.mkdir(parents=True, exist_ok=True)
 
         package_manager: str = 'micropipenv'
 
         # TODO: Check if micropipenv is installed
-        _LOGGER.info(f"Installing requirements using {package_manager}." )
+        _LOGGER.info(f"Installing requirements using {package_manager} in virtualenv at {env_path}." )
 
         #1. Creating new environment
         cli_run([str(env_path)])
 
         #2. Install using micropipenv
-        _ = subprocess.call(f". {env_name}/bin/activate && micropipenv install --dev", shell=True, cwd=complete_path)
+        _ = subprocess.call(f". {kernel_name}/bin/activate && cd {kernel_name} && micropipenv install --dev", shell=True, cwd=complete_path)
 
         os.chdir(initial_path)
         self.finish(json.dumps({

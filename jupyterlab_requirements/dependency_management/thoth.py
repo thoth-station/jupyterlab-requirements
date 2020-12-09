@@ -42,16 +42,19 @@ class ThothAdviseHandler(APIHandler):
         input_data = self.get_json_body()
 
         config: str = input_data["thoth_config"]
-        notebook_path: str = input_data["notebook_path"]
+        kernel_name: str = input_data["kernel_name"]
         requirements: dict = json.loads(input_data["requirements"])
 
-        _LOGGER.info("Starting using thoth...")
+        home = Path.home()
+        complete_path = home.joinpath(".local/share/thoth/kernels")
+        env_path = complete_path.joinpath(kernel_name)
+        env_path.mkdir(parents=True, exist_ok=True)
+        os.chdir(os.path.dirname(env_path))
+
+        _LOGGER.info("Resolution engine used: thoth")
         pipfile_string = Pipfile.from_dict(requirements).to_string()
 
-        complete_path = initial_path.joinpath(Path(notebook_path).parent)
-        os.chdir(os.path.dirname(complete_path))
-
-        _LOGGER.info(f"Current path: {Path(notebook_path).parent}")
+        _LOGGER.info(f"Current path: {env_path}")
         _LOGGER.info(f"Input Pipfile: \n{pipfile_string}")
 
         advise = {"requirements": "", "requirement_lock": "", "error": False}
@@ -96,7 +99,7 @@ class ThothAdviseHandler(APIHandler):
                     advise['requirement_lock'] = pipfile_lock
 
         except Exception as api_error:
-            _LOGGER.warning(f"error talking to Thoth {api_error}")
+            _LOGGER.warning(f"error talking to Thoth: {api_error}")
             advise['error'] = True
 
         _LOGGER.debug(f"advise received {advise}")
