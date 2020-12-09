@@ -137,7 +137,6 @@ export function set_requirements( notebook: NotebookPanel, requirements: Require
  * Function: Get Python requirements lock from notebook metadata.
  */
 
-// TODO: Adjust method to receive Promise<Requirements | null>
 export function get_requirement_lock( notebook: NotebookPanel ): Promise<RequirementsLock|null> {
     return new Promise( async ( resolve, reject ) => {
 

@@ -37,7 +37,7 @@ import {
 } from '../kernel';
 
 import {
-  get_config_file,
+  retrieve_config_file,
   lock_requirements_with_thoth,
   lock_requirements_with_pipenv
 } from '../thoth';
@@ -720,7 +720,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
     async createConfig() {
       // TODO: Use config created automatically by thamos??
-      const config_file = await get_config_file();
+      const config_file = await retrieve_config_file( this.state.kernel_name);
       console.log("Config file", config_file);
 
       return config_file
@@ -987,7 +987,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             </div>
           </div>
       );
-        
+
     }
 
       if ( this.state.status == "locking_requirements_using_pipenv" ) {
@@ -997,7 +997,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             <p>Thoth resolution engine failed... pipenv will be used to lock and install dependencies!</p>
           </div>
       );
-        
+
       }
 
       if ( this.state.status == "failed" ) {
@@ -1036,7 +1036,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             </div>
           </div>
       );
-        
+
       }
 
       if ( this.state.status == "stable" ) {

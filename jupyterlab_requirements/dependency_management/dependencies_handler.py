@@ -49,7 +49,7 @@ class DependencyInstalledHandler(APIHandler):
             capture_output=True,
             cwd=complete_path
         )
-        print(process_output)
+
         processed_list = process_output.stdout.decode("utf-8").split('\n')[2:]
         packages = {}
         for processed_package in processed_list:
@@ -88,7 +88,9 @@ class DependencyInstallHandler(APIHandler):
         cli_run([str(env_path)])
 
         #2. Install using micropipenv
-        _ = subprocess.call(f". {kernel_name}/bin/activate && cd {kernel_name} && micropipenv install --dev", shell=True, cwd=complete_path)
+        _ = subprocess.call(
+            f". {kernel_name}/bin/activate "
+            f"&& cd {kernel_name} && micropipenv install --dev", shell=True, cwd=complete_path)
 
         os.chdir(initial_path)
         self.finish(json.dumps({

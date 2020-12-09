@@ -16,9 +16,12 @@
 
 """Thoth Config API for jupyterlab requirements."""
 
+
+import os
 import json
 import logging
 
+from pathlib import Path
 from jupyter_server.base.handlers import APIHandler
 from tornado import web
 
@@ -28,11 +31,23 @@ _LOGGER = logging.getLogger("jupyterlab_requirements.config")
 
 
 class ThothConfigHandler(APIHandler):
-    """Thoth config handler to create new kernel for jupyter."""
+    """Thoth config handler for user requirements."""
 
     @web.authenticated
-    def get(self):
-        """Get or create thoth config file."""
+    def post(self):
+        """Retrieve or create thoth config file."""
+        initial_path = Path.cwd()
+        input_data = self.get_json_body()
+        kernel_name: str = input_data["kernel_name"]
+        _LOGGER.info(f"kernel_name selected: {kernel_name}")
+
+        home = Path.home()
+        complete_path = home.joinpath(".local/share/thoth/kernels")
+        env_path = complete_path.joinpath(kernel_name)
+        env_path.mkdir(parents=True, exist_ok=True)
+
+        os.chdir(os.path.dirname(env_path))
+
         config = _Configuration()
 
         if not config.config_file_exists():
@@ -43,4 +58,5 @@ class ThothConfigHandler(APIHandler):
 
         thoth_config = config._configuration
         _LOGGER.info("Thoth config:", thoth_config)
+        os.chdir(initial_path)
         self.finish(json.dumps(thoth_config))

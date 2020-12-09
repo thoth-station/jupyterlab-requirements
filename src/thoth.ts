@@ -13,17 +13,26 @@ import { requestAPI } from './handler';
 import { Advise, PipenvResult, ThothConfig } from './types/thoth';
 // import { PipenvResult } from './types/thoth';
 
-export async function get_config_file (
+export async function retrieve_config_file (
+  kernel_name: string,
   init: RequestInit = {}
 ): Promise<ThothConfig> {
 
-  // GET request
+  // POST request
+  const dataToSend = {
+    kernel_name: kernel_name,
+  };
+
   try {
-    const configfile = await requestAPI<any>('thoth/config');
-    return configfile;
+    const advise = await requestAPI<any>('thoth/config', {
+      body: JSON.stringify(dataToSend),
+      method: 'POST'
+    });
+    return JSON.parse(JSON.stringify(advise));
   } catch (reason) {
-    console.error(`Error on GET /jupyterlab-requirements/thoth/config.\n${reason}`);
+    console.error(`Error on POST /jupyterlab-requirements/thoth/config.\n${reason}`);
   }
+
 }
 
 export async function lock_requirements_with_thoth (
