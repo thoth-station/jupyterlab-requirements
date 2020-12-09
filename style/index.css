@@ -1,3 +1,4 @@
+ /* Buttons */
 
 .thoth-new-package-button {
   background-color: rgb(255, 187, 0);
@@ -79,8 +80,28 @@
 }
 
 .thoth-table th {
+  display: table-cell;
+  vertical-align: inherit;
+  font-weight: bold;
+  width: 300%;
   color: rgb(212, 151, 19);
   background-color: rgb(255, 255, 255);
+}
+
+.thoth-package-name-input {
+  background-color: rgb(255, 255, 255);
+  border-radius: 12px;
+  color: rgb(0, 0, 0);
+  padding: 10px 12px;
+  text-align: center;
+}
+
+.thoth-constraint-input {
+  background-color: rgb(255, 255, 255);
+  border-radius: 12px;
+  color: rgb(0, 0, 0);
+  padding: 10px 12px;
+  text-align: center;
 }
 
 
@@ -115,12 +136,12 @@
   font-size: 16px;
 }
 
-.thoth-package-name-input {
+.thoth-installed-package {
   background-color: rgb(255, 255, 255);
   border-radius: 12px;
-  width: 70%;
+  width: 50%;
   color: rgb(0, 0, 0);
-  padding: 10px 16px;
+  padding: 5px 5px;
   margin: 30px;
   text-align: center;
   text-decoration: none;
@@ -128,17 +149,28 @@
   font-size: 16px;
 }
 
-.thoth-constraint-input {
+.thoth-not-installed-package {
+  background-color: rgb(233, 32, 32);
+  border-radius: 12px;
+  width: 50%;
+  color: rgb(0, 0, 0);
+  padding: 5px 5px;
+  margin: 30px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}
+
+ /* Options */
+
+.thoth-kernel-name-input {
   background-color: rgb(255, 255, 255);
   border-radius: 12px;
   width: 40%;
   color: rgb(0, 0, 0);
-  padding: 10px 16px;
-  margin: 30px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
   font-size: 16px;
 }
-
-
