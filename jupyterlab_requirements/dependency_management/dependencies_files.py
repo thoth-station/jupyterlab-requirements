@@ -64,7 +64,7 @@ class DependenciesFilesHandler(APIHandler):
         initial_path = Path.cwd()
         input_data = self.get_json_body()
 
-        kernel_name: str = input_data["notebook_path"]
+        kernel_name: str = input_data["kernel_name"]
         requirements: str = input_data["requirements"]
         requirements_lock: str = input_data["requirement_lock"]
 
