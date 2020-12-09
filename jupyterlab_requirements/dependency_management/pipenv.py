@@ -16,6 +16,7 @@
 
 """Thoth API for jupyterlab requirements."""
 
+import os
 import json
 import logging
 import subprocess
@@ -36,6 +37,7 @@ class PipenvHandler(APIHandler):
     @web.authenticated
     async def post(self):
         """Lock and install dependencies using pipenv."""
+        initial_path = Path.cwd()
         input_data = self.get_json_body()
 
         kernel_name: str = input_data["kernel_name"]
@@ -79,4 +81,5 @@ class PipenvHandler(APIHandler):
 
             _LOGGER.debug(f"result from pipenv received: {result}")
 
+        os.chdir(initial_path)
         self.finish(json.dumps(result))

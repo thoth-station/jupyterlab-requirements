@@ -37,7 +37,7 @@ import {
 } from '../kernel';
 
 import {
-  get_config_file,
+  retrieve_config_file,
   lock_requirements_with_thoth,
   lock_requirements_with_pipenv
 } from '../thoth';
@@ -433,6 +433,17 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
     }
 
+    async store_dependencies_on_disk (requirements: Requirements, requirements_lock: RequirementsLock) {
+        // TODO: Requested from the user (in this case it is to install them)
+        const store_message: string = await store_dependencies(
+          this.state.kernel_name,
+          JSON.stringify(requirements),
+          JSON.stringify(requirements_lock)
+        );
+
+        console.log("Store message", store_message);
+    }
+
     async setKernel() {
 
       try {
@@ -481,8 +492,6 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         this.state.kernel_name
       )
 
-      const notebook_path = this.props.panel.context.path.toString();
-
       const thothConfig: ThothConfig = await this.createConfig();
       console.log("thoth config submitted", JSON.stringify(thothConfig));
 
@@ -503,15 +512,6 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           set_requirements( this.props.panel , advise.requirements )
           set_requirement_lock( this.props.panel , advise.requirement_lock )
           set_thoth_configuration( this.props.panel , thothConfig )
-
-          // TODO: Requested from the user (in this case it is to install them)
-          const store_message: string = await store_dependencies(
-            notebook_path,
-            JSON.stringify(advise.requirements),
-            JSON.stringify(advise.requirement_lock)
-          );
-
-          console.log("Store message", store_message);
 
           this.changeUIstate(
             "installing_requirements",
@@ -720,7 +720,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
     async createConfig() {
       // TODO: Use config created automatically by thamos??
-      const config_file = await get_config_file();
+      const config_file = await retrieve_config_file( this.state.kernel_name);
       console.log("Config file", config_file);
 
       return config_file
@@ -987,7 +987,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             </div>
           </div>
       );
-        
+
     }
 
       if ( this.state.status == "locking_requirements_using_pipenv" ) {
@@ -997,7 +997,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             <p>Thoth resolution engine failed... pipenv will be used to lock and install dependencies!</p>
           </div>
       );
-        
+
       }
 
       if ( this.state.status == "failed" ) {
@@ -1036,7 +1036,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             </div>
           </div>
       );
-        
+
       }
 
       if ( this.state.status == "stable" ) {

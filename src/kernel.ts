@@ -92,7 +92,7 @@ export async function create_new_kernel (
  */
 
 export async function store_dependencies (
-    notebook_path: string,
+    kernel_name: string,
     requirements: string,
     requirement_lock: string,
     init: RequestInit = {},
@@ -100,7 +100,7 @@ export async function store_dependencies (
 
     // POST request
     const dataToSend = {
-      notebook_path: notebook_path,
+      kernel_name: kernel_name,
       requirements: requirements,
       requirement_lock: requirement_lock
     };
