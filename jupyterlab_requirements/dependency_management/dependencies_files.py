@@ -64,11 +64,16 @@ class DependenciesFilesHandler(APIHandler):
         initial_path = Path.cwd()
         input_data = self.get_json_body()
 
-        notebook_path: str = input_data["notebook_path"]
+        kernel_name: str = input_data["notebook_path"]
         requirements: str = input_data["requirements"]
         requirements_lock: str = input_data["requirement_lock"]
 
-        os.chdir(os.path.dirname(notebook_path))
+        home = Path.home()
+        complete_path = home.joinpath(".local/share/thoth/kernels")
+        env_path = complete_path.joinpath(kernel_name)
+        env_path.mkdir(parents=True, exist_ok=True)
+
+        os.chdir(os.path.dirname(env_path))
 
         requirements_format = "pipenv"
 
@@ -80,5 +85,5 @@ class DependenciesFilesHandler(APIHandler):
 
         os.chdir(initial_path)
         self.finish(json.dumps({
-            "message": f"Successfully stored requirements at {notebook_path}!"
+            "message": f"Successfully stored requirements at {env_path}!"
         }))

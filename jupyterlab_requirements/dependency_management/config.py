@@ -39,7 +39,6 @@ class ThothConfigHandler(APIHandler):
         initial_path = Path.cwd()
         input_data = self.get_json_body()
         kernel_name: str = input_data["kernel_name"]
-        _LOGGER.info(f"kernel_name selected: {kernel_name}")
 
         home = Path.home()
         complete_path = home.joinpath(".local/share/thoth/kernels")
@@ -47,6 +46,8 @@ class ThothConfigHandler(APIHandler):
         env_path.mkdir(parents=True, exist_ok=True)
 
         os.chdir(os.path.dirname(env_path))
+
+        _LOGGER.info(f"kernel_name selected: {kernel_name} and path: {env_path}")
 
         config = _Configuration()
 

@@ -64,7 +64,7 @@ class JupyterKernelHandler(APIHandler):
                 cwd=complete_path
             )
             _LOGGER.info(process_output.stdout.decode("utf-8"))
-            print(process_output)
+
         except Exception as e :
             _LOGGER.error(f"Could not enter environment {e}")
 

@@ -481,8 +481,6 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         this.state.kernel_name
       )
 
-      const notebook_path = this.props.panel.context.path.toString();
-
       const thothConfig: ThothConfig = await this.createConfig();
       console.log("thoth config submitted", JSON.stringify(thothConfig));
 
@@ -506,7 +504,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
           // TODO: Requested from the user (in this case it is to install them)
           const store_message: string = await store_dependencies(
-            notebook_path,
+            this.state.kernel_name,
             JSON.stringify(advise.requirements),
             JSON.stringify(advise.requirement_lock)
           );
