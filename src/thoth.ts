@@ -27,7 +27,7 @@ export async function get_config_file (
 }
 
 export async function lock_requirements_with_thoth (
-  notebook_path: string,
+  kernel_name: string,
   thoth_config: string,
   requirements: string,
   init: RequestInit = {},
@@ -35,7 +35,7 @@ export async function lock_requirements_with_thoth (
 
   // POST request
   const dataToSend = {
-    notebook_path: notebook_path,
+    kernel_name: kernel_name,
     thoth_config: thoth_config,
     requirements: requirements
   };
@@ -52,14 +52,14 @@ export async function lock_requirements_with_thoth (
 }
 
 export async function lock_requirements_with_pipenv (
-  notebook_path: string,
+  kernel_name: string,
   requirements: string,
   init: RequestInit = {},
 ): Promise<PipenvResult> {
 
   // POST request
   const dataToSend = {
-    notebook_path: notebook_path,
+    kernel_name: kernel_name,
     requirements: requirements
   };
 

@@ -23,7 +23,7 @@ import { get_requirements, get_requirement_lock, get_thoth_configuration, } from
  * Manage dependencies button extension
  *  - Attach button to notebook toolbar and launch a dialog to handle dependencies
  */
-export class ManageDependenciesButtonExtension 
+export class ManageDependenciesButtonExtension
     implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
     private panel: NotebookPanel;
 
@@ -51,7 +51,7 @@ export class ManageDependenciesButtonExtension
                     panel: this.panel,
                     initial_requirements: initial_requirements,
                     initial_requirements_lock: initial_requirements_lock,
-                    initial_config_file: initial_config_file 
+                    initial_config_file: initial_config_file
                 })
             );
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
