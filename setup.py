@@ -1,5 +1,4 @@
 """jupyterlab-requirements setup."""
-import json
 import os
 
 from pathlib import Path
@@ -15,6 +14,7 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 # The name of the project
 name="jupyterlab_requirements"
 
+
 # Get version
 def _get_version():
     with open(os.path.join("jupyterlab_requirements", "__init__.py")) as f:
@@ -25,6 +25,7 @@ def _get_version():
             # dirty, remove trailing and leading chars
             return line.split(" = ")[1][1:-2]
     raise ValueError("No version identifier found")
+
 
 version = _get_version()
 

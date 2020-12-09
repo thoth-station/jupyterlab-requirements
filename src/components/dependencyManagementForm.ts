@@ -43,14 +43,14 @@ export class DependencyManagementForm extends React.Component<IProps> {
         return (
             React.createElement(
                 DependencyManagementTable,
-                { 
+                {
                     packages: this.props.packages,
                     initial_packages: this.props.initial_packages,
                     installed_packages: this.props.installed_packages,
                     storeRow: this.props.storeRow,
                     editSavedRow: this.props.editSavedRow,
                     deleteRow: this.props.deleteRow,
-                    deleteSavedRow: this.props.deleteSavedRow 
+                    deleteSavedRow: this.props.deleteSavedRow
                 }));
     }
 }

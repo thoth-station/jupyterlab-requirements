@@ -69,37 +69,37 @@ export class DependencyManagementTable extends React.Component<IProps, IState> {
             if (_.has(installed_packages, name)) {
                 rows.push(
                     React.createElement(DependencyManagementTableRowSaved,
-                        { 
+                        {
                             name: name,
                             version: version,
                             installed: "Y",
                             packages: packages,
                             editSavedRow: context.props.editSavedRow,
-                            deleteSavedRow: context.props.deleteSavedRow 
+                            deleteSavedRow: context.props.deleteSavedRow
                         }));
             }
             else {
                 rows.push(
                     React.createElement(DependencyManagementTableRowSaved,
-                        { 
+                        {
                             name: name,
                             version: version,
                             installed: "N",
                             packages: packages,
                             editSavedRow: context.props.editSavedRow,
-                            deleteSavedRow: context.props.deleteSavedRow 
+                            deleteSavedRow: context.props.deleteSavedRow
                         }));
             }
         }
         for (let [name, _] of Object.entries(packages)) {
             rows.push(
                 React.createElement(DependencyManagementTableRowNew,
-                    { 
+                    {
                         name: name,
                         installed: "N",
                         packages: packages,
                         storeRow: context.props.storeRow,
-                        deleteRow: context.props.deleteRow 
+                        deleteRow: context.props.deleteRow
                     }));
         }
         return rows;
