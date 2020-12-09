@@ -433,6 +433,17 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
     }
 
+    async store_dependencies_on_disk (requirements: Requirements, requirements_lock: RequirementsLock) {
+        // TODO: Requested from the user (in this case it is to install them)
+        const store_message: string = await store_dependencies(
+          this.state.kernel_name,
+          JSON.stringify(requirements),
+          JSON.stringify(requirements_lock)
+        );
+
+        console.log("Store message", store_message);
+    }
+
     async setKernel() {
 
       try {
@@ -501,15 +512,6 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           set_requirements( this.props.panel , advise.requirements )
           set_requirement_lock( this.props.panel , advise.requirement_lock )
           set_thoth_configuration( this.props.panel , thothConfig )
-
-          // TODO: Requested from the user (in this case it is to install them)
-          const store_message: string = await store_dependencies(
-            this.state.kernel_name,
-            JSON.stringify(advise.requirements),
-            JSON.stringify(advise.requirement_lock)
-          );
-
-          console.log("Store message", store_message);
 
           this.changeUIstate(
             "installing_requirements",

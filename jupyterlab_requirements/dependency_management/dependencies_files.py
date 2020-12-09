@@ -26,6 +26,7 @@ from jupyter_server.base.handlers import APIHandler
 from tornado import web
 
 from thamos.cli import _load_files, _write_files
+from thoth.python import Project
 
 _LOGGER = logging.getLogger("jupyterlab_requirements.dependencies_files")
 
@@ -77,11 +78,17 @@ class DependenciesFilesHandler(APIHandler):
 
         requirements_format = "pipenv"
 
-        _write_files(
-            requirements=json.loads(requirements),
-            requirements_lock=json.loads(requirements_lock),
-            requirements_format=requirements_format
-        )
+        project = Project.from_dict(requirements, requirements_lock)
+
+        pipfile_path = env_path.joinpath("Pipfile")
+        pipfile_lock_path = env_path.joinpath("Pipfile.lock")
+
+        if requirements_format == "pipenv":
+            _LOGGER.debug("Writing to Pipfile/Pipfile.lock in %r", env_path)
+            project.to_files(
+                pipfile_path=pipfile_path,
+                pipfile_lock_path=pipfile_lock_path
+            )
 
         os.chdir(initial_path)
         self.finish(json.dumps({
