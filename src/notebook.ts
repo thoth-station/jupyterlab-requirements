@@ -12,7 +12,6 @@
 import _ from "lodash"
 
 import { NotebookPanel } from '@jupyterlab/notebook';
-// import { KernelSpec } from '@jupyterlab/services';
 
 import { Source, Requirements, RequirementsLock } from './types/requirements';
 import { ThothConfig } from "./types/thoth";
@@ -22,7 +21,10 @@ import { ThothConfig } from "./types/thoth";
  * Function: Get Kernel info.
  */
 export function get_kernel_spec( notebook: NotebookPanel ): string {
-    const json: string = JSON.stringify( notebook.sessionContext.session.kernel.info )  // TODO: Take kernel info for Python version (kernelspec -> Language info -> version)
+
+    const kernelspec = notebook.content.model.metadata.get( 'kernelspec' )
+
+    const json: string = JSON.stringify( kernelspec )
     if ( _.isUndefined( json ) ) {
         throw Error( "Unable to retrieve Kernel info" )
     }
@@ -34,9 +36,11 @@ export function get_kernel_spec( notebook: NotebookPanel ): string {
  * Function: Get Python version from kernel spec.
  */
 export function get_python_version( notebook: NotebookPanel ): string {
-    const kernel_info = get_kernel_spec( notebook )
-    console.log('kernel info:', kernel_info)
-    const python_version: string = "3.8" || kernel_info // TODO: Parse kernel info
+    const kernelspec = get_kernel_spec( notebook )
+    console.log('kernel info:', kernelspec)
+
+    const language_info = _.get(kernelspec, "language_info")
+    const python_version: string = _.get(language_info, "version")
 
     console.log('python version identified:', python_version)
     const match = python_version.match( /\d.\d/ )
