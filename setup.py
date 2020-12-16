@@ -17,7 +17,7 @@ name="jupyterlab_requirements"
 
 # Get version
 def _get_version():
-    with open(os.path.join("jupyterlab_requirements", "__init__.py")) as f:
+    with open(os.path.join(name, "__init__.py")) as f:
         content = f.readlines()
 
     for line in content:
@@ -46,8 +46,8 @@ package_data_spec = {
 labext_name = "jupyterlab_requirements"
 
 data_files_spec = [
-    ("share/jupyter/lab/extensions%s" % labext_name, lab_path, "**"),
-    ("share/jupyter/lab/extensions%s" % labext_name, HERE, "install.json"),
+    ("share/jupyter/lab/extensions/%s" % labext_name, lab_path, "**"),
+    ("share/jupyter/lab/extensions/%s" % labext_name, HERE, "install.json"),
     ("etc/jupyter/jupyter_server_config.d",
         "jupyter-config/jupyter_server_config.d", "jupyterlab_requirements.json"),
     ("etc/jupyter/jupyter_notebook_config.d",
