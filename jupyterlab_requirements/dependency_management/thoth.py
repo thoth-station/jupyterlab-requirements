@@ -25,7 +25,7 @@ from pathlib import Path
 from jupyter_server.base.handlers import APIHandler
 from tornado import web
 
-from thamos.lib import advise_using_config
+from thamos.lib import advise_using_config, _get_origin
 from thoth.python import Pipfile
 from thoth.common import ThothAdviserIntegrationEnum
 
@@ -44,6 +44,9 @@ class ThothAdviseHandler(APIHandler):
         config: str = input_data["thoth_config"]
         kernel_name: str = input_data["kernel_name"]
         requirements: dict = json.loads(input_data["requirements"])
+
+        # Get origin before changing path
+        origin: str = _get_origin()
 
         home = Path.home()
         complete_path = home.joinpath(".local/share/thoth/kernels")
@@ -66,6 +69,7 @@ class ThothAdviseHandler(APIHandler):
                 pipfile_lock="",
                 force=True,
                 config=config,
+                origin=origin,
                 nowait=False,
                 source_type=ThothAdviserIntegrationEnum.JUPYTER_NOTEBOOK,
                 no_static_analysis=True
