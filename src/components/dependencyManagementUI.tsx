@@ -560,7 +560,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       _.set(runtime_environment, "recommendation_type", this.state.recommendation_type)
       _.set(runtime_environments, 0, runtime_environment)
       _.set(thothConfig, "runtime_environments", runtime_environments)
-  
+
       console.log("thoth config submitted", JSON.stringify(thothConfig));
 
       const notebookMetadataRequirements = this.state.requirements;
@@ -886,6 +886,38 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
                                       </div>
                                     </div>
 
+    let optionsForm = <div>
+                        <section>
+                          <h2>OPTIONS</h2>
+                        </section>
+
+                        <form>
+                          <label>
+                            Kernel name:
+                            <input
+                              title="Kernel name"
+                              type="text"
+                              name="kernel_name"
+                              value={this.state.kernel_name}
+                              onChange={this.setKernelName}
+                            />
+                          </label>
+                          <br />
+                          <label>
+                            Recommendation type:
+                            <select onChange={() => this.changeRecommendationType}>
+                              title="Recommendation Type"
+                              name="recommendation_type"
+                              value={this.state.recommendation_type}
+                              <option value="latest">latest</option>
+                              <option value="performance">performance</option>
+                              <option value="security">security</option>
+                              <option value="stable">stable</option>
+                            </select>
+                          </label>
+                          </form>
+                      </div>
+
       if ( this.state.status == "loading" ) {
 
         this.onStart( )
@@ -945,17 +977,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
               </fieldset>
             </div>
 
-            <br></br> OPTIONS
-
-            <div>
-            Kernel name <input title="Kernel name"
-                className={THOTH_KERNEL_NAME_INPUT}
-                type="text"
-                name="kernel_name"
-                value={this.state.kernel_name}
-                onChange={this.setKernelName}
-              />
-            </div>
+            {optionsForm}
           </div>
         );
       }
@@ -974,36 +996,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
                 Please install them.</p>
               </fieldset>
             </div>
-
-            <section>
-              <h2>OPTIONS</h2>
-            </section>
-
-            <form>
-              <label>
-                Kernel name:
-                <input
-                  title="Kernel name"
-                  type="text"
-                  name="kernel_name"
-                  value={this.state.kernel_name}
-                  onChange={this.setKernelName}
-                />
-              </label>
-              <br />
-              <label>
-                Recommendation type:
-                <select onChange={() => this.changeRecommendationType}>
-                  title="Recommendation Type"
-                  name="recommendation_type"
-                  value={this.state.recommendation_type}
-                  <option value="latest">latest</option>
-                  <option value="performance">performance</option>
-                  <option value="security">security</option>
-                  <option value="stable">stable</option>
-                </select>
-              </label>
-            </form>
+            {optionsForm}
           </div>
         );
       }
