@@ -199,7 +199,6 @@ export class DependencyManagementTableRowNew extends React.Component<IProps, ISt
                         </button>;
         }
 
-
         return (
             <tr>
                 <td>

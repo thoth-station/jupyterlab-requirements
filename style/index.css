@@ -1,7 +1,7 @@
  /* Buttons */
 
 .thoth-new-package-button {
-  background-color: rgb(255, 187, 0);
+  background-color: rgb(200, 200, 200);
   border-radius: 12px;
   border: none;
   color: rgb(2, 1, 1);
@@ -13,15 +13,15 @@
 }
 
 .thoth-new-package-button:hover {
-  background-color: #7a5d0e;
+  background-color: #444444;
   color: white;
 }
 
 .thoth-save-button {
-  background-color: rgb(43, 221, 43);
+  background-color: rgb(174, 0, 255);
   border-radius: 12px;
   border: none;
-  color: rgb(0, 0, 0);
+  color: white;
   padding: 10px 16px;
   text-align: center;
   text-decoration: none;
@@ -30,7 +30,7 @@
 }
 
 .thoth-save-button:hover {
-  background-color: #166e1a;
+  background-color: #b421ad;
   color: white;
 }
 
@@ -40,8 +40,6 @@
   border: none;
   color: white;
   padding: 10px 16px;
-  margin: 0;
-  left: 50%;
   text-align: center;
   text-decoration: none;
   display: inline-block;
@@ -89,7 +87,11 @@
  /* Table */
 
 .thoth-table, thead, tr, th {
-  width: 60%;
+  width: 100%;
+}
+
+.thoth-table, th, tr {
+  border-bottom: 1px solid black;
 }
 
 .thoth-table th {
