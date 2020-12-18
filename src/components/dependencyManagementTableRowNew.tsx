@@ -226,26 +226,28 @@ export class DependencyManagementTableRowNew extends React.Component<IProps, ISt
                     {context.showIfInstalled(this.props.installed)}
                 </td>
                 <td>
-                    {addButton}
-                </td>
-                <td>
-                    {editButton}
-                </td>
-                <td>
-                    <button
-                        title='Delete new package'
-                        className={THOTH_ROW_BUTTON}
-                        type="button"
-                        onClick={context.handleItemDeleted.bind(context, this.state.name)}
-                        >
-                        <deleteIcon.react
-                            tag="div"
-                            elementPosition="center"
-                            width="20px"
-                            height="20px"
-                            display="inline-block"
-                        />
-                    </button>
+                    <td>
+                        {addButton}
+                    </td>
+                    <td>
+                        {editButton}
+                    </td>
+                    <td>
+                        <button
+                            title='Delete new package'
+                            className={THOTH_ROW_BUTTON}
+                            type="button"
+                            onClick={context.handleItemDeleted.bind(context, this.state.name)}
+                            >
+                            <deleteIcon.react
+                                tag="div"
+                                elementPosition="center"
+                                width="20px"
+                                height="20px"
+                                display="inline-block"
+                            />
+                        </button>
+                    </td>
                 </td>
             </tr>
         );

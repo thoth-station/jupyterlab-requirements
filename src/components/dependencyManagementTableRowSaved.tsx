@@ -125,49 +125,51 @@ export class DependencyManagementTableRowSaved extends React.Component<IProps, I
                     {context.showIfInstalled(this.props.installed)}
                 </td>
                 <td>
-                    <button
-                        title='Add package'
-                        className={THOTH_ROW_BUTTON_DEACTIVATED}
-                        type="button"
-                        disabled={true}
-                        >
-                        <addIcon.react
-                            elementPosition="center"
-                            width="20px"
-                            height="20px"
-                            display="inline-block"
-                        />
-                    </button>
-                </td>
-                <td>
-                    <button
-                        title='Edit saved package'
-                        className={THOTH_ROW_BUTTON}
-                        type="button"
-                        onClick={context.handleItemEdited.bind(context, this.props.name, this.props.version)}
-                        >
-                        <editIcon.react
-                            elementPosition="center"
-                            width="20px"
-                            height="20px"
-                            display="inline-block"
-                        />
-                    </button>
+                    <td>
+                        <button
+                            title='Add package'
+                            className={THOTH_ROW_BUTTON_DEACTIVATED}
+                            type="button"
+                            disabled={true}
+                            >
+                            <addIcon.react
+                                elementPosition="center"
+                                width="20px"
+                                height="20px"
+                                display="inline-block"
+                            />
+                        </button>
                     </td>
                     <td>
-                    <button
-                        title='Delete saved package'
-                        className={THOTH_ROW_BUTTON}
-                        type="button"
-                        onClick={context.handleItemDeleted.bind(context, this.props.name)}
-                        >
-                        <deleteIcon.react
-                            elementPosition="center"
-                            width="20px"
-                            height="20px"
-                            display="inline-block"
-                        />
-                    </button>
+                        <button
+                            title='Edit saved package'
+                            className={THOTH_ROW_BUTTON}
+                            type="button"
+                            onClick={context.handleItemEdited.bind(context, this.props.name, this.props.version)}
+                            >
+                            <editIcon.react
+                                elementPosition="center"
+                                width="20px"
+                                height="20px"
+                                display="inline-block"
+                            />
+                        </button>
+                    </td>
+                    <td>
+                        <button
+                            title='Delete saved package'
+                            className={THOTH_ROW_BUTTON}
+                            type="button"
+                            onClick={context.handleItemDeleted.bind(context, this.props.name)}
+                            >
+                            <deleteIcon.react
+                                elementPosition="center"
+                                width="20px"
+                                height="20px"
+                                display="inline-block"
+                            />
+                        </button>
+                    </td>
                 </td>
             </tr>
         );
