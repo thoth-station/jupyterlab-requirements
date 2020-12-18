@@ -12,10 +12,6 @@
 import _ from "lodash";
 
 import * as React from 'react';
-// import { ReactComponent as Icon } from '../types/assets/save.svg';
-{/* <button>
-<Icon className='thoth-save-button' /> Save
-</button> */}
 
 import { NotebookPanel } from '@jupyterlab/notebook';
 
@@ -27,7 +23,7 @@ import { DependencyManagementNewPackageButton } from './dependencyManagementAddP
 import { get_python_version } from "../notebook";
 import { Source, Requirements, RequirementsLock } from '../types/requirements';
 
-import { ThothConfig } from '../types/thoth';
+import { RuntimeEnvornment, ThothConfig } from '../types/thoth';
 
 import {
   discover_installed_packages,
@@ -76,6 +72,7 @@ interface IProps {
 
 export interface IState {
   kernel_name: string
+  recommendation_type: string
   status: string,
   packages: { [ name: string ]: string },
   installed_packages: { [ name: string ]: string },
@@ -108,9 +105,11 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       this.setKernel = this.setKernel.bind(this),
       this.createConfig = this.createConfig.bind(this),
       this.setKernelName = this.setKernelName.bind(this)
+      this.setRecommendationType = this.setRecommendationType.bind(this)
 
       this.state = {
         kernel_name: "jupyterlab_requirements",
+        recommendation_type: "latest",
         status: "loading",
         packages: {},  // editing
         initial_packages: {},
@@ -158,6 +157,26 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       console.log("new", new_state)
       this.setState(new_state);
     }
+
+    /**
+     * Function: Set recommendation type for thamos advise
+     */
+
+    setRecommendationType(recommendation_type: string) {
+
+      this.setState(
+        {
+          recommendation_type: recommendation_type
+        }
+      );
+
+    }
+
+    changeRecommendationType(event: React .ChangeEvent<HTMLInputElement>) {
+
+        const recommendation_type = event.target.value;
+        this.setRecommendationType( recommendation_type )
+  }
 
     /**
      * Function: Set Kernel name to be created and assigned to notebook
@@ -532,6 +551,16 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       )
 
       const thothConfig: ThothConfig = await this.createConfig();
+
+      const runtime_environments: RuntimeEnvornment[] = thothConfig.runtime_environments
+
+      const runtime_environment: RuntimeEnvornment = runtime_environments[0]
+
+      // TODO: Assign user recommendation type to all runtime environments in thoth config?
+      _.set(runtime_environment, "recommendation_type", this.state.recommendation_type)
+      _.set(runtime_environments, 0, runtime_environment)
+      _.set(thothConfig, "runtime_environments", runtime_environments)
+  
       console.log("thoth config submitted", JSON.stringify(thothConfig));
 
       const notebookMetadataRequirements = this.state.requirements;
@@ -939,24 +968,42 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             {dependencyManagementform}
             {addPlusInstallContainers}
             <div>
-            <fieldset>
-              <p>Pinned down software stack found in notebook metadata!<br></br>
-              The kernel selected does not match the dependencies found for the notebook. <br></br>
-              Please install them.</p>
-            </fieldset>
+              <fieldset>
+                <p>Pinned down software stack found in notebook metadata!<br></br>
+                The kernel selected does not match the dependencies found for the notebook. <br></br>
+                Please install them.</p>
+              </fieldset>
             </div>
 
-            <br></br> OPTIONS
+            <section>
+              <h2>OPTIONS</h2>
+            </section>
 
-            <div>
-            Kernel name <input title="Kernel name"
-                className={THOTH_KERNEL_NAME_INPUT}
-                type="text"
-                name="kernel_name"
-                value={this.state.kernel_name}
-                onChange={this.setKernelName}
-              />
-            </div>
+            <form>
+              <label>
+                Kernel name:
+                <input
+                  title="Kernel name"
+                  type="text"
+                  name="kernel_name"
+                  value={this.state.kernel_name}
+                  onChange={this.setKernelName}
+                />
+              </label>
+              <br />
+              <label>
+                Recommendation type:
+                <select onChange={() => this.changeRecommendationType}>
+                  title="Recommendation Type"
+                  name="recommendation_type"
+                  value={this.state.recommendation_type}
+                  <option value="latest">latest</option>
+                  <option value="performance">performance</option>
+                  <option value="security">security</option>
+                  <option value="stable">stable</option>
+                </select>
+              </label>
+            </form>
           </div>
         );
       }
@@ -1084,21 +1131,25 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           <div>
             {dependencyManagementform}
             <div>
-              <button
-                title='Finish.'
-                className={OK_BUTTON_CLASS}
-                onClick={() => this.changeUIstate(
-                  "loading",
-                  this.state.packages,
-                  this.state.initial_packages,
-                  this.state.installed_packages,
-                  this.state.requirements,
-                  this.state.kernel_name
-                )
-                }
-                >
-                Ok
-              </button>
+              <div className={CONTAINER_BUTTON}>
+                <div className={CONTAINER_BUTTON_CENTRE}>
+                  <button
+                    title='Finish.'
+                    className={OK_BUTTON_CLASS}
+                    onClick={() => this.changeUIstate(
+                      "loading",
+                      this.state.packages,
+                      this.state.initial_packages,
+                      this.state.installed_packages,
+                      this.state.requirements,
+                      this.state.kernel_name
+                    )
+                    }
+                    >
+                    Ok
+                  </button>
+                </div>
+              </div>
             </div>
             <div>
               <p>{this.state.error_msg}</p>
@@ -1135,21 +1186,25 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           <div>
             {dependencyManagementform}
             <div>
-                <button
-                  title='Reload Page and assign kernel.'
-                  className={OK_BUTTON_CLASS}
-                  onClick={() => this.changeUIstate(
-                    "stable",
-                    this.state.packages,
-                    this.state.initial_packages,
-                    this.state.installed_packages,
-                    this.state.requirements,
-                    this.state.kernel_name
-                  )
-                  }
-                  >
-                  Ok
-                </button>
+              <div className={CONTAINER_BUTTON}>
+                  <div className={CONTAINER_BUTTON_CENTRE}>
+                    <button
+                      title='Reload Page and assign kernel.'
+                      className={OK_BUTTON_CLASS}
+                      onClick={() => this.changeUIstate(
+                        "stable",
+                        this.state.packages,
+                        this.state.initial_packages,
+                        this.state.installed_packages,
+                        this.state.requirements,
+                        this.state.kernel_name
+                      )
+                      }
+                      >
+                      Ok
+                    </button>
+                  </div>
+              </div>
             </div>
             <div>
                 <fieldset>
