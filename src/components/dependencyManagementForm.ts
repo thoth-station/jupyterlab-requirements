@@ -24,6 +24,7 @@ export interface IProps {
     installed_packages: {
         [name: string]: string;
     };
+    editRow: Function;
     storeRow: Function;
     deleteRow: Function;
     editSavedRow: Function;
@@ -47,6 +48,7 @@ export class DependencyManagementForm extends React.Component<IProps> {
                     packages: this.props.packages,
                     initial_packages: this.props.initial_packages,
                     installed_packages: this.props.installed_packages,
+                    editRow: this.props.editRow,
                     storeRow: this.props.storeRow,
                     editSavedRow: this.props.editSavedRow,
                     deleteRow: this.props.deleteRow,

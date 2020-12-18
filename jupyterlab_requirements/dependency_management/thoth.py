@@ -62,12 +62,12 @@ class ThothAdviseHandler(APIHandler):
 
         advise = {"requirements": "", "requirement_lock": "", "error": False}
 
-        # TODO: Handle all errors
         try:
+            # TODO: Handle all errors
             response = advise_using_config(
                 pipfile=pipfile_string,
-                pipfile_lock="",
-                force=True,
+                pipfile_lock="",  # TODO: Provide Pipfile.lock retrieved?
+                force=True,  # TODO: Provide force input from user?
                 config=config,
                 origin=origin,
                 nowait=False,
