@@ -6,7 +6,6 @@
   border: none;
   color: rgb(2, 1, 1);
   padding: 10px 16px;
-  margin: 30px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
@@ -19,12 +18,11 @@
 }
 
 .thoth-save-button {
-  background-color: rgb(19, 139, 19);
+  background-color: rgb(43, 221, 43);
   border-radius: 12px;
   border: none;
-  color: white;
+  color: rgb(0, 0, 0);
   padding: 10px 16px;
-  margin: 30px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
@@ -32,7 +30,7 @@
 }
 
 .thoth-save-button:hover {
-  background-color: #10da1a;
+  background-color: #166e1a;
   color: white;
 }
 
@@ -42,7 +40,8 @@
   border: none;
   color: white;
   padding: 10px 16px;
-  margin: 30px;
+  margin: 0;
+  left: 50%;
   text-align: center;
   text-decoration: none;
   display: inline-block;
@@ -72,20 +71,33 @@
   color: white;
 }
 
+.thoth-container-button {
+  height: 50px;
+  position: relative;
+}
+
+.thoth-container-button-centre {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
 
  /* Table */
 
-.thoth-table {
-  width: 100%;
+.thoth-table, thead, tr, th {
+  width: 60%;
 }
 
 .thoth-table th {
-  display: table-cell;
-  vertical-align: inherit;
+  padding: 10px 12px;
   font-weight: bold;
-  width: 300%;
   color: rgb(212, 151, 19);
   background-color: rgb(255, 255, 255);
+  text-align: center;
 }
 
 .thoth-package-name-input {
@@ -104,61 +116,30 @@
   text-align: center;
 }
 
-
 .thoth-row-button {
-  background-color: rgb(255, 187, 0);
+  background-color: rgb(200, 200, 200);
   border-radius: 12px;
-  border: none;
+  border: black;
   color: rgb(2, 1, 1);
   padding: 10px 16px;
-  margin: 30px;
   text-align: center;
   text-decoration: none;
-  display: inline-block;
   font-size: 16px;
 }
 
 .thoth-row-button:hover {
-  background-color: #7a5d0e;
+  background-color: #444444;
   color: white;
 }
 
 .thoth-row-button-deactivated {
-  background-color: rgb(54, 54, 52);
+  background-color: rgb(109, 109, 109);
   border-radius: 12px;
   border: none;
   color: rgb(245, 245, 245);
   padding: 10px 16px;
-  margin: 30px;
   text-align: center;
   text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-}
-
-.thoth-installed-package {
-  background-color: rgb(255, 255, 255);
-  border-radius: 12px;
-  width: 50%;
-  color: rgb(0, 0, 0);
-  padding: 5px 5px;
-  margin: 30px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-}
-
-.thoth-not-installed-package {
-  background-color: rgb(233, 32, 32);
-  border-radius: 12px;
-  width: 50%;
-  color: rgb(0, 0, 0);
-  padding: 5px 5px;
-  margin: 30px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
   font-size: 16px;
 }
 

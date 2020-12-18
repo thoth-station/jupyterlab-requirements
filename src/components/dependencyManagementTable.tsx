@@ -30,6 +30,7 @@ export interface IProps {
     installed_packages: {
         [name: string]: string;
     };
+    editRow: Function;
     storeRow: Function;
     deleteRow: Function;
     editSavedRow: Function;
@@ -55,16 +56,29 @@ export class DependencyManagementTable extends React.Component<IProps, IState> {
         };
     }
     renderTableHeader() {
-        return this.state.headers.map((key, index) => {
-            return React.createElement("th", { key: index }, key.toUpperCase());
-        });
+        var hRows: React.ReactNode[] = [];
+        const headers = this.state.headers;
+
+        _.forEach(headers, function(header) {
+
+            hRows.push(
+                React.createElement(
+                    "th",
+                    { className: {THOTH_TABLE} },
+                    header.toUpperCase()
+                )
+            );
+        })
+
+        return hRows;
     }
+
     renderRows() {
         var context = this;
         var packages = this.props.packages;
         var initial_packages = this.props.initial_packages;
         var installed_packages = this.props.installed_packages;
-        var rows = [];
+        var rows: React.ReactNode[] = [];
         for (let [name, version] of Object.entries(initial_packages)) {
             if (_.has(installed_packages, name)) {
                 rows.push(
@@ -98,6 +112,7 @@ export class DependencyManagementTable extends React.Component<IProps, IState> {
                         name: name,
                         installed: "N",
                         packages: packages,
+                        editRow: context.props.editRow,
                         storeRow: context.props.storeRow,
                         deleteRow: context.props.deleteRow
                     }));
@@ -105,8 +120,24 @@ export class DependencyManagementTable extends React.Component<IProps, IState> {
         return rows;
     }
     render() {
-        return (React.createElement("table", { id: THOTH_TABLE, className: THOTH_TABLE },
-            React.createElement("thead", null, this.renderTableHeader()),
-            React.createElement("tbody", null, this.renderRows())));
+        return (
+            React.createElement(
+                "table",
+                { id: THOTH_TABLE, className: THOTH_TABLE },
+            React.createElement(
+                "thead",
+                { className: {THOTH_TABLE} },
+                React.createElement(
+                    "tr",
+                    { id: THOTH_TABLE, className: THOTH_TABLE },
+                    this.renderTableHeader()
+                )
+            ),
+            React.createElement(
+                "tbody",
+                { className: {THOTH_TABLE} },
+                this.renderRows()
+            )
+        ));
     }
 }

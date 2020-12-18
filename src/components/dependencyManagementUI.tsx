@@ -56,6 +56,8 @@ import { Advise } from "../types/thoth";
  */
 const OK_BUTTON_CLASS = "thoth-ok-button";
 const THOTH_KERNEL_NAME_INPUT = "thoth-kernel-name-input";
+const CONTAINER_BUTTON = "thoth-container-button";
+const CONTAINER_BUTTON_CENTRE = "thoth-container-button-centre";
 
 /**
  * Class: Holds properties for DependenciesManagementDialog.
@@ -93,6 +95,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       this.onStart = this.onStart.bind(this),
       this.changeUIstate = this.changeUIstate.bind(this),
       this.addNewRow = this.addNewRow.bind(this),
+      this.editRow = this.editRow.bind(this),
       this.editSavedRow = this.editSavedRow.bind(this),
       this.storeRow = this.storeRow.bind(this),
       this.deleteRow = this.deleteRow.bind(this),
@@ -191,6 +194,30 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         this.state.requirements,
         this.state.kernel_name
       )
+    }
+
+    /**
+     * Function: Edit added row
+     */
+
+    editRow(package_name: string) {
+
+      const packages = this.state.packages
+
+      _.unset(packages, package_name)
+      _.set(packages, "", "*")
+
+      console.log("After editing (current)", packages)
+
+      this.changeUIstate(
+        "editing",
+        packages,
+        this.state.initial_packages,
+        this.state.installed_packages,
+        this.state.requirements,
+        this.state.kernel_name
+      )
+
     }
 
     /**
@@ -330,9 +357,21 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
         if ( _.isEqual(total_packages, this.state.installed_packages) ){
 
+          var sameRequirements: Requirements = {
+            packages: total_packages,
+            requires: notebookMetadataRequirements.requires,
+            sources: notebookMetadataRequirements.sources
+          }
+
+          // Set requirements in notebook;
+          set_requirements( this.props.panel , sameRequirements )
+
+          // Save all changes to disk.
+          this.props.panel.context.save()
+
           this.changeUIstate(
             "stable",
-            this.state.packages,
+            {},
             this.state.initial_packages,
             this.state.installed_packages,
             this.state.requirements,
@@ -609,7 +648,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       }
     }
 
-    async onStart(panel: NotebookPanel) {
+    async onStart() {
 
         // Load requirements from notebook metadata if any otherwise receive default one
         var initial_requirements: Requirements = this.props.initial_requirements
@@ -648,7 +687,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         }
 
         const initial_locked_packages = {}
-        // requirements and requirements locked is present in notebook metadata
+        // requirements and requirements locked are present in notebook metadata
 
         // Retrieve packages locked
         _.forIn(initial_requirements_lock.default, function(value, package_name) {
@@ -659,31 +698,71 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         // Retrieve kernel name from metadata
         const kernel_name = get_kernel_name( this.props.panel)
 
-        // check if all requirements locked are also installed in the current kernel
-        const are_installed: boolean = await this.checkInstalledPackages(kernel_name, initial_locked_packages)
+        // Check if all package in requirements are also in requirements locked (both from notebook metadata)
+        const check_packages = {}
 
-        // if locked requirments are present in the kernel (match packages installed), go to stable state
-        if ( are_installed == true ) {
+        _.forIn(initial_packages, function(version, name) {
+          if (_.has(initial_locked_packages, name.toLowerCase())) {
+            _.set(check_packages, name, version)
+          }
+        })
+        
+        console.log("initial packages", initial_packages)
+        console.log("packages in req and req lock", check_packages)
 
-          this.changeUIstate(
-            "stable",
-            this.state.packages,
-            initial_packages,
-            initial_packages,
-            initial_requirements,
-            kernel_name
-            )
+        const installed_packages = await this.retrieveInstalledPackages(kernel_name, initial_locked_packages)
 
-          return
+        const initial_installed_packages = {}
+
+        _.forIn(initial_packages, function(version, name) {
+          if (_.has(installed_packages, name.toLowerCase())) {
+            _.set(initial_installed_packages, name, version)
+          }
+        })
+
+        console.log("initial installed packages", initial_installed_packages)
+
+        if (_.isEqual(_.size(initial_packages), _.size(check_packages) )) {
+
+
+          // check if all requirements locked are also installed in the current kernel
+          const are_installed: boolean = await this.checkInstalledPackages(installed_packages, initial_locked_packages)
+
+          // if locked requirements are present in the kernel (match packages installed), go to stable state
+          if ( are_installed == true ) {
+
+            this.changeUIstate(
+              "stable",
+              this.state.packages,
+              initial_packages,
+              initial_packages,
+              initial_requirements,
+              kernel_name
+              )
+
+            return
+          }
+
+          // if locked requirements are not present or not all present in the kernel, go to only_install state
+          else {
+            this.changeUIstate(
+              "only_install_kernel",
+              this.state.packages,
+              initial_packages,
+              initial_installed_packages,
+              initial_requirements,
+              kernel_name
+              )
+            return
+          }
         }
 
-        // if locked requirements are not present or not all present in the kernel, go to only_install state
         else {
           this.changeUIstate(
-            "only_install",
+            "only_install_kernel",
             this.state.packages,
             initial_packages,
-            this.state.installed_packages,
+            initial_installed_packages,
             initial_requirements,
             kernel_name
             )
@@ -691,9 +770,10 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         }
     }
 
-    async checkInstalledPackages(kernel_name:string, packages: {}): Promise<boolean> {
 
-      // Check installed packages
+    async retrieveInstalledPackages(kernel_name:string, packages: {}): Promise<{}> {
+
+      // Retrieve installed packages
       const retrieved_packages = await discover_installed_packages( kernel_name )
 
       console.log("packages installed (pip list)", retrieved_packages);
@@ -708,6 +788,12 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       })
       console.log("Installed packages:", installed_packages)
 
+      return installed_packages
+    }
+
+    async checkInstalledPackages(installed_packages: {}, packages: {}): Promise<boolean> {
+
+      // Check installed packages
       if (_.isEqual(_.size(packages), _.size(installed_packages) )) {
         return true
       }
@@ -728,12 +814,52 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
     render(): React.ReactNode {
 
-      let styles =  "float:left"
-      // var ui = []
+      let dependencyManagementform = <div>
+                                        <DependencyManagementForm
+                                          initial_packages={this.state.initial_packages}
+                                          installed_packages={this.state.installed_packages}
+                                          packages={this.state.packages}
+                                          editRow={this.editRow}
+                                          storeRow={this.storeRow}
+                                          deleteRow={this.deleteRow}
+                                          editSavedRow={this.editSavedRow}
+                                          deleteSavedRow={this.deleteSavedRow}
+                                        />
+                                      </div>
+
+      let addPlusInstallContainers = <div>
+                                        <div className={CONTAINER_BUTTON}>
+                                          <div className={CONTAINER_BUTTON_CENTRE}>
+                                          <DependencyManagementNewPackageButton addNewRow={this.addNewRow} />
+                                          </div>
+                                        </div>
+                                        <div className={CONTAINER_BUTTON}>
+                                          <div className={CONTAINER_BUTTON_CENTRE}>
+                                            <DependencyManagementInstallButton
+                                            changeUIstate={this.changeUIstate}
+                                            install={this.lock_using_thoth} />
+                                          </div>
+                                        </div>
+                                      </div>
+
+      let addPlusSaveContainers = <div>
+                                      <div className={CONTAINER_BUTTON}>
+                                        <div className={CONTAINER_BUTTON_CENTRE}>
+                                        <DependencyManagementNewPackageButton addNewRow={this.addNewRow} />
+                                        </div>
+                                      </div>
+                                      <div className={CONTAINER_BUTTON}>
+                                        <div className={CONTAINER_BUTTON_CENTRE}>
+                                          <DependencyManagementSaveButton
+                                            onSave={this.onSave}
+                                            changeUIstate={this.changeUIstate} />
+                                        </div>
+                                      </div>
+                                    </div>
 
       if ( this.state.status == "loading" ) {
 
-        this.onStart( this.props.panel )
+        this.onStart( )
 
         return (
           <div>
@@ -747,11 +873,15 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
         return (
           <div>
-            <div className={styles} >
+            <div className={CONTAINER_BUTTON}>
+              <div className={CONTAINER_BUTTON_CENTRE}>
               <DependencyManagementNewPackageButton addNewRow={this.addNewRow} />
+              </div>
             </div>
             <div>
-              <p> No dependencies found! Click New to add package. </p>
+              <fieldset>
+                <p> No dependencies found! Click New to add package. </p>
+              </fieldset>
             </div>
 
           </div>
@@ -762,25 +892,13 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
         return (
           <div>
+              {dependencyManagementform}
+              {addPlusSaveContainers}
             <div>
-              <DependencyManagementForm
-              initial_packages={this.state.initial_packages}
-              installed_packages={this.state.installed_packages}
-              packages={this.state.packages}
-              storeRow={this.storeRow}
-              deleteRow={this.deleteRow}
-              editSavedRow={this.editSavedRow}
-              deleteSavedRow={this.deleteSavedRow}/>
+              <fieldset>
+                <p> Dependencies missing! Click New to add package. </p>
+              </fieldset>
             </div>
-            <div>
-              <DependencyManagementNewPackageButton addNewRow={this.addNewRow} />
-            </div>
-            <div>
-              <DependencyManagementSaveButton
-              onSave={this.onSave}
-              changeUIstate={this.changeUIstate} />
-            </div>
-            <p> Dependencies missing! Click New to add package. </p>
           </div>
         );
       }
@@ -789,27 +907,43 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
         return (
           <div>
-            <div>
-              <DependencyManagementForm
-              initial_packages={this.state.initial_packages}
-              installed_packages={this.state.installed_packages}
-              packages={this.state.packages}
-              storeRow={this.storeRow}
-              deleteRow={this.deleteRow}
-              editSavedRow={this.editSavedRow}
-              deleteSavedRow={this.deleteSavedRow}/>
-            </div>
-            <div>
-              <DependencyManagementNewPackageButton addNewRow={this.addNewRow} />
-            </div>
-            <div>
-              <DependencyManagementInstallButton
-              changeUIstate={this.changeUIstate}
-              install={this.lock_using_thoth} />
-            </div>
+            {dependencyManagementform}
+            {addPlusInstallContainers}
 
             <div>
-              <p>Dependencies found in notebook metadata but lock file is missing. </p>
+              <fieldset>
+                <p>Dependencies found in notebook metadata but lock file is missing. </p>
+              </fieldset>
+            </div>
+
+            <br></br> OPTIONS
+
+            <div>
+            Kernel name <input title="Kernel name"
+                className={THOTH_KERNEL_NAME_INPUT}
+                type="text"
+                name="kernel_name"
+                value={this.state.kernel_name}
+                onChange={this.setKernelName}
+              />
+            </div>
+          </div>
+        );
+      }
+
+
+      if ( this.state.status == "only_install_kernel" ) {
+
+        return (
+          <div>
+            {dependencyManagementform}
+            {addPlusInstallContainers}
+            <div>
+            <fieldset>
+              <p>Pinned down software stack found in notebook metadata!<br></br>
+              The kernel selected does not match the dependencies found for the notebook. <br></br>
+              Please install them.</p>
+            </fieldset>
             </div>
 
             <br></br> OPTIONS
@@ -830,25 +964,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       if ( this.state.status == "editing" ) {
         return (
           <div>
-            <div>
-              <DependencyManagementForm
-              initial_packages={this.state.initial_packages}
-              installed_packages={this.state.installed_packages}
-              packages={this.state.packages}
-              storeRow={this.storeRow}
-              deleteRow={this.deleteRow}
-              editSavedRow={this.editSavedRow}
-              deleteSavedRow={this.deleteSavedRow}
-              />
-            </div>
-            <div>
-              <DependencyManagementNewPackageButton addNewRow={this.addNewRow} />
-            </div>
-            <div>
-              <DependencyManagementSaveButton
-              onSave={this.onSave}
-              changeUIstate={this.changeUIstate} />
-            </div>
+            {dependencyManagementform}
+            {addPlusSaveContainers}
           </div>
         );
       }
@@ -856,24 +973,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       if ( this.state.status == "saved" ) {
         return (
           <div>
-            <div>
-              <DependencyManagementForm
-              initial_packages={this.state.initial_packages}
-              installed_packages={this.state.installed_packages}
-              packages={this.state.packages}
-              storeRow={this.storeRow}
-              deleteRow={this.deleteRow}
-              editSavedRow={this.editSavedRow}
-              deleteSavedRow={this.deleteSavedRow}/>
-            </div>
-            <div>
-              <DependencyManagementNewPackageButton addNewRow={this.addNewRow} />
-            </div>
-            <div>
-              <DependencyManagementInstallButton
-              changeUIstate={this.changeUIstate}
-              install={this.lock_using_thoth} />
-            </div>
+            {dependencyManagementform}
+            {addPlusInstallContainers}
 
             OPTIONS
             <div> Kernel name
@@ -892,16 +993,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       if ( this.state.status == "locking_requirements" ) {
         return (
           <div>
-            <div>
-              <DependencyManagementForm
-              initial_packages={this.state.initial_packages}
-              installed_packages={this.state.installed_packages}
-              packages={this.state.packages}
-              storeRow={this.storeRow}
-              deleteRow={this.deleteRow}
-              editSavedRow={this.editSavedRow}
-              deleteSavedRow={this.deleteSavedRow}/>
-            </div>
+            {dependencyManagementform}
             <fieldset>
               <p>Contacting thoth for advise... please be patient!</p>
             </fieldset>
@@ -915,20 +1007,11 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
         return (
           <div>
-            <div>
-              <DependencyManagementForm
-              initial_packages={this.state.initial_packages}
-              installed_packages={this.state.installed_packages}
-              packages={this.state.packages}
-              storeRow={this.storeRow}
-              deleteRow={this.deleteRow}
-              editSavedRow={this.editSavedRow}
-              deleteSavedRow={this.deleteSavedRow}/>
-            </div>
+            {dependencyManagementform}
             <fieldset>
-            <p>Requirements locked and saved!<br></br>
-            Installing new requirements...
-            </p>
+              <p>Requirements locked and saved!<br></br>
+              Installing new requirements...
+              </p>
             </fieldset>
           </div>
         );
@@ -940,16 +1023,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
         return (
           <div>
-            <div>
-              <DependencyManagementForm
-              initial_packages={this.state.initial_packages}
-              installed_packages={this.state.installed_packages}
-              packages={this.state.packages}
-              storeRow={this.storeRow}
-              deleteRow={this.deleteRow}
-              editSavedRow={this.editSavedRow}
-              deleteSavedRow={this.deleteSavedRow}/>
-            </div>
+            {dependencyManagementform}
             <fieldset>
               <p>Requirements locked and saved!<br></br>
               Requirements installed!<br></br>
@@ -965,7 +1039,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
         return (
           <div>
-            <div className={styles}>
+            <div>
               <button
                 title='Add requirements.'
                 className={OK_BUTTON_CLASS}
@@ -983,7 +1057,9 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
               </button>
             </div>
             <div>
-              <p>No requirements have been added please click add after inserting package name!</p>
+              <fieldset>
+                <p>No requirements have been added please click add after inserting package name!</p>
+              </fieldset>
             </div>
           </div>
       );
@@ -994,7 +1070,9 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
         return (
           <div>
-            <p>Thoth resolution engine failed... pipenv will be used to lock and install dependencies!</p>
+            <fieldset>
+              <p>Thoth resolution engine failed... pipenv will be used to lock and install dependencies!</p>
+            </fieldset>
           </div>
       );
 
@@ -1004,17 +1082,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
         return (
           <div>
+            {dependencyManagementform}
             <div>
-              <DependencyManagementForm
-              initial_packages={this.state.initial_packages}
-              installed_packages={this.state.installed_packages}
-              packages={this.state.packages}
-              storeRow={this.storeRow}
-              deleteRow={this.deleteRow}
-              editSavedRow={this.editSavedRow}
-              deleteSavedRow={this.deleteSavedRow}/>
-            </div>
-            <div className={styles} >
               <button
                 title='Finish.'
                 className={OK_BUTTON_CLASS}
@@ -1043,19 +1112,16 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
         return (
           <div>
-            <DependencyManagementForm
-            initial_packages={this.state.initial_packages}
-            installed_packages={this.state.installed_packages}
-            packages={this.state.packages}
-            storeRow={this.storeRow}
-            deleteRow={this.deleteRow}
-            editSavedRow={this.editSavedRow}
-            deleteSavedRow={this.deleteSavedRow}/>
-            <div>
+            {dependencyManagementform}
+            <div className={CONTAINER_BUTTON}>
+              <div className={CONTAINER_BUTTON_CENTRE}>
               <DependencyManagementNewPackageButton addNewRow={this.addNewRow} />
+              </div>
             </div>
             <div>
+              <fieldset>
                 <p> Everything installed and ready to use!</p>
+              </fieldset>
             </div>
           </div>
         );
@@ -1067,15 +1133,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
         return (
           <div>
-            <DependencyManagementForm
-            initial_packages={this.state.initial_packages}
-            installed_packages={this.state.installed_packages}
-            packages={this.state.packages}
-            storeRow={this.storeRow}
-            deleteRow={this.deleteRow}
-            editSavedRow={this.editSavedRow}
-            deleteSavedRow={this.deleteSavedRow}/>
-            <div className={styles} >
+            {dependencyManagementform}
+            <div>
                 <button
                   title='Reload Page and assign kernel.'
                   className={OK_BUTTON_CLASS}

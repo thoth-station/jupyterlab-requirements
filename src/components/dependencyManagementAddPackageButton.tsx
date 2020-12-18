@@ -10,6 +10,9 @@
  */
 import * as React from 'react';
 
+import { addIcon } from '../icons';
+
+
 /**
  * The class name added to the new package button (CSS).
  */
@@ -35,10 +38,20 @@ export class DependencyManagementNewPackageButton extends React.Component<IProps
     }
     render() {
         return (
-            React.createElement("button",
-            {
-                title: 'Add new line! Only one empty line is displayed.',
-                className: NEW_PACKAGE_BUTTON_CLASS,
-                onClick: this.addNewEmptyRow.bind(this) }, "New"));
+            <button
+                    title='Add new line! Only one empty line is displayed.'
+                    className={NEW_PACKAGE_BUTTON_CLASS}
+                    type="button"
+                    onClick={this.addNewEmptyRow.bind(this)}
+                    >
+                    <addIcon.react
+                        tag="div"
+                        elementPosition="center"
+                        width="20px"
+                        height="20px"
+                        display="inline-block"
+                    />
+            </button>
+            );
     }
 }
