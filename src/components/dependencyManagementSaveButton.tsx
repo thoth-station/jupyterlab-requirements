@@ -57,7 +57,7 @@ export class DependencyManagementSaveButton extends React.Component<IProps> {
                 tag="div"
                 elementPosition="center"
                 right="7px"
-                top="5px" 
+                top="5px"
                 width="20px"
                 height="20px"
             />

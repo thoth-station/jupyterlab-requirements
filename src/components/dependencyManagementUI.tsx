@@ -706,7 +706,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             _.set(check_packages, name, version)
           }
         })
-        
+
         console.log("initial packages", initial_packages)
         console.log("packages in req and req lock", check_packages)
 

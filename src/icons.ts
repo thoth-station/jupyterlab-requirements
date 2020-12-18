@@ -48,7 +48,7 @@ export const installedIcon = new LabIcon({
     name: 'thoth:installed-icon',
     svgstr: installedSvgstr
   });
-  
+
 /**
  * Class: Not installed icon.
  */
