@@ -144,7 +144,7 @@ export function get_requirement_lock( notebook: NotebookPanel ): Promise<Require
             const retrieved = notebook.model.metadata.get("requirements_lock")
 
             if (typeof retrieved == "undefined") {
-                console.log("requirement_lock key is not in notebook metadata!")
+                console.log("requirements_lock key is not in notebook metadata!")
                 resolve( null )
             }
 
