@@ -47,11 +47,6 @@ function activate (
   // ManageDependenciesButtonExtension initialization code
   const buttonExtension = new ManageDependenciesButtonExtension();
   app.docRegistry.addWidgetExtension('Notebook', buttonExtension);
-  app.contextMenu.addItem({
-    selector: '.jp-Notebook',
-    command: commandIDs.dependencyManagement,
-    rank: -0.5
-  });
 
 }
 

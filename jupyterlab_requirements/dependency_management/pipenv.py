@@ -62,7 +62,7 @@ class PipenvHandler(APIHandler):
         result = {"requirements_lock": "", "error": False}
 
         try:
-            subprocess.run(["pipenv", "lock"], cwd=env_path)
+            subprocess.run(["pipenv", "lock"], cwd=env_path, check=True)
 
         except Exception as pipenv_error:
             _LOGGER.warning(f"error locking using pipenv: {pipenv_error}")

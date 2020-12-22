@@ -8,17 +8,20 @@
  * @author Francesco Murdaca <fmurdaca@redhat.com>
  * @since  0.0.1
  */
-import { ToolbarButton } from '@jupyterlab/apputils';
 import React from 'react';
-import { ReactWidget, Dialog } from '@jupyterlab/apputils';
-import { MessageLoop } from '@lumino/messaging';
-import { Widget } from '@lumino/widgets';
-import { DependenciesManagementUI } from './components/dependencyManagementUI';
-import { THOTH_TOOLBAR_BUTTON_POSITION } from './constants';
+
+import { ToolbarButton, ReactWidget, Dialog } from '@jupyterlab/apputils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
+
+import { MessageLoop } from '@lumino/messaging';
+import { Widget } from '@lumino/widgets';
 import { IDisposable } from '@lumino/disposable';
+
 import { get_requirements, get_requirement_lock, get_thoth_configuration, } from "./notebook";
+import { DependenciesManagementUI } from './components/dependencyManagementUI';
+import { THOTH_TOOLBAR_BUTTON_POSITION } from './constants';
+
 /**
  * Manage dependencies button extension
  *  - Attach button to notebook toolbar and launch a dialog to handle dependencies
@@ -42,6 +45,7 @@ export class ManageDependenciesButtonExtension
         // Check if any thoth config is stored in notebook metadata
         const initial_config_file = get_thoth_configuration(this.panel);
         console.log('Thoth config from notebook metadata', initial_config_file);
+
         /**
          * Start UI for dependency Management
          */
@@ -62,8 +66,7 @@ export class ManageDependenciesButtonExtension
         };
         const dialog = new Dialog(ui);
         dialog.launch();
-        // Save all changes to disk.
-        this.panel.context.save();
+
     };
 
     createNew(
