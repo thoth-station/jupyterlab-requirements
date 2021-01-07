@@ -46,11 +46,27 @@ jupyter labextension list
 
 ## Usage
 
-Virtualenv created to run your notebook according to your requirements is created in:
+jupyter-nbrequirements extension for JupyterLab can be easily used directly from the notebook in JupyterLab.
+On the notebook menu there is a new button that allows to manage dependencies easily.
+
+### Resolution engines
+
+* [Thoth](https://thoth-station.ninja/)
+
+* [pipenv](https://github.com/pypa/pipenv)
+
+Currently Thoth is used by default and pipenv is backup. In the future user will be able to select specific one.
+
+### Virtual environment for you dependencies
+
+Virtualenv created to run your notebook according to your dependencies requirement is created in:
 
 `~/.local/share/thoth/kernels/{kernel_name}`
 
-Current development efforts are focused on creating first UI.
+### Dependencies installation
+
+Once lock file is created using any of available resolution engine. The dependencies are installed in the virtualenv using 
+[micropipenv](https://pypi.org/project/micropipenv/)
 
 ## Contributing
 
