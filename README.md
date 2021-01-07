@@ -65,7 +65,7 @@ Virtualenv created to run your notebook according to your dependencies requireme
 
 ### Dependencies installation
 
-Once lock file is created using any of available resolution engine. The dependencies are installed in the virtualenv using 
+Once lock file is created using any of available resolution engine. The dependencies are installed in the virtualenv using
 [micropipenv](https://pypi.org/project/micropipenv/)
 
 ## Contributing
