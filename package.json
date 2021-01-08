@@ -1,6 +1,6 @@
 {
   "name": "jupyterlab_requirements",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "JupyterLab Extension for dependency management and optimization",
   "keywords": [
     "jupyter",
@@ -48,13 +48,13 @@
     "watch:labextension": "jupyter labextension watch ."
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.0.0-rc.11",
-    "@jupyterlab/launcher": "^3.0.0-rc.11",
-    "@jupyterlab/mainmenu": "^3.0.0-rc.11",
-    "@jupyterlab/nbformat": "^3.0.0-rc.11",
-    "@jupyterlab/notebook": "^3.0.0-rc.11",
-    "@jupyterlab/services": "^6.0.0-rc.11",
-    "@jupyterlab/translation": "^3.0.0-rc.11",
+    "@jupyterlab/application": "^3.0.0",
+    "@jupyterlab/launcher": "^3.0.0",
+    "@jupyterlab/mainmenu": "^3.0.0",
+    "@jupyterlab/nbformat": "^3.0.0",
+    "@jupyterlab/notebook": "^3.0.0",
+    "@jupyterlab/services": "^6.0.0",
+    "@jupyterlab/translation": "^3.0.0",
     "@lumino/algorithm": "^1.3.3",
     "@lumino/coreutils": "^1.5.3",
     "@lumino/datagrid": "^0.5.2",
@@ -66,8 +66,8 @@
   "devDependencies": {
     "@babel/core": "^7",
     "@babel/preset-env": "^7",
-    "@jupyterlab/builder": "^3.0.0-rc.11",
-    "@jupyterlab/testutils": "^3.0.0-rc.11",
+    "@jupyterlab/builder": "^3.0.0",
+    "@jupyterlab/testutils": "^3.0.0",
     "@types/jest": "^24",
     "@typescript-eslint/eslint-plugin": "^2.27.0",
     "@typescript-eslint/parser": "^2.27.0",
