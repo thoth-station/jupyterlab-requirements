@@ -77,6 +77,7 @@ export interface IState {
   packages: { [ name: string ]: string },
   installed_packages: { [ name: string ]: string },
   initial_packages: { [ name: string ]: string },
+  deleted_packages: { [ name: string ]: string },
   requirements: Requirements,
   error_msg: string
 }
@@ -114,6 +115,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         packages: {},  // editing
         initial_packages: {},
         installed_packages: {},
+        deleted_packages: {},
         requirements: {
           packages: {},
           requires: { python_version: get_python_version( this.props.panel ) },
@@ -132,6 +134,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       packages: { [ name: string ]: string },
       initial_packages: { [ name: string ]: string },
       installed_packages: { [ name: string ]: string },
+      deleted_packages: { [ name: string ]: string },
       requirements: Requirements,
       kernel_name: string,
       error_msg?: string,
@@ -147,6 +150,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       _.set(new_state, "initial_packages", initial_packages)
 
       _.set(new_state, "installed_packages", installed_packages)
+
+      _.set(new_state, "deleted_packages", deleted_packages)
 
       _.set(new_state, "requirements", requirements)
 
@@ -210,6 +215,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         packages,
         this.state.initial_packages,
         this.state.installed_packages,
+        this.state.deleted_packages,
         this.state.requirements,
         this.state.kernel_name
       )
@@ -233,6 +239,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         packages,
         this.state.initial_packages,
         this.state.installed_packages,
+        this.state.deleted_packages,
         this.state.requirements,
         this.state.kernel_name
       )
@@ -259,6 +266,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         packages,
         initial_packages,
         this.state.installed_packages,
+        this.state.deleted_packages,
         this.state.requirements,
         this.state.kernel_name
       )
@@ -273,15 +281,23 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
       const packages = this.state.packages
 
+      const deleted_packages = {}
+
       _.unset(packages, package_name)
 
       console.log("After deleting", packages)
+
+      // TODO: Set correctly the version deleted
+      _.set(deleted_packages, package_name, "*")
+
+      console.log("Deleted", deleted_packages)
 
       this.changeUIstate(
         "editing",
         packages,
         this.state.initial_packages,
         this.state.installed_packages,
+        deleted_packages,
         this.state.requirements,
         this.state.kernel_name
       )
@@ -300,11 +316,19 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
       console.log("After deleting saved", saved_packages)
 
+      const deleted_packages = {}
+
+      // TODO: Set correctly the version deleted
+      _.set(deleted_packages, package_name, "*")
+
+      console.log("Deleted", deleted_packages)
+
       this.changeUIstate(
         "editing",
         this.state.packages,
         saved_packages,
         this.state.installed_packages,
+        deleted_packages,
         this.state.requirements,
         this.state.kernel_name
       )
@@ -336,6 +360,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         new_dict,
         this.state.initial_packages,
         this.state.installed_packages,
+        this.state.deleted_packages,
         this.state.requirements,
         this.state.kernel_name
       )
@@ -347,6 +372,14 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
      */
 
     onSave() {
+
+      const deleted_packages = this.state.deleted_packages
+
+      // Check if there are any deleted packages and relock in that case
+      if ( _.size( deleted_packages ) > 0 ) {
+        this.lock_using_thoth()
+        return
+      }
 
       const notebookMetadataRequirements = this.state.requirements
       const added_packages = this.state.packages
@@ -393,6 +426,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             {},
             this.state.initial_packages,
             this.state.installed_packages,
+            this.state.deleted_packages,
             this.state.requirements,
             this.state.kernel_name
           )
@@ -423,6 +457,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             {},
             total_packages,
             this.state.installed_packages,
+            this.state.deleted_packages,
             finalRequirements,
             this.state.kernel_name
           )
@@ -449,6 +484,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           new_packages,
           this.state.initial_packages,
           this.state.installed_packages,
+          this.state.deleted_packages,
           this.state.requirements,
           this.state.kernel_name
         )
@@ -468,6 +504,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             {},
             this.state.initial_packages,
             this.state.initial_packages,
+            this.state.deleted_packages,
             this.state.requirements,
             this.state.kernel_name
           )
@@ -483,6 +520,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           this.state.packages,
           this.state.initial_packages,
           this.state.installed_packages,
+          this.state.deleted_packages,
           this.state.requirements,
           this.state.kernel_name,
           "Error install dependencies in the new virtual environment, please contact Thoth team."
@@ -514,6 +552,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             {},
             this.state.initial_packages,
             this.state.initial_packages,
+            this.state.deleted_packages,
             this.state.requirements,
             this.state.kernel_name
           )
@@ -529,6 +568,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             this.state.packages,
             this.state.initial_packages,
             this.state.installed_packages,
+            this.state.deleted_packages,
             this.state.requirements,
             this.state.kernel_name,
             "Error setting new environment in a jupyter kernel, please contact Thoth team."
@@ -546,6 +586,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         this.state.packages,
         this.state.initial_packages,
         this.state.installed_packages,
+        this.state.deleted_packages,
         this.state.requirements,
         this.state.kernel_name
       )
@@ -586,6 +627,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             {},
             this.state.initial_packages,
             this.state.installed_packages,
+            {},
             advise.requirements,
             this.state.kernel_name
           )
@@ -612,6 +654,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         this.state.packages,
         this.state.initial_packages,
         this.state.installed_packages,
+        this.state.deleted_packages,
         this.state.requirements,
         this.state.kernel_name
       )
@@ -637,6 +680,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             {},
             this.state.initial_packages,
             this.state.installed_packages,
+            {},
             notebookMetadataRequirements,
             this.state.kernel_name
           )
@@ -651,6 +695,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             this.state.packages,
             this.state.initial_packages,
             this.state.installed_packages,
+            this.state.deleted_packages,
             this.state.requirements,
             this.state.kernel_name,
             "No resolution engine was able to install dependendices, please contact Thoth team."
@@ -668,6 +713,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           this.state.packages,
           this.state.initial_packages,
           this.state.installed_packages,
+          this.state.deleted_packages,
           this.state.requirements,
           this.state.kernel_name,
           "No resolution engine was able to install dependendices, please contact Thoth team."
@@ -679,7 +725,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
     async onStart() {
 
-        // Load requirements from notebook metadata if any otherwise receive default one
+        // Load requirements from notebook metadata, if any, otherwise receive default ones
         var initial_requirements: Requirements = this.props.initial_requirements
         console.log("initial requirements", initial_requirements)
         var initial_packages = initial_requirements.packages
@@ -691,6 +737,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             this.state.packages,
             initial_packages,
             this.state.installed_packages,
+            this.state.deleted_packages,
             initial_requirements,
             this.state.kernel_name
           )
@@ -709,14 +756,15 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             this.state.packages,
             initial_packages,
             this.state.installed_packages,
+            this.state.deleted_packages,
             initial_requirements,
             this.state.kernel_name
           )
           return
         }
 
-        const initial_locked_packages = {}
         // requirements and requirements locked are present in notebook metadata
+        const initial_locked_packages = {}
 
         // Retrieve packages locked
         _.forIn(initial_requirements_lock.default, function(value, package_name) {
@@ -765,6 +813,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
               this.state.packages,
               initial_packages,
               initial_packages,
+              this.state.deleted_packages,
               initial_requirements,
               kernel_name
               )
@@ -779,6 +828,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
               this.state.packages,
               initial_packages,
               initial_installed_packages,
+              this.state.deleted_packages,
               initial_requirements,
               kernel_name
               )
@@ -792,6 +842,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             this.state.packages,
             initial_packages,
             initial_installed_packages,
+            this.state.deleted_packages,
             initial_requirements,
             kernel_name
             )
@@ -1088,6 +1139,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
                   this.state.packages,
                   this.state.initial_packages,
                   this.state.installed_packages,
+                  this.state.deleted_packages,
                   this.state.requirements,
                   this.state.kernel_name
                 )
@@ -1134,6 +1186,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
                       this.state.packages,
                       this.state.initial_packages,
                       this.state.installed_packages,
+                      this.state.deleted_packages,
                       this.state.requirements,
                       this.state.kernel_name
                     )
@@ -1189,6 +1242,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
                         this.state.packages,
                         this.state.initial_packages,
                         this.state.installed_packages,
+                        this.state.deleted_packages,
                         this.state.requirements,
                         this.state.kernel_name
                       )

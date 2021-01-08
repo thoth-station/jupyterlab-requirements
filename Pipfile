@@ -10,7 +10,7 @@ invectio = "*"
 thamos = "*"
 thoth-python = "*"
 thoth-common = "*"
-jupyterlab =">3.*"
+jupyterlab = ">3."
 
 [dev-packages]
 jupyter-packaging = "*"
