@@ -1,0 +1,10 @@
+check:
+  - thoth-build
+  - thoth-precommit
+build:
+  base-image: quay.io/thoth-station/s2i-thoth-ubi8-py38:v0.20.1
+  build-stratergy: Source
+  registry: quay.io
+  registry-org: thoth-station
+  registry-project: jupyterlab-requirements
+  registry-secret: thoth-station-thoth-pusher-secret
