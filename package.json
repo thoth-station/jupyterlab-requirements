@@ -91,7 +91,7 @@
           "pip"
         ],
         "base": {
-          "name": "jupyterlab-requirements"
+          "name": "jupyterlab_requirements"
         }
       }
     },
