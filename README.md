@@ -113,3 +113,7 @@ jupyter lab build --minimize=False
 ```bash
 pip uninstall jupyterlab-requirements
 ```
+
+## Demo development status
+
+* [Dec 8 2020](https://www.youtube.com/watch?v=IBzTOP4TCdA)

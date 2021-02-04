@@ -41,7 +41,7 @@ class JupyterKernelHandler(APIHandler):
 
         home = Path.home()
         complete_path = home.joinpath(".local/share/thoth/kernels")
-
+        
         _LOGGER.info(f"Setting new jupyter kernel {kernel_name} from {complete_path}/{kernel_name}." )
 
         # TODO: Check if ipykernel is installed, otherwise install it
@@ -61,8 +61,8 @@ class JupyterKernelHandler(APIHandler):
                 f". {kernel_name}/bin/activate && ipython kernel install --user"
                 f" --name={kernel_name} --display-name 'Python ({kernel_name})'",
                 shell=True,
+                cwd=complete_path,
                 capture_output=True,
-                cwd=complete_path
             )
             _LOGGER.info(process_output.stdout.decode("utf-8"))
 

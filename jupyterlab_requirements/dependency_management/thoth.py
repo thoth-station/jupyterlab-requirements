@@ -27,6 +27,7 @@ from tornado import web
 
 from thamos.lib import advise_using_config, _get_origin
 from thoth.python import Pipfile
+from thoth.python import Project
 from thoth.common import ThothAdviserIntegrationEnum
 
 _LOGGER = logging.getLogger("jupyterlab_requirements.thoth")
@@ -101,6 +102,20 @@ class ThothAdviseHandler(APIHandler):
 
                     advise['requirements'] = pipfile
                     advise['requirement_lock'] = pipfile_lock
+
+                    requirements_format = "pipenv"
+
+                    project = Project.from_dict(requirements, pipfile_lock)
+
+                    pipfile_path = env_path.joinpath("Pipfile")
+                    pipfile_lock_path = env_path.joinpath("Pipfile.lock")
+
+                    if requirements_format == "pipenv":
+                        _LOGGER.debug("Writing to Pipfile/Pipfile.lock in %r", env_path)
+                        project.to_files(
+                            pipfile_path=pipfile_path,
+                            pipfile_lock_path=pipfile_lock_path
+                        )
 
         except Exception as api_error:
             _LOGGER.warning(f"error talking to Thoth: {api_error}")
