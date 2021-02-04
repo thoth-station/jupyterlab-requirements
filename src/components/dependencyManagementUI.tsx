@@ -747,7 +747,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         // requirements is present in notebook metadata
 
         // Load requirements lock from notebook metadata ( if any )
-        const initial_requirements_lock = this.props.initial_requirements_lock
+        const initial_requirements_lock: RequirementsLock = this.props.initial_requirements_lock
+        console.log("initial requirements lock", initial_requirements_lock)
 
         // Check if requirements locked are present
         if ( initial_requirements_lock == null ) {
