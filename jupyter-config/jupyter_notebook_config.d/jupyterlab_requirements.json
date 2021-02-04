@@ -1,6 +1,6 @@
 {
   "NotebookApp": {
-    "jpserver_extensions": {
+    "nbserver_extensions": {
       "jupyterlab_requirements": true
     }
   }
