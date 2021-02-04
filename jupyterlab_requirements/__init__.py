@@ -27,7 +27,7 @@ from .dependency_management import JupyterKernelHandler, DependencyInstalledHand
 
 HERE = osp.abspath(osp.dirname(__file__))
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 with open(osp.join(HERE, 'labextension', 'package.json')) as fid:
     data = json.load(fid)
