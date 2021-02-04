@@ -1,5 +1,5 @@
 {
   "packageManager": "python",
-  "packageName": "jupyterlab-requirements",
+  "packageName": "jupyterlab_requirements",
   "uninstallInstructions": "Use your Python package manager (pip, conda, etc.) to uninstall the package jupyterlab-requirements"
 }
