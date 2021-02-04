@@ -52,18 +52,19 @@ def _load_jupyter_server_extension(server_app):
     host_pattern = ".*$"
 
     base_url = web_app.settings["base_url"]
+    print("base_url:", base_url)
 
     url_path = "jupyterlab-requirements"
 
     # Prepend the base_url so that it works in a jupyterhub setting
     handlers = [
-        (url_path_join(base_url, f"{url_path}/thoth/config"), ThothConfigHandler),
-        (url_path_join(base_url, f"{url_path}/thoth/resolution"), ThothAdviseHandler),
-        (url_path_join(base_url, f"{url_path}/pipenv"), PipenvHandler),
-        (url_path_join(base_url, f"{url_path}/kernel/packages"), DependencyInstalledHandler),
-        (url_path_join(base_url, f"{url_path}/kernel/install"), DependencyInstallHandler),
-        (url_path_join(base_url, f"{url_path}/kernel/create"), JupyterKernelHandler),
-        (url_path_join(base_url, f"{url_path}/file/dependencies"), DependenciesFilesHandler),
+        (url_path_join(base_url, f"/{url_path}/thoth/config"), ThothConfigHandler),
+        (url_path_join(base_url, f"/{url_path}/thoth/resolution"), ThothAdviseHandler),
+        (url_path_join(base_url, f"/{url_path}/pipenv"), PipenvHandler),
+        (url_path_join(base_url, f"/{url_path}/kernel/packages"), DependencyInstalledHandler),
+        (url_path_join(base_url, f"/{url_path}/kernel/install"), DependencyInstallHandler),
+        (url_path_join(base_url, f"/{url_path}/kernel/create"), JupyterKernelHandler),
+        (url_path_join(base_url, f"/{url_path}/file/dependencies"), DependenciesFilesHandler),
     ]
     web_app.add_handlers(host_pattern, handlers)
 
