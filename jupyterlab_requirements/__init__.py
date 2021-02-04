@@ -27,7 +27,7 @@ from .dependency_management import JupyterKernelHandler, DependencyInstalledHand
 
 HERE = osp.abspath(osp.dirname(__file__))
 
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 
 with open(osp.join(HERE, 'labextension', 'package.json')) as fid:
     data = json.load(fid)
@@ -54,7 +54,7 @@ def _load_jupyter_server_extension(server_app):
     base_url = web_app.settings["base_url"]
     print("base_url:", base_url)
 
-    url_path = "jupyterlab-requirements"
+    url_path = "jupyterlab_requirements"
 
     # Prepend the base_url so that it works in a jupyterhub setting
     handlers = [
