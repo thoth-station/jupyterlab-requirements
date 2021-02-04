@@ -12,11 +12,11 @@ import setuptools
 HERE = os.path.abspath(os.path.dirname(__file__))
 
 # The name of the project
-name="jupyterlab_requirements"
+name = "jupyterlab_requirements"
 
 
 # Get version
-def _get_version():
+def _get_version(name):
     with open(os.path.join(name, "__init__.py")) as f:
         content = f.readlines()
 
@@ -27,7 +27,7 @@ def _get_version():
     raise ValueError("No version identifier found")
 
 
-version = _get_version()
+version = _get_version(name=name)
 
 lab_path = os.path.join(HERE, name, "labextension")
 
@@ -43,15 +43,22 @@ package_data_spec = {
     ]
 }
 
+# name of the labextension
 labext_name = "jupyterlab_requirements"
 
 data_files_spec = [
     ("share/jupyter/lab/extensions/%s" % labext_name, lab_path, "**"),
     ("share/jupyter/lab/extensions/%s" % labext_name, HERE, "install.json"),
-    ("etc/jupyter/jupyter_server_config.d",
-        "jupyter-config/jupyter_server_config.d", "jupyterlab_requirements.json"),
-    ("etc/jupyter/jupyter_notebook_config.d",
-        'jupyter-config/jupyter_notebook_config.d', 'jupyterlab_requirements.json')
+    (
+        "etc/jupyter/jupyter_server_config.d",
+        "jupyter-config/jupyter_server_config.d",
+        "jupyterlab_requirements.json"
+    ),
+    (
+        "etc/jupyter/jupyter_notebook_config.d",
+        'jupyter-config/jupyter_notebook_config.d',
+        'jupyterlab_requirements.json'
+    )
 ]
 
 # To deploy simultaneously the frontend and the backend,
