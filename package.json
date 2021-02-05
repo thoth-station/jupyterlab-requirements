@@ -1,6 +1,6 @@
 {
   "name": "jupyterlab_requirements",
-  "version": "0.2.1",
+  "version": "0.2.5",
   "description": "JupyterLab Extension for dependency management and optimization",
   "keywords": [
     "jupyter",
@@ -82,7 +82,8 @@
     "typescript": "~4.0.3"
   },
   "sideEffects": [
-    "style/*.css"
+    "style/*.css",
+    "style/icons/*.svg"
   ],
   "jupyterlab": {
     "discovery": {
@@ -91,7 +92,7 @@
           "pip"
         ],
         "base": {
-          "name": "jupyterlab_requirements"
+          "name": "jupyterlab-requirements"
         }
       }
     },
