@@ -9,7 +9,7 @@
  * @since  0.0.1
  */
 
-import { requestAPI } from './handler';
+import { requestAPI, THOTH_JUPYTER_INTEGRATION_API_BASE_NAME } from './handler';
 import { Advise, PipenvResult, ThothConfig } from './types/thoth';
 // import { PipenvResult } from './types/thoth';
 
@@ -23,14 +23,15 @@ export async function retrieve_config_file (
     kernel_name: kernel_name,
   };
 
+  const endpoint: string = 'thoth/config'
   try {
-    const advise = await requestAPI<any>('thoth/config', {
+    const advise = await requestAPI<any>(endpoint, {
       body: JSON.stringify(dataToSend),
       method: 'POST'
     });
     return JSON.parse(JSON.stringify(advise));
   } catch (reason) {
-    console.error(`Error on POST /jupyterlab-requirements/thoth/config.\n${reason}`);
+    console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
   }
 
 }
@@ -49,14 +50,15 @@ export async function lock_requirements_with_thoth (
     requirements: requirements
   };
 
+  const endpoint: string = 'thoth/resolution'
   try {
-    const advise = await requestAPI<any>('thoth/resolution', {
+    const advise = await requestAPI<any>(endpoint, {
       body: JSON.stringify(dataToSend),
       method: 'POST'
     });
     return JSON.parse(JSON.stringify(advise));
   } catch (reason) {
-    console.error(`Error on POST /jupyterlab-requirements/thoth/resolution.\n${reason}`);
+    console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
   }
 }
 
@@ -72,13 +74,15 @@ export async function lock_requirements_with_pipenv (
     requirements: requirements
   };
 
+  const endpoint: string = 'pipenv'
+
   try {
-    const result = await requestAPI<any>('pipenv', {
+    const result = await requestAPI<any>(endpoint, {
       body: JSON.stringify(dataToSend),
       method: 'POST'
     });
     return JSON.parse(JSON.stringify(result));
   } catch (reason) {
-    console.error(`Error on POST /jupyterlab-requirements/pipenv.\n${reason}`);
+    console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
   }
 }

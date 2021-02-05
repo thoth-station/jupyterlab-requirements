@@ -17,7 +17,8 @@
 """Dependency manager for JupyterLab notebook."""
 
 import json
-import os.path as osp
+
+from pathlib import Path
 
 from jupyter_server.utils import url_path_join
 
@@ -25,34 +26,34 @@ from .dependency_management import DependenciesFilesHandler, PipenvHandler
 from .dependency_management import ThothConfigHandler, ThothAdviseHandler
 from .dependency_management import JupyterKernelHandler, DependencyInstalledHandler, DependencyInstallHandler
 
-HERE = osp.abspath(osp.dirname(__file__))
+HERE = Path(__file__).parent.resolve()
 
-__version__ = "0.2.3"
+__version__ = "0.2.5"
 
-with open(osp.join(HERE, 'labextension', 'package.json')) as fid:
+with (HERE / "labextension" / "package.json").open() as fid:
     data = json.load(fid)
 
 
 def _jupyter_labextension_paths():
-    return [{
-        'src': 'labextension',
-        'dest': data['name']
-    }]
+    return [{"src": "labextension", "dest": data["name"]}]
 
 
-def _jupyter_server_extension_paths():
-    return [{
-        "module": "jupyterlab_requirements"
-    }]
+def _jupyter_server_extension_points():
+    return [{"module": "jupyterlab_requirements"}]
 
 
 def _load_jupyter_server_extension(server_app):
-    """Register the API handler to receive HTTP requests from the frontend extension."""
+    """Register the API handler to receive HTTP requests from the frontend extension.
+
+    Parameters
+    ----------
+    server_app: jupyterlab.labapp.LabApp
+        JupyterLab application instance
+    """
     web_app = server_app.web_app
-    host_pattern = ".*$"
+    host_pattern = ".*"
 
     base_url = web_app.settings["base_url"]
-    print("base_url:", base_url)
 
     url_path = "jupyterlab_requirements"
 

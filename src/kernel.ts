@@ -10,7 +10,7 @@
  */
 
 
-import { requestAPI } from './handler';
+import { requestAPI, THOTH_JUPYTER_INTEGRATION_API_BASE_NAME } from './handler';
 
 /**
  * Function: Install dependencies in the new kernel.
@@ -26,14 +26,16 @@ export async function install_packages (
     kernel_name: kernel_name
   };
 
+  const endpoint: string = 'kernel/install'
+
   try {
-    const message = await requestAPI<any>('kernel/install', {
+    const message = await requestAPI<any>(endpoint, {
       body: JSON.stringify(dataToSend),
       method: 'POST'
     });
     return message;
   } catch (reason) {
-    console.error(`Error on POST /jupyterlab-requirements/kernel/install.\n${reason}`);
+    console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
   }
 }
 
@@ -51,14 +53,16 @@ export async function discover_installed_packages (
     kernel_name: kernel_name
   };
 
+  const endpoint: string = 'kernel/packages'
+
   try {
-    const packages = await requestAPI<any>('kernel/packages', {
+    const packages = await requestAPI<any>(endpoint, {
       body: JSON.stringify(dataToSend),
       method: 'POST'
     });
     return JSON.parse(JSON.stringify(packages));
   } catch (reason) {
-    console.error(`Error on POST /jupyterlab-requirements/kernel/packages.\n${reason}`);
+    console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
   }
 }
 
@@ -76,14 +80,16 @@ export async function create_new_kernel (
     kernel_name: kernel_name
   };
 
+  const endpoint: string = 'kernel/create'
+
   try {
-    const message = await requestAPI<any>('kernel/create', {
+    const message = await requestAPI<any>(endpoint, {
       body: JSON.stringify(dataToSend),
       method: 'POST'
     });
     return message;
   } catch (reason) {
-    console.error(`Error on POST /jupyterlab-requirements/kernel/create.\n${reason}`);
+    console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
   }
 }
 
@@ -105,13 +111,15 @@ export async function store_dependencies (
       requirement_lock: requirement_lock
     };
 
+    const endpoint: string = 'file/dependencies'
+
     try {
-      const message = await requestAPI<any>('file/dependencies', {
+      const message = await requestAPI<any>(endpoint, {
         body: JSON.stringify(dataToSend),
         method: 'POST'
       });
       return message;
     } catch (reason) {
-      console.error(`Error on POST /jupyterlab-requirements/file/dependencies.\n${reason}`);
+      console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
     }
   }

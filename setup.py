@@ -9,7 +9,7 @@ from jupyter_packaging import (
 )
 import setuptools
 
-HERE = os.path.abspath(os.path.dirname(__file__))
+HERE = Path(__file__).parent.resolve()
 
 # The name of the project
 name = "jupyterlab_requirements"
@@ -47,8 +47,8 @@ package_data_spec = {
 labext_name = "jupyterlab_requirements"
 
 data_files_spec = [
-    ("share/jupyter/lab/extensions/%s" % labext_name, lab_path, "**"),
-    ("share/jupyter/lab/extensions/%s" % labext_name, HERE, "install.json"),
+    ("share/jupyter/labextensions/%s" % labext_name, str(lab_path), "**"),
+    ("share/jupyter/labextensions/%s" % labext_name, str(HERE), "install.json"),
     (
         "etc/jupyter/jupyter_server_config.d",
         "jupyter-config/jupyter_server_config.d",
