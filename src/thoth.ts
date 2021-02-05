@@ -52,7 +52,7 @@ export async function lock_requirements_with_thoth (
 
   const endpoint: string = 'thoth/resolution'
   try {
-    const advise = await requestAPI<any>('thoth/resolution', {
+    const advise = await requestAPI<any>(endpoint, {
       body: JSON.stringify(dataToSend),
       method: 'POST'
     });
@@ -77,7 +77,7 @@ export async function lock_requirements_with_pipenv (
   const endpoint: string = 'pipenv'
 
   try {
-    const result = await requestAPI<any>('pipenv', {
+    const result = await requestAPI<any>(endpoint, {
       body: JSON.stringify(dataToSend),
       method: 'POST'
     });
