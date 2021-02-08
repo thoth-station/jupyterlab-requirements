@@ -61,11 +61,11 @@
         },
         "anyio": {
             "hashes": [
-                "sha256:01cce0087b8fd8b6b7e629dc11505dcde02f916ce903332892cb2ae9817b597d",
-                "sha256:35075abd32cf20fd7e0be2fee3614e80b92d5392eba257c8d2f33de3df7ca237"
+                "sha256:8a56e08623dc55955a06719d4ad62de6009bb3f1dd04936e60b2104dd58da484",
+                "sha256:c286818ccd5dcbd5d385b223f16a055393474527b1d5650da489828a9887d559"
             ],
             "markers": "python_full_version >= '3.6.2'",
-            "version": "==2.0.2"
+            "version": "==2.1.0"
         },
         "argo-workflows": {
             "hashes": [
@@ -1052,11 +1052,11 @@
         },
         "thoth-python": {
             "hashes": [
-                "sha256:25042e9357d09173820ef83bf40e6fcf4f60e3e2c4a368e341add7e218d326c0",
-                "sha256:d8f9afbf2f1a8a2375dc0c6e4b2611afea5bcaaadf27d60d53201bbc1a60666b"
+                "sha256:26ae99f5ddeabe719843debd93beff0cf825dc32019df86ff23b713eaa19eb0d",
+                "sha256:f8ea20a38f5e62be1f7dd7c3f9938e4c3f4fec87168e38218adda596dce39b06"
             ],
             "index": "pypi",
-            "version": "==0.11.0"
+            "version": "==0.12.0"
         },
         "toml": {
             "hashes": [
