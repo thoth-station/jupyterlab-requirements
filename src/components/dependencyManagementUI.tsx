@@ -42,7 +42,8 @@ import {
   get_kernel_name,
   set_requirements,
   set_requirement_lock,
-  set_thoth_configuration
+  set_thoth_configuration,
+  delete_key_from_notebook_metadata
 } from "../notebook"
 
 import { Advise } from "../types/thoth";
@@ -375,12 +376,6 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
       const deleted_packages = this.state.deleted_packages
 
-      // Check if there are any deleted packages and relock in that case
-      if ( _.size( deleted_packages ) > 0 ) {
-        this.lock_using_thoth()
-        return
-      }
-
       const notebookMetadataRequirements = this.state.requirements
       const added_packages = this.state.packages
       console.log("added_packages", added_packages)
@@ -403,6 +398,44 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           _.set(new_packages, key, value)
         }
       })
+
+      // Check if there are any deleted packages
+      if ( _.size( deleted_packages ) > 0 ) {
+
+        if (  _.size(total_packages ) > 0 ) {
+          // If there are any deleted packages and others relock with resolution engine
+
+          this.lock_using_thoth()
+          return
+        }
+
+        else {
+          // If there are any deleted packages and no other packages, then free requirements, requirements_lock and thoth.yaml
+          delete_key_from_notebook_metadata( this.props.panel, "requirements" )
+          delete_key_from_notebook_metadata( this.props.panel, "requirements_lock" )
+          delete_key_from_notebook_metadata( this.props.panel, "thoth_config" )
+
+          // Save all changes to disk.
+          this.props.panel.context.save()
+
+          var emptyRequirements: Requirements = {
+            packages: total_packages,
+            requires: notebookMetadataRequirements.requires,
+            sources: notebookMetadataRequirements.sources
+          }
+
+          this.changeUIstate(
+            "initial",
+            new_packages,
+            this.state.initial_packages,
+            this.state.installed_packages,
+            {},
+            emptyRequirements,
+            this.state.kernel_name
+          )
+        }
+
+      }
 
       // Check if there are packages saved, otherwise go to failed notification message
       if ( _.size(total_packages ) > 0 ) {
