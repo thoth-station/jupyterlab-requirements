@@ -49,6 +49,7 @@ def _load_jupyter_server_extension(server_app):
     ----------
     server_app: jupyterlab.labapp.LabApp
         JupyterLab application instance
+
     """
     web_app = server_app.web_app
     host_pattern = ".*"
