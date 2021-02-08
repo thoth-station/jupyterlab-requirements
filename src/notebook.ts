@@ -27,6 +27,12 @@ export function get_python_version( notebook: NotebookPanel ): string {
     const python_version: string = _.get(language_info, "version")
 
     console.log('python version identified:', python_version)
+
+    if ( python_version == null ) {
+        console.log( `Python version '${ python_version }' is null.` )
+        return null  // TODO: Discover automatically Python version present
+    }
+
     const match = python_version.match( /\d.\d/ )
     console.log('match identified:', match)
 
@@ -52,8 +58,24 @@ export function get_kernel_name( notebook: NotebookPanel ): string {
 }
 
 /**
- * Function: Get Python requirements from notebook metadata.
+ * Function: Delete Python requirements from notebook metadata.
  */
+
+export function delete_key_from_notebook_metadata( notebook: NotebookPanel , key_to_remove: string):  Promise<string> {
+    return new Promise( async ( resolve, reject ) => {
+
+    try {
+        notebook.model.metadata.delete(key_to_remove)
+        return resolve( "Removed correctly " + key_to_remove + " from notebook metadata" )
+
+        } catch ( err ) {
+            reject( err )
+        }
+
+    })
+}
+
+
 export function get_requirements( notebook: NotebookPanel ):  Promise<Requirements> {
     return new Promise( async ( resolve, reject ) => {
 
