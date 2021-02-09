@@ -1,2 +1,4 @@
+check:
+  - thoth-precommit
 release:
   - upload-pypi-sesheta
