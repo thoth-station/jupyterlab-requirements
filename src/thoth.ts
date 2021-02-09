@@ -11,7 +11,6 @@
 
 import { requestAPI, THOTH_JUPYTER_INTEGRATION_API_BASE_NAME } from './handler';
 import { Advise, PipenvResult, ThothConfig } from './types/thoth';
-// import { PipenvResult } from './types/thoth';
 
 export async function retrieve_config_file (
   kernel_name: string,
@@ -25,11 +24,11 @@ export async function retrieve_config_file (
 
   const endpoint: string = 'thoth/config'
   try {
-    const advise = await requestAPI<any>(endpoint, {
+    const thoth_config = await requestAPI<any>(endpoint, {
       body: JSON.stringify(dataToSend),
       method: 'POST'
     });
-    return JSON.parse(JSON.stringify(advise));
+    return JSON.parse(JSON.stringify(thoth_config));
   } catch (reason) {
     console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
   }

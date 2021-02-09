@@ -68,7 +68,7 @@ class ThothAdviseHandler(APIHandler):
             response = advise_using_config(
                 pipfile=pipfile_string,
                 pipfile_lock="",  # TODO: Provide Pipfile.lock retrieved?
-                force=True,  # TODO: Provide force input from user?
+                force=False,  # TODO: Provide force input from user?
                 config=config,
                 origin=origin,
                 nowait=False,

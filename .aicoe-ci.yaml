@@ -1,4 +1,4 @@
 check:
-  - thoth-pytest-py38
+  - thoth-precommit
 release:
   - upload-pypi-sesheta

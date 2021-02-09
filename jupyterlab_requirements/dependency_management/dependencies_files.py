@@ -19,6 +19,7 @@
 import json
 import os
 import logging
+import subprocess
 
 from pathlib import Path
 
@@ -65,12 +66,24 @@ class DependenciesFilesHandler(APIHandler):
         initial_path = Path.cwd()
         input_data = self.get_json_body()
 
+        # Path of the repo where we need to store
+        path_to_store: str = input_data["path_to_store"]
+        using_home_path_base: bool = input_data["using_home_path_base"]
+
         kernel_name: str = input_data["kernel_name"]
         requirements: str = input_data["requirements"]
         requirements_lock: str = input_data["requirement_lock"]
 
         home = Path.home()
-        complete_path = home.joinpath(".local/share/thoth/kernels")
+
+        if using_home_path_base:
+            complete_path = home.joinpath(path_to_store)
+        else:
+            git_root = _get_git_root()
+            complete_path = Path(git_root).joinpath(path_to_store)
+
+        _LOGGER.info("path to store dependencies is:", complete_path)
+
         env_path = complete_path.joinpath(kernel_name)
         env_path.mkdir(parents=True, exist_ok=True)
 
@@ -78,7 +91,7 @@ class DependenciesFilesHandler(APIHandler):
 
         requirements_format = "pipenv"
 
-        project = Project.from_dict(requirements, requirements_lock)
+        project = Project.from_strings(requirements, requirements_lock)
 
         pipfile_path = env_path.joinpath("Pipfile")
         pipfile_lock_path = env_path.joinpath("Pipfile.lock")
@@ -94,3 +107,10 @@ class DependenciesFilesHandler(APIHandler):
         self.finish(json.dumps({
             "message": f"Successfully stored requirements at {env_path}!"
         }))
+
+
+def _get_git_root():
+    return subprocess.Popen(
+        ['git', 'rev-parse', '--show-toplevel'],
+        stdout=subprocess.PIPE
+    ).communicate()[0].rstrip().decode('utf-8')

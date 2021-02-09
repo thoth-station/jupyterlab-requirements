@@ -421,7 +421,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           var emptyRequirements: Requirements = {
             packages: total_packages,
             requires: notebookMetadataRequirements.requires,
-            sources: notebookMetadataRequirements.sources
+            sources: [new Source()]
           }
 
           this.changeUIstate(
@@ -504,7 +504,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         var emptyRequirements: Requirements = {
           packages: total_packages,
           requires: notebookMetadataRequirements.requires,
-          sources: notebookMetadataRequirements.sources
+          sources: [new Source()]
         }
 
         console.log("Requirements are: ", emptyRequirements)
@@ -562,12 +562,19 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
     }
 
-    async store_dependencies_on_disk (requirements: Requirements, requirements_lock: RequirementsLock) {
+    async store_dependencies_on_disk (
+        requirements: Requirements,
+        requirements_lock: RequirementsLock,
+        path_to_store: string,
+        using_home_path_base: boolean
+      ) {
         // TODO: Requested from the user (in this case it is to install them)
         const store_message: string = await store_dependencies(
           this.state.kernel_name,
           JSON.stringify(requirements),
-          JSON.stringify(requirements_lock)
+          JSON.stringify(requirements_lock),
+          path_to_store,
+          using_home_path_base
         );
 
         console.log("Store message", store_message);
@@ -628,7 +635,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
       // If the endpoint cannot be reached or there are issues with thamos config creation
 
-      if (typeof thothConfig == "undefined") {
+      if (_.isUndefined(thothConfig)) {
 
         console.log("Thoth config is undefined")
 
@@ -663,6 +670,13 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           set_requirements( this.props.panel , advise.requirements )
           set_requirement_lock( this.props.panel , advise.requirement_lock )
           set_thoth_configuration( this.props.panel , thothConfig )
+
+          await this.store_dependencies_on_disk(
+            advise.requirements,
+            advise.requirement_lock,
+            'overlays',
+            false
+          )
 
           this.changeUIstate(
             "installing_requirements",
@@ -716,6 +730,13 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         if ( result.error == false ) {
 
           set_requirement_lock( this.props.panel , result.requirements_lock )
+
+          await this.store_dependencies_on_disk(
+            notebookMetadataRequirements,
+            result.requirements_lock,
+            'overlays',
+            false
+          )
 
           this.changeUIstate(
             "installing_requirements",

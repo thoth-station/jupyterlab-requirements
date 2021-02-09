@@ -101,6 +101,8 @@ export async function store_dependencies (
     kernel_name: string,
     requirements: string,
     requirement_lock: string,
+    path_to_store: string = ".local/share/thoth/kernels",
+    using_home_path_base: boolean = true,
     init: RequestInit = {},
   ): Promise<string> {
 
@@ -108,7 +110,9 @@ export async function store_dependencies (
     const dataToSend = {
       kernel_name: kernel_name,
       requirements: requirements,
-      requirement_lock: requirement_lock
+      requirement_lock: requirement_lock,
+      path_to_store: path_to_store,
+      using_home_path_base: using_home_path_base
     };
 
     const endpoint: string = 'file/dependencies'
