@@ -38,3 +38,15 @@ all the things that you see...
 * :pushpin: Automatic update of dependency pytest-mypy from 0.7.0 to 0.8.0 (#9)
 * :pushpin: Automatic update of dependency jupyterlab from 3.0.0rc7 to 3.0.0rc9 (#8)
 * :pushpin: Automatic update of dependency thamos from 1.3.0 to 1.3.1 (#4)
+
+## Release 0.3.0 (2021-02-09T15:57:36)
+### Features
+* :arrow_up: Automatic update of dependencies by Kebechet (#95)
+* Adjust demo link (#91)
+* :arrow_up: Automatic update of dependencies by Kebechet (#90)
+* :arrow_up: Automatic update of dependencies by Kebechet (#89)
+### Bug Fixes
+* Store in overlays after creating lock file (#98)
+* Fix issue when all dependencies are deleted (#92)
+### Improvements
+* minor adjustments for consistency (#97)
