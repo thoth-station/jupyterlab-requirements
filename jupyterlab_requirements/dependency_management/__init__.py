@@ -16,7 +16,7 @@
 
 """Dependency Management APIs for jupyter server."""
 
-from .config import ThothConfigHandler
+from .thoth_config import ThothConfigHandler
 from .customized_kernel import JupyterKernelHandler
 from .dependencies_files import DependenciesFilesHandler
 from .dependencies_handler import DependencyInstallHandler, DependencyInstalledHandler

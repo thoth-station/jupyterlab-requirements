@@ -27,7 +27,7 @@ from tornado import web
 
 from thamos.config import _Configuration
 
-_LOGGER = logging.getLogger("jupyterlab_requirements.config")
+_LOGGER = logging.getLogger("jupyterlab_requirements.thoth_config")
 
 
 class ThothConfigHandler(APIHandler):

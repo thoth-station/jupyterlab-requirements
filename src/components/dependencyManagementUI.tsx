@@ -626,6 +626,15 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
       const thothConfig: ThothConfig = await this.createConfig();
 
+      // If the endpoint cannot be reached or there are issues with thamos config creation
+
+      if (typeof thothConfig == "undefined") {
+
+        console.log("Thoth config is undefined")
+
+        this.lock_using_pipenv()
+      }
+
       const runtime_environments: RuntimeEnvornment[] = thothConfig.runtime_environments
 
       const runtime_environment: RuntimeEnvornment = runtime_environments[0]
