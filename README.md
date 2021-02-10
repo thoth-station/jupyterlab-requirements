@@ -64,13 +64,18 @@ Clicking the above button you will receive the following dialog form initially:
 <img alt="Initial Dialog Form" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/InitialDialogForm.png">
 </div>
 
-Initially, no dependencies are identified if you start a new notebook. The extension checks in the notebook metadata in order to identify them.You can start adding your packages using the add button (Remember to add your package using ):
+Initially, no dependencies are identified if you start a new notebook as metadata related are not existing.
+The extension checks in the notebook metadata in order to identify them every time you restart a notebook.
+Moreover it verifies that the kernel you are using is matching your dependencies. If not it warns to use install button again to avoid weird behaviours.
+
+You can start adding your packages using the central add button and once you select package name and version, remember to add your package using add button in action,
+otherwise it won't be saved (in the future this behaviour will not be necessary due to the autocompletion feature):
 
 <div style="text-align:center">
 <img alt="Add Package" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/AddPackages.png">
 </div>
 
-NOTE: The extra button in action will be removed in the future
+NOTE: The extra button in action will be removed in the future.
 
 NOTE: Autocompletion is planned in the future so that user can check which version are available on PyPI.
 
@@ -84,7 +89,7 @@ After saving the install button will appear so you can check before actually ins
 
 NOTE: You can choose the name of the kernel you want for your notebook.
 
-Using the Thoth resolution engine you can request an optimized software that satisfies your requirements using the Thoth recommender system. 
+Using the Thoth resolution engine you can request an optimized software that satisfies your requirements using the Thoth recommender system.
 You can choose the type of recommendation that better fits your needs:
 
 * latest
