@@ -67,7 +67,7 @@ Clicking the above button you will receive the following dialog form initially:
 Initially, no dependencies are identified if you start a new notebook. The extension checks in the notebook metadata in order to identify them.You can start adding your packages using the add button (Remember to add your package using ):
 
 <div style="text-align:center">
-<img alt="Initial Dialog Form" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/docs/images/AddPackages.jpg">
+<img alt="Add Package" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/docs/images/AddPackages.jpg">
 </div>
 
 NOTE: The extra button in action will be removed in the future
@@ -79,7 +79,7 @@ NOTE: Autocompletion is planned in the future so that user can check which versi
 After saving the install button will appear so you can check before actually installing the dependencies:
 
 <div style="text-align:center">
-<img alt="Initial Dialog Form" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/docs/images/Install.jpg">
+<img alt="Install" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/docs/images/Install.jpg">
 </div>
 
 NOTE: You can choose the name of the kernel you want for your notebook.
@@ -98,7 +98,7 @@ You can find more information and updates [here](https://thoth-station.ninja/rec
 Finally after using the install button:
 
 <div style="text-align:center">
-<img alt="Initial Dialog Form" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/docs/images/ReadyToWork.jpg">
+<img alt="Ready to Work" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/docs/images/ReadyToWork.jpg">
 </div>
 
 Now all dependencies will be locked (direct and transitive), saved in the notebook metadata, and installed. Moreover, the kernel will be automatically created and set for your notebook without human intervention required.
@@ -110,9 +110,8 @@ Now all dependencies will be locked (direct and transitive), saved in the notebo
 If you restart notebook and check dependencies with button you will see that they are all installed and ready:
 
 <div style="text-align:center">
-<img alt="Initial Dialog Form" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/docs/images/RestartingNotebook.jpg">
+<img alt="Restarting Notebook" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/docs/images/RestartingNotebook.jpg">
 </div>
-
 
 ## Resolution engines
 
