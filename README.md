@@ -47,9 +47,73 @@ jupyter labextension list
 ## Usage
 
 jupyter-nbrequirements extension for JupyterLab can be easily used directly from the notebook in JupyterLab.
-On the notebook menu there is a new button that allows to manage dependencies easily.
 
-### Resolution engines
+### Extension Button
+
+This jupyterlab extension provides a button directly in the notebook to manage the dependencies (see image below).
+
+<div style="text-align:center">
+<img alt="JupyterLab Requirements Extension" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/docs/images/JupyterLabRequirementsExtension.jpg">
+</div>
+
+### Start adding dependencies
+
+Clicking the above button you will receive the following dialog form initially:
+
+<div style="text-align:center">
+<img alt="Initial Dialog Form" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/docs/images/InitialDialogForm.jpg">
+</div>
+
+Initially, no dependencies are identified if you start a new notebook. The extension checks in the notebook metadata in order to identify them.You can start adding your packages using the add button (Remember to add your package using ):
+
+<div style="text-align:center">
+<img alt="Add Package" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/docs/images/AddPackages.jpg">
+</div>
+
+NOTE: The extra button in action will be removed in the future
+
+NOTE: Autocompletion is planned in the future so that user can check which version are available on PyPI.
+
+### Save dependencies added and install them in your customized kernel
+
+After saving the install button will appear so you can check before actually installing the dependencies:
+
+<div style="text-align:center">
+<img alt="Install" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/docs/images/Install.jpg">
+</div>
+
+NOTE: You can choose the name of the kernel you want for your notebook.
+
+Using the Thoth resolution engine you can request an optimized software that satisfies your requirements using the Thoth recommender system. 
+You can choose the type of recommendation that better fits your needs:
+
+* latest
+* performance
+* security
+* stable
+* testing
+
+You can find more information and updates [here](https://thoth-station.ninja/recommendation-types/).
+
+Finally after using the install button:
+
+<div style="text-align:center">
+<img alt="Ready to Work" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/docs/images/ReadyToWork.jpg">
+</div>
+
+Now all dependencies will be locked (direct and transitive), saved in the notebook metadata, and installed. Moreover, the kernel will be automatically created and set for your notebook without human intervention required.
+
+**Now you are ready to work on your project!**
+
+### Restart notebook
+
+If you restart notebook and check dependencies with button you will see that they are all installed and ready:
+
+<div style="text-align:center">
+<img alt="Restarting Notebook" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/docs/images/RestartingNotebook.jpg">
+</div>
+
+## Resolution engines
 
 * [Thoth](https://thoth-station.ninja/)
 
@@ -57,20 +121,25 @@ On the notebook menu there is a new button that allows to manage dependencies ea
 
 Currently Thoth is used by default and pipenv is backup. In the future user will be able to select specific one.
 
-### Virtual environment for you dependencies
+## Virtual environment for you dependencies
 
 Virtualenv created to run your notebook according to your dependencies requirement is created in:
 
 `~/.local/share/thoth/kernels/{kernel_name}`
 
-### Dependencies installation
+## Dependencies installation
 
 Once lock file is created using any of available resolution engine. The dependencies are installed in the virtualenv using
 [micropipenv](https://pypi.org/project/micropipenv/)
 
-## Contributing
+## Overlays directory
 
-### Development install
+The dependencies stored in the notebook metadata are also stored into `overlays` folder (created automatically) using the kernel name by default.
+If you want to know more about the use of overlays have a look [here](https://github.com/thoth-station/thamos#support-for-multiple-runtime-environments)
+
+# Contributing
+
+## Development install
 
 Note: You will need NodeJS to build the extension package.
 
@@ -108,12 +177,14 @@ By default, the `jlpm run build` command generates the source maps for this exte
 jupyter lab build --minimize=False
 ```
 
-### Uninstall
+# Uninstall
 
 ```bash
 pip uninstall jupyterlab-requirements
 ```
 
-## Demo development status
+# Demo development status
+
+* v0.3.0 (WIP) [Feb 10 2021]
 
 * [v0.1.0](https://www.youtube.com/watch?v=IBzTOP4TCdA) [Dec 8 2020]
