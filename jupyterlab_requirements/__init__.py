@@ -17,7 +17,6 @@
 """Dependency manager for JupyterLab notebook."""
 
 import json
-import jupyter_server
 from pathlib import Path
 
 from jupyter_server.utils import url_path_join
@@ -29,7 +28,7 @@ from .dependency_management import JupyterKernelHandler, DependencyInstalledHand
 
 HERE = Path(__file__).parent.resolve()
 
-__version__ = "0.3.2"
+__version__ = "0.3.3"
 
 with (HERE / "labextension" / "package.json").open() as fid:
     data = json.load(fid)
@@ -37,6 +36,10 @@ with (HERE / "labextension" / "package.json").open() as fid:
 
 def _jupyter_labextension_paths():
     return [{"src": "labextension", "dest": data["name"]}]
+
+
+def _jupyter_server_extension_points():
+    return [{"module": "jupyterlab_requirements"}]
 
 
 def _jupyter_server_extension_paths():
@@ -49,16 +52,16 @@ def _jupyter_server_extension_paths():
     ]
 
 
-def _load_jupyter_server_extension(server_app: jupyter_server.serverapp.ServerApp):
+def _load_jupyter_server_extension(lab_app):
     """Register the API handler to receive HTTP requests from the frontend extension.
 
     Parameters
     ----------
-    server_app: jupyterlab.labapp.LabApp
+    lab_app: jupyterlab.labapp.LabApp
         JupyterLab application instance
 
     """
-    web_app = server_app.web_app
+    web_app = lab_app.web_app
     host_pattern = '.*$'
 
     base_url = web_app.settings["base_url"]
@@ -81,48 +84,48 @@ def _load_jupyter_server_extension(server_app: jupyter_server.serverapp.ServerAp
         (
             url_path_join(base_url, "/static/favicons/favicon.ico"),
             RedirectHandler,
-            {"url": url_path_join(server_app.base_url, "static/base/images/favicon.ico")}
+            {"url": url_path_join(lab_app.base_url, "static/base/images/favicon.ico")}
         ),
         (
             url_path_join(base_url, "/static/favicons/favicon-busy-1.ico"),
             RedirectHandler,
-            {"url": url_path_join(server_app.base_url, "static/base/images/favicon-busy-1.ico")}
+            {"url": url_path_join(lab_app.base_url, "static/base/images/favicon-busy-1.ico")}
         ),
         (
             url_path_join(base_url, "/static/favicons/favicon-busy-2.ico"),
             RedirectHandler,
-            {"url": url_path_join(server_app.base_url, "static/base/images/favicon-busy-2.ico")}
+            {"url": url_path_join(lab_app.base_url, "static/base/images/favicon-busy-2.ico")}
         ),
         (
             url_path_join(base_url, "/static/favicons/favicon-busy-3.ico"),
             RedirectHandler,
-            {"url": url_path_join(server_app.base_url, "static/base/images/favicon-busy-3.ico")}
+            {"url": url_path_join(lab_app.base_url, "static/base/images/favicon-busy-3.ico")}
         ),
         (
             url_path_join(base_url, "/static/favicons/favicon-file.ico"),
             RedirectHandler,
-            {"url": url_path_join(server_app.base_url, "static/base/images/favicon-file.ico")}
+            {"url": url_path_join(lab_app.base_url, "static/base/images/favicon-file.ico")}
         ),
         (
             url_path_join(base_url, "/static/favicons/favicon-notebook.ico"),
             RedirectHandler,
-            {"url": url_path_join(server_app.base_url, "static/base/images/favicon-notebook.ico")}
+            {"url": url_path_join(lab_app.base_url, "static/base/images/favicon-notebook.ico")}
         ),
         (
             url_path_join(base_url, "/static/favicons/favicon-terminal.ico"),
             RedirectHandler,
-            {"url": url_path_join(server_app.base_url, "static/base/images/favicon-terminal.ico")}
+            {"url": url_path_join(lab_app.base_url, "static/base/images/favicon-terminal.ico")}
         ),
         (
             url_path_join(base_url, "/static/logo/logo.png"),
             RedirectHandler,
-            {"url": url_path_join(server_app.base_url, "static/base/images/logo.png")}
+            {"url": url_path_join(lab_app.base_url, "static/base/images/logo.png")}
         ),
     ]
 
     web_app.add_handlers(host_pattern, custom_handlers + favicon_redirects)
 
-    server_app.log.info(f"Registered JupyterLab extension at URL {url_path}")
+    lab_app.log.info(f"Registered JupyterLab extension at URL {url_path}")
 
 
 # Reference the old function name with the new function name.

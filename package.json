@@ -1,6 +1,6 @@
 {
   "name": "jupyterlab_requirements",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "JupyterLab Extension for dependency management and optimization",
   "keywords": [
     "jupyter",
@@ -93,7 +93,7 @@
           "pip"
         ],
         "base": {
-          "name": "jupyterlab-requirements"
+          "name": "jupyterlab_requirements"
         }
       }
     },
