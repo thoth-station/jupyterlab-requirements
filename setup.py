@@ -97,6 +97,7 @@ setup_args = dict(
     long_description= README,
     long_description_content_type="text/markdown",
     cmdclass=cmdclass,
+    packages=setuptools.find_packages(),
     install_requires=_get_install_requires(),
     zip_safe=False,
     include_package_data=True,
