@@ -19,13 +19,16 @@ NOTE: The requirements are optimized using the [Thoth](https://thoth-station.nin
 
 ## Installation
 
+You can install this extension with pip:
+
 ```bash
 pip install jupyterlab-requirements
 ```
 
+And start using it immediately on JupyterLab:
+
 ```bash
-pip install --upgrade jupyterlab jupyterlab-requirements
-jupyter lab build
+jupyter lab
 ```
 
 ## Troubleshoot
@@ -190,6 +193,6 @@ pip uninstall jupyterlab-requirements
 
 # Demo development status
 
-* v0.3.0 (WIP) [Feb 10 2021]
+* v0.3.5 (WIP) [Feb 10 2021]
 
 * [v0.1.0](https://www.youtube.com/watch?v=IBzTOP4TCdA) [Dec 8 2020]
