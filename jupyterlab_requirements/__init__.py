@@ -17,7 +17,6 @@
 """Dependency manager for JupyterLab notebook."""
 
 import json
-import jupyter_server
 from pathlib import Path
 
 from jupyter_server.utils import url_path_join
@@ -29,7 +28,7 @@ from .dependency_management import JupyterKernelHandler, DependencyInstalledHand
 
 HERE = Path(__file__).parent.resolve()
 
-__version__ = "0.3.2"
+__version__ = "0.3.3"
 
 with (HERE / "labextension" / "package.json").open() as fid:
     data = json.load(fid)
@@ -37,6 +36,10 @@ with (HERE / "labextension" / "package.json").open() as fid:
 
 def _jupyter_labextension_paths():
     return [{"src": "labextension", "dest": data["name"]}]
+
+
+def _jupyter_server_extension_points():
+    return [{"module": "jupyterlab_requirements"}]
 
 
 def _jupyter_server_extension_paths():
@@ -49,7 +52,7 @@ def _jupyter_server_extension_paths():
     ]
 
 
-def _load_jupyter_server_extension(server_app: jupyter_server.serverapp.ServerApp):
+def _load_jupyter_server_extension(server_app):
     """Register the API handler to receive HTTP requests from the frontend extension.
 
     Parameters
