@@ -46,6 +46,12 @@ class PipenvHandler(APIHandler):
         home = Path.home()
         complete_path = home.joinpath(".local/share/thoth/kernels")
         env_path = complete_path.joinpath(kernel_name)
+
+        # Delete and recreate folder
+        if env_path.exists():
+            _ = subprocess.call(
+                f"rm -rf ./{kernel_name} ", shell=True, cwd=complete_path)
+
         env_path.mkdir(parents=True, exist_ok=True)
 
         pipfile_path = env_path.joinpath("Pipfile")
@@ -65,7 +71,7 @@ class PipenvHandler(APIHandler):
             subprocess.run(["pipenv", "lock"], cwd=env_path, check=True)
 
         except Exception as pipenv_error:
-            _LOGGER.warning(f"error locking using pipenv: {pipenv_error}")
+            _LOGGER.warning("error locking using pipenv: %r", pipenv_error)
             result['error'] = True
 
         if not result['error']:

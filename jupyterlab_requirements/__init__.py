@@ -20,7 +20,6 @@ import json
 from pathlib import Path
 
 from jupyter_server.utils import url_path_join
-from tornado.web import RedirectHandler
 
 from .dependency_management import DependenciesFilesHandler, PipenvHandler
 from .dependency_management import ThothConfigHandler, ThothAdviseHandler
@@ -43,7 +42,8 @@ def _jupyter_server_extension_points():
 
 
 def _jupyter_server_extension_paths():
-    """
+    """Jupyter Server Extension Paths.
+
     Returns a list of dictionaries with metadata describing
     where to find the `_load_jupyter_server_extension` function.
     """
@@ -79,51 +79,7 @@ def _load_jupyter_server_extension(lab_app):
         (url_path_join(base_url, f"/{url_path}/file/dependencies"), DependenciesFilesHandler),
     ]
 
-    # Favicon redirects.
-    favicon_redirects = [
-        (
-            url_path_join(base_url, "/static/favicons/favicon.ico"),
-            RedirectHandler,
-            {"url": url_path_join(lab_app.base_url, "static/base/images/favicon.ico")}
-        ),
-        (
-            url_path_join(base_url, "/static/favicons/favicon-busy-1.ico"),
-            RedirectHandler,
-            {"url": url_path_join(lab_app.base_url, "static/base/images/favicon-busy-1.ico")}
-        ),
-        (
-            url_path_join(base_url, "/static/favicons/favicon-busy-2.ico"),
-            RedirectHandler,
-            {"url": url_path_join(lab_app.base_url, "static/base/images/favicon-busy-2.ico")}
-        ),
-        (
-            url_path_join(base_url, "/static/favicons/favicon-busy-3.ico"),
-            RedirectHandler,
-            {"url": url_path_join(lab_app.base_url, "static/base/images/favicon-busy-3.ico")}
-        ),
-        (
-            url_path_join(base_url, "/static/favicons/favicon-file.ico"),
-            RedirectHandler,
-            {"url": url_path_join(lab_app.base_url, "static/base/images/favicon-file.ico")}
-        ),
-        (
-            url_path_join(base_url, "/static/favicons/favicon-notebook.ico"),
-            RedirectHandler,
-            {"url": url_path_join(lab_app.base_url, "static/base/images/favicon-notebook.ico")}
-        ),
-        (
-            url_path_join(base_url, "/static/favicons/favicon-terminal.ico"),
-            RedirectHandler,
-            {"url": url_path_join(lab_app.base_url, "static/base/images/favicon-terminal.ico")}
-        ),
-        (
-            url_path_join(base_url, "/static/logo/logo.png"),
-            RedirectHandler,
-            {"url": url_path_join(lab_app.base_url, "static/base/images/logo.png")}
-        ),
-    ]
-
-    web_app.add_handlers(host_pattern, custom_handlers + favicon_redirects)
+    web_app.add_handlers(host_pattern, custom_handlers)
 
     lab_app.log.info(f"Registered JupyterLab extension at URL {url_path}")
 

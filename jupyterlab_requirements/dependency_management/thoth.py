@@ -19,6 +19,7 @@
 import json
 import os
 import logging
+import subprocess
 
 from pathlib import Path
 
@@ -52,13 +53,19 @@ class ThothAdviseHandler(APIHandler):
         home = Path.home()
         complete_path = home.joinpath(".local/share/thoth/kernels")
         env_path = complete_path.joinpath(kernel_name)
+
+        # Delete and recreate folder
+        if env_path.exists():
+            _ = subprocess.call(
+                f"rm -rf ./{kernel_name} ", shell=True, cwd=complete_path)
+
         env_path.mkdir(parents=True, exist_ok=True)
         os.chdir(os.path.dirname(env_path))
 
         _LOGGER.info("Resolution engine used: thoth")
         pipfile_string = Pipfile.from_dict(requirements).to_string()
 
-        _LOGGER.info(f"Current path: {env_path}")
+        _LOGGER.info(f"Current path: %r ", env_path.as_posix())
         _LOGGER.info(f"Input Pipfile: \n{pipfile_string}")
 
         advise = {"requirements": "", "requirement_lock": "", "error": False}
@@ -105,13 +112,13 @@ class ThothAdviseHandler(APIHandler):
 
                     requirements_format = "pipenv"
 
-                    project = Project.from_dict(requirements, pipfile_lock)
+                    project = Project.from_dict(pipfile, pipfile_lock)
 
                     pipfile_path = env_path.joinpath("Pipfile")
                     pipfile_lock_path = env_path.joinpath("Pipfile.lock")
 
                     if requirements_format == "pipenv":
-                        _LOGGER.debug("Writing to Pipfile/Pipfile.lock in %r", env_path)
+                        _LOGGER.info("Writing to Pipfile/Pipfile.lock in %r", env_path.as_posix())
                         project.to_files(
                             pipfile_path=pipfile_path,
                             pipfile_lock_path=pipfile_lock_path
