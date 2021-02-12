@@ -78,8 +78,6 @@ class DependencyInstallHandler(APIHandler):
         env_name = kernel_name
         env_path = complete_path.joinpath(env_name)
 
-        # TODO: Delete and recreate kernel if it already exists to have clean environment
-
         env_path.mkdir(parents=True, exist_ok=True)
 
         package_manager: str = 'micropipenv'

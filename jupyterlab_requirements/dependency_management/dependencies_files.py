@@ -82,7 +82,7 @@ class DependenciesFilesHandler(APIHandler):
             git_root = _get_git_root()
             complete_path = Path(git_root).joinpath(path_to_store)
 
-        _LOGGER.info("path to store dependencies is:", complete_path)
+        _LOGGER.info("path to store dependencies is: %r", complete_path.as_posix())
 
         env_path = complete_path.joinpath(kernel_name)
         env_path.mkdir(parents=True, exist_ok=True)
