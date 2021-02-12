@@ -20,7 +20,6 @@ import json
 from pathlib import Path
 
 from jupyter_server.utils import url_path_join
-from tornado.web import RedirectHandler
 
 from .dependency_management import DependenciesFilesHandler, PipenvHandler
 from .dependency_management import ThothConfigHandler, ThothAdviseHandler
@@ -43,7 +42,8 @@ def _jupyter_server_extension_points():
 
 
 def _jupyter_server_extension_paths():
-    """
+    """Jupyter Server Extension Paths.
+
     Returns a list of dictionaries with metadata describing
     where to find the `_load_jupyter_server_extension` function.
     """
