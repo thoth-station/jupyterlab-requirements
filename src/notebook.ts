@@ -78,11 +78,9 @@ export function delete_key_from_notebook_metadata( notebook: NotebookPanel , key
 
 export function get_requirements( notebook: NotebookPanel ):  Promise<Requirements> {
     return new Promise( async ( resolve, reject ) => {
-
         try {
-            const retrieved = notebook.model.metadata.get("requirements")
 
-            if (typeof retrieved == "undefined") {
+            if ( notebook.model.metadata.has("requirements") == false ) {
                 console.log("requirements key is not in notebook metadata! Initialize requirements for user...")
                 const python_packages: { [ name: string ]: string } = {}
                 const requires = { python_version: get_python_version( notebook ) }
@@ -97,6 +95,8 @@ export function get_requirements( notebook: NotebookPanel ):  Promise<Requiremen
                 return resolve( requirements )
 
             }
+
+            const retrieved = notebook.model.metadata.get("requirements")
 
             let notebookMetadataRequirements: Requirements = JSON.parse(retrieved.toString())
 
@@ -132,10 +132,10 @@ export function get_requirements( notebook: NotebookPanel ):  Promise<Requiremen
  */
 
 export function set_requirements( notebook: NotebookPanel, requirements: Requirements ): void {
-    const metadata = notebook.model.metadata
+    const notebook_metadata = notebook.model.metadata
 
-    if ( metadata.has("requirements") == false ) {
-        metadata.set('requirements', JSON.stringify(requirements) )
+    if ( notebook_metadata.has("requirements") == false ) {
+        notebook_metadata.set('requirements', JSON.stringify(requirements) )
         console.log( "Notebook requirements have been set successfully." )
 
     } else {
@@ -143,14 +143,13 @@ export function set_requirements( notebook: NotebookPanel, requirements: Require
 
         // update the notebook metadata
 
-        console.log()
-        // Insert empty requirements if no packages are present.
-        if  (typeof requirements.packages === 'undefined')  {
-            metadata.set('requirements', {} )
-            return
+        // Fail if no packages are present are not in requirements.
+        if  ( _.isEmpty(requirements.packages) == true)  {
+            console.log( "Notebook requirements packages is empty..." )
+            throw new Error( `Packages in notebook requirements is empty: '${ requirements }' `, )
         }
 
-        metadata.set('requirements', JSON.stringify(requirements) )
+        notebook_metadata.set('requirements', JSON.stringify(requirements) )
         return
     }
 }
@@ -161,16 +160,16 @@ export function set_requirements( notebook: NotebookPanel, requirements: Require
 
 export function get_requirement_lock( notebook: NotebookPanel ): Promise<RequirementsLock|null> {
     return new Promise( async ( resolve, reject ) => {
+        const notebook_metadata = notebook.model.metadata
 
         try {
-            const retrieved = notebook.model.metadata.get("requirements_lock")
-
-            if (typeof retrieved == "undefined") {
+            if ( notebook_metadata.has("requirements_lock") == false ) {
                 console.log("requirements_lock key is not in notebook metadata!")
                 resolve( null )
             }
-
-            var notebookMetadataRequirementsLock: RequirementsLock = JSON.parse(retrieved.toString())
+            
+            const requirements_lock = notebook_metadata.get("requirements_lock")
+            var notebookMetadataRequirementsLock: RequirementsLock = JSON.parse(requirements_lock.toString())
 
             console.log("requirements_lock key is in notebook metadata!")
             resolve ( notebookMetadataRequirementsLock )
@@ -186,15 +185,15 @@ export function get_requirement_lock( notebook: NotebookPanel ): Promise<Require
  */
 
 export function set_requirement_lock( notebook: NotebookPanel, requirements_lock: RequirementsLock ): void {
-    const metadata = notebook.model.metadata
+    const notebook_metadata = notebook.model.metadata
 
-    if ( metadata.has("requirements_lock") == false ) {
-        metadata.set('requirements_lock', JSON.stringify(requirements_lock) )
+    if ( notebook_metadata.has("requirements_lock") == false ) {
+        notebook_metadata.set('requirements_lock', JSON.stringify(requirements_lock) )
 
     } else {
         console.debug( "Notebook requirement_lock already exist. Updating." )
         // update the notebook metadata
-        metadata.set('requirements_lock', JSON.stringify(requirements_lock) )
+        notebook_metadata.set('requirements_lock', JSON.stringify(requirements_lock) )
     }
 
     console.log( "Notebook requirements_lock have been set successfully." )

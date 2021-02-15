@@ -72,6 +72,11 @@ class ThothAdviseHandler(APIHandler):
 
         try:
             # TODO: Handle all errors
+            _LOGGER.info("Adviser inputs are:", {
+                "pipfile": pipfile_string,
+                "config": config,
+                "origin": origin
+            })
             response = advise_using_config(
                 pipfile=pipfile_string,
                 pipfile_lock="",  # TODO: Provide Pipfile.lock retrieved?

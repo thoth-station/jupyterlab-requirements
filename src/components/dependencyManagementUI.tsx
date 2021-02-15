@@ -666,28 +666,42 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         console.log("Advise received", advise);
 
         if ( advise.error == false ) {
-          // Set requirements in notebook;
-          set_requirements( this.props.panel , advise.requirements )
-          set_requirement_lock( this.props.panel , advise.requirement_lock )
-          set_thoth_configuration( this.props.panel , thothConfig )
+          if ( _.isEmpty( advise.requirements.packages ) == false) {
 
-          await this.store_dependencies_on_disk(
-            advise.requirements,
-            advise.requirement_lock,
-            'overlays',
-            false
-          )
+             // Set requirements, requirements lock and thoth config in notebook;
+            set_requirements( this.props.panel , advise.requirements )
+            set_requirement_lock( this.props.panel , advise.requirement_lock )
+            set_thoth_configuration( this.props.panel , thothConfig )
 
-          this.changeUIstate(
-            "installing_requirements",
-            {},
-            this.state.initial_packages,
-            this.state.installed_packages,
-            {},
-            advise.requirements,
-            this.state.kernel_name
-          )
+            // Save all changes to disk.
+            this.props.panel.context.save()
 
+            await this.store_dependencies_on_disk(
+              advise.requirements,
+              advise.requirement_lock,
+              'overlays',
+              false
+            )
+
+            this.changeUIstate(
+              "installing_requirements",
+              {},
+              this.state.initial_packages,
+              this.state.installed_packages,
+              {},
+              advise.requirements,
+              this.state.kernel_name
+            )
+
+            return
+
+          }
+          else {
+
+            console.log("Advise requirements packages received is empty", advise.requirements);
+
+            this.lock_using_pipenv()
+          }
         }
         else {
 
@@ -730,6 +744,9 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         if ( result.error == false ) {
 
           set_requirement_lock( this.props.panel , result.requirements_lock )
+
+          // Save all changes to disk.
+          this.props.panel.context.save()
 
           await this.store_dependencies_on_disk(
             notebookMetadataRequirements,
