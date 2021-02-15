@@ -50,3 +50,10 @@ all the things that you see...
 * Fix issue when all dependencies are deleted (#92)
 ### Improvements
 * minor adjustments for consistency (#97)
+
+## Release 0.3.6 (2021-02-15T09:39:34)
+### Features
+* :arrow_up: Automatic update of dependencies by Kebechet (#113)
+* Create clean environment every time (#112)
+* Adjust readme for installation (#110)
+* :arrow_up: Automatic update of dependencies by Kebechet (#109)
