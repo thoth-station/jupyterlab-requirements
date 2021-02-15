@@ -57,3 +57,7 @@ all the things that you see...
 * Create clean environment every time (#112)
 * Adjust readme for installation (#110)
 * :arrow_up: Automatic update of dependencies by Kebechet (#109)
+
+## Release 0.3.7 (2021-02-15T21:52:53)
+### Bug Fixes
+* Handle errors in a better way when requirements are missing (#120)
