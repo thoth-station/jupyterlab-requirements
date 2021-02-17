@@ -167,7 +167,7 @@ export function get_requirement_lock( notebook: NotebookPanel ): Promise<Require
                 console.log("requirements_lock key is not in notebook metadata!")
                 resolve( null )
             }
-            
+
             const requirements_lock = notebook_metadata.get("requirements_lock")
             var notebookMetadataRequirementsLock: RequirementsLock = JSON.parse(requirements_lock.toString())
 
