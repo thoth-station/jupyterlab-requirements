@@ -27,7 +27,9 @@ from tornado import web
 
 from thamos.config import _Configuration
 
-_LOGGER = logging.getLogger("jupyterlab_requirements.thoth_config")
+from jupyterlab_requirements.dependency_management.common import get_git_root
+
+_LOGGER = logging.getLogger("jupyterlab_requirements.thoth_config_handler")
 
 
 class ThothConfigHandler(APIHandler):
@@ -35,7 +37,7 @@ class ThothConfigHandler(APIHandler):
 
     @web.authenticated
     def post(self):
-        """Retrieve or create thoth config file."""
+        """Retrieve or create Thoth config file."""
         initial_path = Path.cwd()
         input_data = self.get_json_body()
         kernel_name: str = input_data["kernel_name"]
@@ -55,8 +57,8 @@ class ThothConfigHandler(APIHandler):
             _LOGGER.info("Thoth config does not exist, creating it...")
             try:
                 config.create_default_config()
-            except Exception:
-                raise Exception("Thoth config file could not be created!")
+            except Exception as e:
+                raise Exception("Thoth config file could not be created! %r", e)
 
         config.load_config()
 
@@ -64,3 +66,26 @@ class ThothConfigHandler(APIHandler):
         _LOGGER.info("Thoth config:", thoth_config)
         os.chdir(initial_path)
         self.finish(json.dumps(thoth_config))
+
+
+    @web.authenticated
+    def put(self):
+        """Update Thoth config file."""
+        initial_path = Path.cwd()
+        input_data = self.get_json_body()
+        new_runtime_environment: str = input_data["runtime_environment"]
+        force: bool = input_data["force"]
+
+        configuration = _Configuration()
+
+        configuration.set_runtime_environment(
+            runtime_environment=new_runtime_environment,
+            force=force  # TODO: force should be user choice?
+        )
+        configuration.save_config()
+
+        _LOGGER.info("Updated Thoth config:", configuration.content)
+
+        self.finish(json.dumps({
+            "message": f"Successfully updated thoth config at {initial_path}!"
+        }))

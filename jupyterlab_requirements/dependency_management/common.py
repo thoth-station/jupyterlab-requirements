@@ -14,22 +14,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""Dependency Management APIs for jupyter server."""
+"""Common methods for jupyterlab requirements."""
 
-from .dependencies_files_handler import DependenciesFilesHandler
-from .dependencies_discover_handler import DependencyInstalledHandler
-from .kernel_handler import JupyterKernelHandler
-from .install_handler import DependencyInstallHandler
-from .pipenv import PipenvHandler
-from .thoth import ThothAdviseHandler
-from .thoth_config_handler import ThothConfigHandler
 
-__all__ = [
-    "DependenciesFilesHandler",
-    "DependencyInstallHandler",
-    "DependencyInstalledHandler",
-    "JupyterKernelHandler",
-    "PipenvHandler",
-    "ThothAdviseHandler",
-    "ThothConfigHandler",
-]
+import subprocess
+
+def get_git_root():
+    """Get Git root."""
+    return subprocess.Popen(
+        ['git', 'rev-parse', '--show-toplevel'],
+        stdout=subprocess.PIPE
+    ).communicate()[0].rstrip().decode('utf-8')

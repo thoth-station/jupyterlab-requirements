@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""Dependency management API for jupyterlab requirements."""
+"""Install API for jupyterlab requirements."""
 
 import json
 import os
@@ -27,37 +27,8 @@ from pathlib import Path
 from jupyter_server.base.handlers import APIHandler
 from tornado import web
 
-_LOGGER = logging.getLogger("jupyterlab_requirements.dependencies_handler")
+_LOGGER = logging.getLogger("jupyterlab_requirements.install_handler")
 
-
-class DependencyInstalledHandler(APIHandler):
-    """Dependency management handler to discover dependencies installed."""
-
-    @web.authenticated
-    def post(self):
-        """Discover list of packages installed."""
-        input_data = self.get_json_body()
-
-        kernel_name: str = input_data["kernel_name"]
-
-        home = Path.home()
-        complete_path = home.joinpath(".local/share/thoth/kernels")
-
-        process_output = subprocess.run(
-            f". {kernel_name}/bin/activate && pip list",
-            shell=True,
-            capture_output=True,
-            cwd=complete_path
-        )
-
-        processed_list = process_output.stdout.decode("utf-8").split('\n')[2:]
-        packages = {}
-        for processed_package in processed_list:
-            if processed_package:
-                package_version = [el for el in processed_package.split(' ') if el != '']
-                packages[package_version[0]] = package_version[1]
-
-        self.finish(json.dumps(packages))
 
 
 class DependencyInstallHandler(APIHandler):
@@ -98,22 +69,3 @@ class DependencyInstallHandler(APIHandler):
             "message": "installed with micropipenv",
             "kernel_name": env_name
         }))
-
-
-def list_installed_packages() -> dict:
-    """List packages installed."""
-    # this import has to be scoped
-    from pip._internal.commands.list import get_installed_distributions, format_for_json
-
-    packages = get_installed_distributions()
-    packages = sorted(
-        packages,
-        key=lambda dist: dist.project_name.lower(),
-    )
-
-    class ListOptions:
-        verbose  = False
-        outdated = False
-
-    list_packages = json.loads(format_for_json(packages, options=ListOptions))
-    return { element['name']: element['version'] for element in list_packages}

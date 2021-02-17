@@ -19,7 +19,6 @@
 import json
 import os
 import logging
-import subprocess
 
 from pathlib import Path
 
@@ -28,8 +27,9 @@ from tornado import web
 
 from thamos.cli import _load_files
 from thoth.python import Project
+from jupyterlab_requirements.dependency_management.common import get_git_root
 
-_LOGGER = logging.getLogger("jupyterlab_requirements.dependencies_files")
+_LOGGER = logging.getLogger("jupyterlab_requirements.dependencies_files_handler")
 
 
 class DependenciesFilesHandler(APIHandler):
@@ -79,7 +79,7 @@ class DependenciesFilesHandler(APIHandler):
         if using_home_path_base:
             complete_path = home.joinpath(path_to_store)
         else:
-            git_root = _get_git_root()
+            git_root = get_git_root()
             complete_path = Path(git_root).joinpath(path_to_store)
 
         _LOGGER.info("path to store dependencies is: %r", complete_path.as_posix())
@@ -107,10 +107,3 @@ class DependenciesFilesHandler(APIHandler):
         self.finish(json.dumps({
             "message": f"Successfully stored requirements at {env_path}!"
         }))
-
-
-def _get_git_root():
-    return subprocess.Popen(
-        ['git', 'rev-parse', '--show-toplevel'],
-        stdout=subprocess.PIPE
-    ).communicate()[0].rstrip().decode('utf-8')
