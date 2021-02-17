@@ -19,6 +19,7 @@
 
 import subprocess
 
+
 def get_git_root():
     """Get Git root."""
     return subprocess.Popen(

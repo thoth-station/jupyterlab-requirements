@@ -30,7 +30,6 @@ from tornado import web
 _LOGGER = logging.getLogger("jupyterlab_requirements.install_handler")
 
 
-
 class DependencyInstallHandler(APIHandler):
     """Dependency management handler to install dependencies."""
 

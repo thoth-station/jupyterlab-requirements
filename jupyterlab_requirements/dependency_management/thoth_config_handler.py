@@ -27,8 +27,6 @@ from tornado import web
 
 from thamos.config import _Configuration
 
-from jupyterlab_requirements.dependency_management.common import get_git_root
-
 _LOGGER = logging.getLogger("jupyterlab_requirements.thoth_config_handler")
 
 
@@ -66,7 +64,6 @@ class ThothConfigHandler(APIHandler):
         _LOGGER.info("Thoth config:", thoth_config)
         os.chdir(initial_path)
         self.finish(json.dumps(thoth_config))
-
 
     @web.authenticated
     def put(self):
