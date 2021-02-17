@@ -34,6 +34,7 @@ import {
 
 import {
   retrieve_config_file,
+  update_thoth_config_on_disk,
   lock_requirements_with_thoth,
   lock_requirements_with_pipenv
 } from '../thoth';
@@ -80,6 +81,7 @@ export interface IState {
   initial_packages: { [ name: string ]: string },
   deleted_packages: { [ name: string ]: string },
   requirements: Requirements,
+  thoth_config: ThothConfig,
   error_msg: string
 }
 
@@ -122,6 +124,20 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           requires: { python_version: get_python_version( this.props.panel ) },
           sources: [new Source()]
         },
+        thoth_config: {
+          host: "khemenu.thoth-station.ninja",
+          tls_verify: false,
+          requirements_format: "pipenv",
+          runtime_environments: [{
+            name: "ubi:8",
+            operating_system: {
+              name: "ubi",
+              version: "8",
+            },
+            python_version: "3.8",
+            recommendation_type: "latest"
+        }]
+        },
         error_msg: undefined
       }
     }
@@ -138,6 +154,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       deleted_packages: { [ name: string ]: string },
       requirements: Requirements,
       kernel_name: string,
+      thoth_config: ThothConfig,
       error_msg?: string,
     ) {
 
@@ -157,6 +174,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       _.set(new_state, "requirements", requirements)
 
       _.set(new_state, "kernel_name", kernel_name)
+
+      _.set(new_state, "thoth_config", thoth_config)
 
       _.set(new_state, "error_msg", error_msg)
 
@@ -218,7 +237,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         this.state.installed_packages,
         this.state.deleted_packages,
         this.state.requirements,
-        this.state.kernel_name
+        this.state.kernel_name,
+        this.state.thoth_config
       )
     }
 
@@ -242,7 +262,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         this.state.installed_packages,
         this.state.deleted_packages,
         this.state.requirements,
-        this.state.kernel_name
+        this.state.kernel_name,
+        this.state.thoth_config
       )
 
     }
@@ -269,7 +290,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         this.state.installed_packages,
         this.state.deleted_packages,
         this.state.requirements,
-        this.state.kernel_name
+        this.state.kernel_name,
+        this.state.thoth_config
       )
 
     }
@@ -300,7 +322,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         this.state.installed_packages,
         deleted_packages,
         this.state.requirements,
-        this.state.kernel_name
+        this.state.kernel_name,
+        this.state.thoth_config
       )
 
     }
@@ -331,7 +354,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         this.state.installed_packages,
         deleted_packages,
         this.state.requirements,
-        this.state.kernel_name
+        this.state.kernel_name,
+        this.state.thoth_config
       )
     }
 
@@ -363,7 +387,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         this.state.installed_packages,
         this.state.deleted_packages,
         this.state.requirements,
-        this.state.kernel_name
+        this.state.kernel_name,
+        this.state.thoth_config
       )
 
     }
@@ -431,16 +456,17 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             this.state.installed_packages,
             {},
             emptyRequirements,
-            this.state.kernel_name
+            this.state.kernel_name,
+            this.state.thoth_config
           )
         }
 
       }
 
       // Check if there are packages saved, otherwise go to failed notification message
-      if ( _.size(total_packages ) > 0 ) {
+      if ( _.size( total_packages ) > 0 ) {
 
-        if ( _.isEqual(total_packages, this.state.installed_packages) ){
+        if ( _.isEqual( total_packages, this.state.installed_packages) ){
 
           var sameRequirements: Requirements = {
             packages: total_packages,
@@ -461,10 +487,10 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             this.state.installed_packages,
             this.state.deleted_packages,
             this.state.requirements,
-            this.state.kernel_name
+            this.state.kernel_name,
+            this.state.thoth_config
           )
           return
-
         }
 
         else {
@@ -492,7 +518,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             this.state.installed_packages,
             this.state.deleted_packages,
             finalRequirements,
-            this.state.kernel_name
+            this.state.kernel_name,
+            this.state.thoth_config
           )
 
           return
@@ -519,7 +546,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           this.state.installed_packages,
           this.state.deleted_packages,
           this.state.requirements,
-          this.state.kernel_name
+          this.state.kernel_name,
+          this.state.thoth_config
         )
         return
       }
@@ -539,7 +567,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             this.state.initial_packages,
             this.state.deleted_packages,
             this.state.requirements,
-            this.state.kernel_name
+            this.state.kernel_name,
+            this.state.thoth_config
           )
 
           return
@@ -556,6 +585,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           this.state.deleted_packages,
           this.state.requirements,
           this.state.kernel_name,
+          this.state.thoth_config,
           "Error install dependencies in the new virtual environment, please contact Thoth team."
         )
       }
@@ -594,7 +624,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             this.state.initial_packages,
             this.state.deleted_packages,
             this.state.requirements,
-            this.state.kernel_name
+            this.state.kernel_name,
+            this.state.thoth_config
           )
 
           return
@@ -611,6 +642,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             this.state.deleted_packages,
             this.state.requirements,
             this.state.kernel_name,
+            this.state.thoth_config,
             "Error setting new environment in a jupyter kernel, please contact Thoth team."
           )
 
@@ -628,33 +660,15 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         this.state.installed_packages,
         this.state.deleted_packages,
         this.state.requirements,
-        this.state.kernel_name
+        this.state.kernel_name,
+        this.state.thoth_config
       )
 
-      const thothConfig: ThothConfig = await this.createConfig();
+      const thothConfig: ThothConfig = this.state.thoth_config;
+      console.log("thoth config to be submitted", JSON.stringify(thothConfig));
 
-      // If the endpoint cannot be reached or there are issues with thamos config creation
-
-      if (_.isUndefined(thothConfig)) {
-
-        console.log("Thoth config is undefined")
-
-        this.lock_using_pipenv()
-      }
-
-      const runtime_environments: RuntimeEnvornment[] = thothConfig.runtime_environments
-
-      const runtime_environment: RuntimeEnvornment = runtime_environments[0]
-
-      // TODO: Assign user recommendation type to all runtime environments in thoth config?
-      _.set(runtime_environment, "recommendation_type", this.state.recommendation_type)
-      _.set(runtime_environments, 0, runtime_environment)
-      _.set(thothConfig, "runtime_environments", runtime_environments)
-
-      console.log("thoth config submitted", JSON.stringify(thothConfig));
-
-      const notebookMetadataRequirements = this.state.requirements;
-      console.log("Requirements submitted", JSON.stringify(notebookMetadataRequirements));
+      const notebookMetadataRequirements: Requirements = this.state.requirements;
+      console.log("Requirements to be submitted", JSON.stringify(notebookMetadataRequirements));
 
       try {
 
@@ -683,6 +697,11 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
               false
             )
 
+            await update_thoth_config_on_disk(
+              this.state.thoth_config.runtime_environments[0],
+              true
+            )
+
             this.changeUIstate(
               "installing_requirements",
               {},
@@ -690,7 +709,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
               this.state.installed_packages,
               {},
               advise.requirements,
-              this.state.kernel_name
+              this.state.kernel_name,
+              this.state.thoth_config
             )
 
             return
@@ -726,7 +746,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         this.state.installed_packages,
         this.state.deleted_packages,
         this.state.requirements,
-        this.state.kernel_name
+        this.state.kernel_name,
+        this.state.thoth_config
       )
 
       const notebookMetadataRequirements = this.state.requirements;
@@ -755,6 +776,11 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             false
           )
 
+          await update_thoth_config_on_disk(
+            this.state.thoth_config.runtime_environments[0],
+            true
+          )
+
           this.changeUIstate(
             "installing_requirements",
             {},
@@ -762,7 +788,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             this.state.installed_packages,
             {},
             notebookMetadataRequirements,
-            this.state.kernel_name
+            this.state.kernel_name,
+            this.state.thoth_config
           )
 
           return
@@ -778,6 +805,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             this.state.deleted_packages,
             this.state.requirements,
             this.state.kernel_name,
+            this.state.thoth_config,
             "No resolution engine was able to install dependendices, please contact Thoth team."
           )
 
@@ -796,6 +824,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           this.state.deleted_packages,
           this.state.requirements,
           this.state.kernel_name,
+          this.state.thoth_config,
           "No resolution engine was able to install dependendices, please contact Thoth team."
         )
         return
@@ -804,6 +833,33 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
     }
 
     async onStart() {
+
+        // Load thoth_config from notebook metadata, if any, otherwise get default one
+        var thoth_config: ThothConfig = this.props.initial_config_file
+
+        if ( thoth_config == null ) {
+          // No Thoth config found in notebook metadata, create default one
+          console.log("No initial thoth config found, creating default one")
+          var thoth_config: ThothConfig = await this.createConfig();
+        }
+
+        // If the endpoint cannot be reached or there are issues with thamos config creation
+
+        if (_.isUndefined(thoth_config)) {
+          console.warn("Thoth config is undefined")
+          var thoth_config: ThothConfig = this.state.thoth_config;
+        }
+
+        const runtime_environments: RuntimeEnvornment[] = thoth_config.runtime_environments
+        const runtime_environment: RuntimeEnvornment = runtime_environments[0]
+
+        // TODO: Assign user recommendation type to all runtime environments in thoth config?
+        _.set(runtime_environment, "name", this.state.kernel_name)
+        _.set(runtime_environment, "recommendation_type", this.state.recommendation_type)
+        _.set(runtime_environments, 0, runtime_environment)
+        _.set(thoth_config, "runtime_environments", runtime_environments)
+
+        console.log("initial thoth config", thoth_config)
 
         // Load requirements from notebook metadata, if any, otherwise receive default ones
         var initial_requirements: Requirements = this.props.initial_requirements
@@ -819,7 +875,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             this.state.installed_packages,
             this.state.deleted_packages,
             initial_requirements,
-            this.state.kernel_name
+            this.state.kernel_name,
+            thoth_config
           )
           return
         }
@@ -839,7 +896,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             this.state.installed_packages,
             this.state.deleted_packages,
             initial_requirements,
-            this.state.kernel_name
+            this.state.kernel_name,
+            thoth_config
           )
           return
         }
@@ -896,7 +954,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
               initial_packages,
               this.state.deleted_packages,
               initial_requirements,
-              kernel_name
+              kernel_name,
+              thoth_config
               )
 
             return
@@ -911,7 +970,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
               initial_installed_packages,
               this.state.deleted_packages,
               initial_requirements,
-              kernel_name
+              kernel_name,
+              thoth_config
               )
             return
           }
@@ -925,7 +985,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             initial_installed_packages,
             this.state.deleted_packages,
             initial_requirements,
-            kernel_name
+            kernel_name,
+            thoth_config
             )
           return
         }
@@ -966,7 +1027,6 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
     }
 
     async createConfig() {
-      // TODO: Use config created automatically by thamos??
       const config_file = await retrieve_config_file( this.state.kernel_name);
       console.log("Config file", config_file);
 
@@ -1222,7 +1282,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
                   this.state.installed_packages,
                   this.state.deleted_packages,
                   this.state.requirements,
-                  this.state.kernel_name
+                  this.state.kernel_name,
+                  this.state.thoth_config,
                 )
                 }
                 >
@@ -1269,7 +1330,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
                       this.state.installed_packages,
                       this.state.deleted_packages,
                       this.state.requirements,
-                      this.state.kernel_name
+                      this.state.kernel_name,
+                      this.state.thoth_config,
                     )
                     }
                     >
@@ -1325,7 +1387,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
                         this.state.installed_packages,
                         this.state.deleted_packages,
                         this.state.requirements,
-                        this.state.kernel_name
+                        this.state.kernel_name,
+                        this.state.thoth_config,
                       )
                       }
                       >
