@@ -689,18 +689,27 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
             // Save all changes to disk.
             this.props.panel.context.save()
+            try {
+              await this.store_dependencies_on_disk(
+                advise.requirements,
+                advise.requirement_lock,
+                'overlays',
+                false
+              )
+            } catch ( error ) {
 
-            await this.store_dependencies_on_disk(
-              advise.requirements,
-              advise.requirement_lock,
-              'overlays',
-              false
-            )
+              console.log("Error storing dependencies in overlays", error)
 
-            await update_thoth_config_on_disk(
-              this.state.thoth_config.runtime_environments[0],
-              true
-            )
+            }
+
+            try {
+              await update_thoth_config_on_disk(
+                this.state.thoth_config.runtime_environments[0],
+                true
+              )
+            } catch ( error ) {
+              console.log("Error updating thoth config on disk", error)
+            }
 
             this.changeUIstate(
               "installing_requirements",
@@ -769,17 +778,28 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           // Save all changes to disk.
           this.props.panel.context.save()
 
-          await this.store_dependencies_on_disk(
-            notebookMetadataRequirements,
-            result.requirements_lock,
-            'overlays',
-            false
-          )
+          try {
+            await this.store_dependencies_on_disk(
+              notebookMetadataRequirements,
+              result.requirements_lock,
+              'overlays',
+              false
+            )
 
-          await update_thoth_config_on_disk(
-            this.state.thoth_config.runtime_environments[0],
-            true
-          )
+          } catch ( error ) {
+
+            console.log("Error storing dependencies in overlays", error)
+
+          }
+
+          try {
+            await update_thoth_config_on_disk(
+              this.state.thoth_config.runtime_environments[0],
+              true
+            )
+          } catch ( error ) {
+            console.log("Error updating thoth config on disk", error)
+          }
 
           this.changeUIstate(
             "installing_requirements",
