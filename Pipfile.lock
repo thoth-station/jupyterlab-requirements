@@ -913,7 +913,7 @@
                 "sha256:a8ee22199562278d2f78148cacb2f9460ccac362cd4a40f705505b41daae60e0",
                 "sha256:f8f08fdac6bd67dc2dd7fe976da702d748487aa9eb5d050c48b2321bc67ed659"
             ],
-            "markers": "python_version >= '3.6' and python_version < '4.0'",
+            "markers": "python_version >= '3.6' and python_version < '4'",
             "version": "==9.11.0"
         },
         "rsa": {
@@ -1029,11 +1029,11 @@
         },
         "thamos": {
             "hashes": [
-                "sha256:32fc35ff294c5a4abccf11c371f73fdb559cf42cb3e9a769c1e2fcd117f18c71",
-                "sha256:eacc040311ac54cb77a7a2a473d02cb79ffb21f51f6c1a68b80bf1cdbc18a716"
+                "sha256:10e8ae8c4d622df1bfacbd9edaf0f26ebfa55091607e09a52b1934c9775420e2",
+                "sha256:3c3afda17ff6af467fc425bcf89fea2a1e3e823ca9a6875417245c81d537af50"
             ],
             "index": "pypi",
-            "version": "==1.11.1"
+            "version": "==1.12.0"
         },
         "thoth-analyzer": {
             "hashes": [
@@ -1141,7 +1141,7 @@
                 "sha256:1b465e494e3e0d8939b50680403e3aedaa2bc434b7d5af64dfd3c958d7f5ae80",
                 "sha256:de3eedaad74a2683334e282005cd8d7f22f4d55fa690a2a1020a416cb0a47e73"
             ],
-            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4.0'",
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'",
             "version": "==1.26.3"
         },
         "wcwidth": {
@@ -1301,7 +1301,7 @@
                 "sha256:fbb17c0d0822684b7d6c09915677a32319f16ff1115df5ec05bdcaaee40b35f3",
                 "sha256:fff1f3a586246110f34dc762098b5afd2de88de507559e63553d7da643053786"
             ],
-            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4.0'",
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'",
             "version": "==5.4"
         },
         "distlib": {
