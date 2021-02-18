@@ -264,4 +264,3 @@ export function set_resolution_engine( notebook: NotebookPanel, dependency_resol
 
     console.log( "Dependency resolution engine used for requirements have been set successfully." )
   }
-
