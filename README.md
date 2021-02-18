@@ -138,12 +138,18 @@ Virtualenv created to run your notebook according to your dependencies requireme
 ## Dependencies installation
 
 Once lock file is created using any of available resolution engine. The dependencies are installed in the virtualenv using
-[micropipenv](https://pypi.org/project/micropipenv/)
+[micropipenv](https://pypi.org/project/micropipenv/).
 
 ## Overlays directory
 
 The dependencies stored in the notebook metadata are also stored into `overlays` folder (created automatically) using the kernel name by default.
-If you want to know more about the use of overlays have a look [here](https://github.com/thoth-station/thamos#support-for-multiple-runtime-environments)
+If you want to know more about the use of overlays, have a look [here](https://github.com/thoth-station/thamos#support-for-multiple-runtime-environments).
+
+## Thoth configuration file
+
+Thoth resolution engine is able to provide an optimized software stack based on the runtime environment you are using (more inputs are used, if you want to know more, have a look here [here](https://github.com/thoth-station/adviser)).
+
+In general different runtime environment will provide different effect on you application (e.g. more performance), therefore we include these information in the notebook metadata so that other can find out what runtime environment has been used to run a certain notebook.
 
 # Contributing
 
@@ -192,6 +198,8 @@ pip uninstall jupyterlab-requirements
 ```
 
 # Demo development status
+
+* [v0.4.0] (WIP) [TBD]
 
 * [v0.3.6](https://www.youtube.com/watch?v=-_dtDAAyMlU&t=190s) [Feb 10 2021]
 

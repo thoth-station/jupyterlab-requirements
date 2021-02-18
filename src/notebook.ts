@@ -203,17 +203,28 @@ export function set_requirement_lock( notebook: NotebookPanel, requirements_lock
 /**
  * Function: Get Thoth configuration from notebook metadata.
  */
-export function get_thoth_configuration( notebook: NotebookPanel ): ThothConfig | null {
+export function get_thoth_configuration( notebook: NotebookPanel ): Promise<ThothConfig|null> {
 
-    let retrieved = notebook.model.metadata.get("thoth_config")
+    return new Promise( async ( resolve, reject ) => {
+        const notebook_metadata = notebook.model.metadata
 
-    if (retrieved == null) {
-        console.log("thoth_config key is not in notebook metadata!")
-        return null
+        try {
+            if ( notebook_metadata.has("thoth_config") == false ) {
+                console.log("thoth_config key is not in notebook metadata!")
+                resolve( null )
+            }
+
+            const thoth_config = notebook_metadata.get("thoth_config")
+            var notebookMetadataThothConfig: ThothConfig = JSON.parse(thoth_config.toString())
+
+            console.log("thoth_config key is in notebook metadata!")
+            resolve ( notebookMetadataThothConfig )
+
+        } catch ( err ) {
+            reject( err )
+        }
+    })
     }
-
-    return  JSON.parse(JSON.stringify(retrieved))
-}
 
 /**
  * Function: Set Thoth config file requirements into notebook metadata.

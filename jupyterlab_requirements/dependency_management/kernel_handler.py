@@ -26,7 +26,7 @@ from jupyter_server.base.handlers import APIHandler
 from tornado import web
 
 
-_LOGGER = logging.getLogger("jupyterlab_requirements.customized_kernel")
+_LOGGER = logging.getLogger("jupyterlab_requirements.kernel_handler")
 
 
 class JupyterKernelHandler(APIHandler):

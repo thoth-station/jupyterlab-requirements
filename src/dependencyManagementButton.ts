@@ -43,7 +43,7 @@ export class ManageDependenciesButtonExtension
         console.log("requirements_lock", initial_requirements_lock);
 
         // Check if any thoth config is stored in notebook metadata
-        const initial_config_file = get_thoth_configuration(this.panel);
+        const initial_config_file = await get_thoth_configuration(this.panel);
         console.log('Thoth config from notebook metadata', initial_config_file);
 
         /**

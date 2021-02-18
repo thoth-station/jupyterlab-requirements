@@ -10,7 +10,7 @@
  */
 
 import { requestAPI, THOTH_JUPYTER_INTEGRATION_API_BASE_NAME } from './handler';
-import { Advise, PipenvResult, ThothConfig } from './types/thoth';
+import { Advise, PipenvResult, ThothConfig, RuntimeEnvornment } from './types/thoth';
 
 export async function retrieve_config_file (
   kernel_name: string,
@@ -31,6 +31,31 @@ export async function retrieve_config_file (
     return JSON.parse(JSON.stringify(thoth_config));
   } catch (reason) {
     console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
+  }
+
+}
+
+export async function update_thoth_config_on_disk (
+  runtime_environment: RuntimeEnvornment,
+  force: boolean,
+  init: RequestInit = {}
+): Promise<string> {
+
+  // PUT request
+  const dataToSend = {
+    runtime_environment: runtime_environment,
+    force: force
+  };
+
+  const endpoint: string = 'thoth/config'
+  try {
+    const thoth_config = await requestAPI<any>(endpoint, {
+      body: JSON.stringify(dataToSend),
+      method: 'PUT'
+    });
+    return JSON.parse(JSON.stringify(thoth_config));
+  } catch (reason) {
+    console.error('Error on PUT /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
   }
 
 }
