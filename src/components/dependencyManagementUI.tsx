@@ -43,6 +43,7 @@ import {
   get_kernel_name,
   set_requirements,
   set_requirement_lock,
+  set_resolution_engine,
   set_thoth_configuration,
   delete_key_from_notebook_metadata
 } from "../notebook"
@@ -686,6 +687,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             set_requirements( this.props.panel , advise.requirements )
             set_requirement_lock( this.props.panel , advise.requirement_lock )
             set_thoth_configuration( this.props.panel , thothConfig )
+            set_resolution_engine( this.props.panel , "thoth" )
 
             // Save all changes to disk.
             this.props.panel.context.save()
@@ -773,7 +775,9 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
         if ( result.error == false ) {
 
+          set_requirements( this.props.panel , notebookMetadataRequirements )
           set_requirement_lock( this.props.panel , result.requirements_lock )
+          set_resolution_engine( this.props.panel , "pipenv" )
 
           // Save all changes to disk.
           this.props.panel.context.save()

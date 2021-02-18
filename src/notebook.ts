@@ -244,3 +244,23 @@ export function set_thoth_configuration( notebook: NotebookPanel, config_file: T
 
     console.log( "Notebook Thoth config have been set successfully." )
   }
+
+
+/**
+ * Function: Set resolution engine name used into notebook metadata.
+ */
+
+export function set_resolution_engine( notebook: NotebookPanel, dependency_resolution_engine: string ): void {
+    const metadata = notebook.model.metadata
+
+    if ( metadata.has("dependency_resolution_engine") == false ) {
+        metadata.set('dependency_resolution_engine', dependency_resolution_engine )
+
+    } else {
+        console.debug( "Dependency resolution engine used for requirements already exist. Updating." )
+        // update the notebook metadata
+        metadata.set('dependency_resolution_engine', dependency_resolution_engine )
+    }
+
+    console.log( "Dependency resolution engine used for requirements have been set successfully." )
+  }
