@@ -247,7 +247,7 @@ export function set_thoth_configuration( notebook: NotebookPanel, config_file: T
 
 
 /**
- * Function: Set Thoth config file requirements into notebook metadata.
+ * Function: Set resolution engine name used into notebook metadata.
  */
 
 export function set_resolution_engine( notebook: NotebookPanel, python_resolution_engine: string ): void {
@@ -257,11 +257,11 @@ export function set_resolution_engine( notebook: NotebookPanel, python_resolutio
         metadata.set('resolution_engine', python_resolution_engine )
 
     } else {
-        console.debug( "Notebook resolution engine already exist. Updating." )
+        console.debug( "Resolution engine used for requirements already exist. Updating." )
         // update the notebook metadata
         metadata.set('resolution_engine', python_resolution_engine )
     }
 
-    console.log( "Notebook resolution engine have been set successfully." )
+    console.log( "Resolution engine used for requirements have been set successfully." )
   }
 
