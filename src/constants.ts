@@ -9,4 +9,4 @@
  * @since  0.0.1
  */
 // TODO: Make sure this place cannot be overwritten by another extension.
-export const THOTH_TOOLBAR_BUTTON_POSITION = 10;
+export const THOTH_TOOLBAR_BUTTON_POSITION = 11;
