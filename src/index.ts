@@ -44,6 +44,7 @@ function activate (
 ): void {
 
   // Add button in notebook menu
+  console.log('jupyterlab-requirements extension is activated!');
   // ManageDependenciesButtonExtension initialization code
   const buttonExtension = new ManageDependenciesButtonExtension();
   app.docRegistry.addWidgetExtension('Notebook', buttonExtension);
