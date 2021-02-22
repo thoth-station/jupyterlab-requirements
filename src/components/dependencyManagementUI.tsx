@@ -23,7 +23,7 @@ import { DependencyManagementNewPackageButton } from './dependencyManagementAddP
 import { get_python_version } from "../notebook";
 import { Requirements, RequirementsLock } from '../types/requirements';
 
-import { RuntimeEnvornment, ThothConfig } from '../types/thoth';
+import { RuntimeEnvironment, ThothConfig } from '../types/thoth';
 
 import {
   discover_installed_packages,
@@ -853,23 +853,86 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
     async onStart() {
 
         // Load thoth_config from notebook metadata, if any, otherwise get default one
-        var thoth_config: ThothConfig = this.props.initial_config_file
+        var thoth_config_loaded: ThothConfig = this.props.initial_config_file
+        var thoth_config_used: string = "loaded"
 
-        if ( thoth_config == null ) {
+        if ( thoth_config_loaded == null ) {
           // No Thoth config found in notebook metadata, create default one
-          console.log("No initial thoth config found, creating default one")
-          var thoth_config: ThothConfig = await this.createConfig();
+          console.log("No initial thoth config found")
+        }
+        else {
+          var runtime_environment_loaded = thoth_config_loaded.runtime_environments[0]
+
+          var operating_system_name_loaded = runtime_environment_loaded.operating_system.name
+          var operating_system_version_loaded = runtime_environment_loaded.operating_system.version
+          var python_version_loaded = runtime_environment_loaded.python_version
         }
 
+        var thoth_config_detected: ThothConfig = await this.createConfig();
         // If the endpoint cannot be reached or there are issues with thamos config creation
-
-        if (_.isUndefined(thoth_config)) {
+        if (_.isUndefined(thoth_config_detected)) {
           console.warn("Thoth config is undefined")
-          var thoth_config: ThothConfig = this.state.thoth_config;
+          var thoth_config_detected: ThothConfig = this.state.thoth_config;
         }
 
-        const runtime_environments: RuntimeEnvornment[] = thoth_config.runtime_environments
-        const runtime_environment: RuntimeEnvornment = runtime_environments[0]
+        if ( thoth_config_loaded != null ) {
+          var runtime_environment_detected: RuntimeEnvironment = thoth_config_detected.runtime_environments[0]
+
+          var operating_system_name_detected = runtime_environment_detected.operating_system.name
+          var operating_system_version_detected = runtime_environment_detected.operating_system.version
+          var python_version_detected = runtime_environment_detected.python_version
+
+          console.log("runtime environment used", runtime_environment_loaded)
+          console.log("runtime environment detected", runtime_environment_detected)
+
+          const checks = []
+          if (_.isEqual(operating_system_name_loaded, operating_system_name_detected) ) {
+              console.log("Operating system name loaded is the same as detected one")
+              checks.push(1)
+          }
+          else {
+            console.log( `Operating system name loaded '${ operating_system_name_loaded }' is not the same as detected one '${ operating_system_name_detected }'` )
+            checks.push(0)
+          }
+
+          if (_.isEqual(operating_system_version_loaded, operating_system_version_detected) ) {
+            console.log("Operating system version loaded is the same as detected one")
+            checks.push(1)
+          }
+          else {
+            console.log( `Operating system version loaded '${ operating_system_version_loaded }' is not the same as detected one '${ operating_system_version_detected }'` )
+            checks.push(0)
+          }
+
+          if (_.isEqual(python_version_loaded, python_version_detected) ) {
+            console.log("Python version loaded is the same as detected one")
+            checks.push(1)
+          }
+          else {
+            console.log( `Python version loaded '${ python_version_loaded }' is not the same as detected one '${ python_version_detected }'` )
+            checks.push(0)
+          }
+
+          if ( _.sum(checks) != 3 ) {
+            console.log("Runtime environment loaded is not the same as detected one")
+            var thoth_config = thoth_config_detected
+            var thoth_config_used = "detected"
+          }
+
+          else {
+            console.log("Runtime environment loaded is not the same as detected one")
+            var thoth_config = thoth_config_loaded
+            var thoth_config_used = "loaded"
+          }
+
+        }
+        else {
+          var thoth_config = thoth_config_detected
+          var thoth_config_used = "detected"
+        }
+
+        const runtime_environments: RuntimeEnvironment[] = thoth_config.runtime_environments
+        const runtime_environment: RuntimeEnvironment = thoth_config.runtime_environments[0]
 
         // TODO: Assign user recommendation type to all runtime environments in thoth config?
         _.set(runtime_environment, "name", this.state.kernel_name)
@@ -961,22 +1024,43 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           // check if all requirements locked are also installed in the current kernel
           const are_installed: boolean = await this.checkInstalledPackages(installed_packages, initial_locked_packages)
 
-          // if locked requirements are present in the kernel (match packages installed), go to stable state
-          if ( are_installed == true ) {
+          // if locked requirements are present in the kernel (match packages installed)
+          if ( are_installed == true  ) {
 
-            this.changeUIstate(
-              "stable",
-              this.state.packages,
-              initial_packages,
-              initial_packages,
-              this.state.deleted_packages,
-              initial_requirements,
-              kernel_name,
-              thoth_config
-              )
+            // and thoth config is loaded, go to stable state
+            if ( thoth_config_used == "loaded" ) {
 
-            return
-          }
+              this.changeUIstate(
+                "stable",
+                this.state.packages,
+                initial_packages,
+                initial_packages,
+                this.state.deleted_packages,
+                initial_requirements,
+                kernel_name,
+                thoth_config
+                )
+
+              return
+            }
+
+            // and thoth config is detected, user needs to relock because runtime environment is not the same
+            else {
+              this.changeUIstate(
+                "only_install_kernel_re",
+                this.state.packages,
+                initial_packages,
+                initial_packages,
+                this.state.deleted_packages,
+                initial_requirements,
+                kernel_name,
+                thoth_config
+                )
+
+              return
+            }
+
+            }
 
           // if locked requirements are not present or not all present in the kernel, go to only_install_kernel state
           else {
@@ -1206,6 +1290,24 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
                 <p>Pinned down software stack found in notebook metadata!<br></br>
                 The kernel selected does not match the dependencies found for the notebook. <br></br>
                 Please install them.</p>
+              </fieldset>
+            </div>
+            {optionsForm}
+          </div>
+        );
+      }
+
+      if ( this.state.status == "only_install_kernel_re" ) {
+
+        return (
+          <div>
+            {dependencyManagementform}
+            {addPlusInstallContainers}
+            <div>
+              <fieldset>
+                <p>Pinned down software stack found in notebook metadata!<br></br>
+                The runtime environment found in the notebook does not match your environment. <br></br>
+                Please use install button.</p>
               </fieldset>
             </div>
             {optionsForm}

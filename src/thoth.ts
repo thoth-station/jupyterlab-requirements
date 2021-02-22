@@ -10,7 +10,7 @@
  */
 
 import { requestAPI, THOTH_JUPYTER_INTEGRATION_API_BASE_NAME } from './handler';
-import { Advise, PipenvResult, ThothConfig, RuntimeEnvornment } from './types/thoth';
+import { Advise, PipenvResult, ThothConfig, RuntimeEnvironment } from './types/thoth';
 
 export async function retrieve_config_file (
   kernel_name: string,
@@ -36,7 +36,7 @@ export async function retrieve_config_file (
 }
 
 export async function update_thoth_config_on_disk (
-  runtime_environment: RuntimeEnvornment,
+  runtime_environment: RuntimeEnvironment,
   force: boolean,
   init: RequestInit = {}
 ): Promise<string> {

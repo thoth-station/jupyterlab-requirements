@@ -30,17 +30,16 @@ export interface OperatingSystem {
     version: string,
 }
 
-export interface RuntimeEnvornment {
+export interface RuntimeEnvironment {
     name: string,
     operating_system: OperatingSystem
     python_version: string,
     recommendation_type: string
-
 }
 
 export interface ThothConfig {
     host: string,
     tls_verify: boolean,
     requirements_format: string,
-    runtime_environments: Array<RuntimeEnvornment>
+    runtime_environments: Array<RuntimeEnvironment>
 }
