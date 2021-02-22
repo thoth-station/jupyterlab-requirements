@@ -78,3 +78,9 @@ all the things that you see...
 * Remove space for showing link (#126)
 * Update README link for demos (#125)
 * :arrow_up: Automatic update of dependencies by Kebechet (#123)
+
+## Release 0.4.1 (2021-02-22T13:19:22)
+### Features
+* Fix missing depndency (#146)
+### Improvements
+* Provide default source for requirements (#147)
