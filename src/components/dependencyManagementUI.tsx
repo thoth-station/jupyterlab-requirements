@@ -1325,7 +1325,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         return (
           <div>
             <fieldset>
-              <p>Thoth resolution engine failed... pipenv will be used to lock and install dependencies!</p>
+              <p>Thoth resolution engine failed... pipenv will be used to lock dependencies!</p>
             </fieldset>
           </div>
       );
