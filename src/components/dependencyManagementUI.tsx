@@ -930,7 +930,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         console.log(initial_locked_packages)
 
         // Retrieve kernel name from metadata
-        const kernel_name = get_kernel_name( this.props.panel)
+        const kernel_name = get_kernel_name( this.props.panel )
 
         // Check if all package in requirements are also in requirements locked (both from notebook metadata)
         const check_packages = {}
@@ -958,7 +958,6 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
         if (_.isEqual(_.size(initial_packages), _.size(check_packages) )) {
 
-
           // check if all requirements locked are also installed in the current kernel
           const are_installed: boolean = await this.checkInstalledPackages(installed_packages, initial_locked_packages)
 
@@ -979,7 +978,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             return
           }
 
-          // if locked requirements are not present or not all present in the kernel, go to only_install state
+          // if locked requirements are not present or not all present in the kernel, go to only_install_kernel state
           else {
             this.changeUIstate(
               "only_install_kernel",
@@ -1033,15 +1032,18 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
     async checkInstalledPackages(installed_packages: {}, packages: {}): Promise<boolean> {
 
-      // Check installed packages
-      if (_.isEqual(_.size(packages), _.size(installed_packages) )) {
-        return true
-      }
+      // Check installed packages and verify pipfile.lock are all in installed list
+      _.forIn(packages, function(version, name) {
+        if (_.has(installed_packages, name.toLowerCase())) {
+          if (_.get(installed_packages, name.toLowerCase()) == version) {
+            console.log(name, version, "is in installed list!")
+          }
+          else {
+            return false
+          }
+      })
 
-      else {
-        return false
-      }
-
+      return true
     }
 
     async createConfig() {
