@@ -1034,14 +1034,14 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
       // Check installed packages and verify pipfile.lock are all in installed list
       _.forIn(packages, function(version, name) {
-        if (_.has(installed_packages, name.toLowerCase())) {
-          if (_.get(installed_packages, name.toLowerCase()) == version) {
-            console.log(name, version, "is in installed list!")
-          }
-          else {
-            return false
-          }
-      })
+        if (_.has(installed_packages, name.toLowerCase()) && _.get(installed_packages, name.toLowerCase()) == version ) {
+            console.log( `Package '${ name }' in version '${ version }' is already installed` )
+        }
+        else {
+          return false
+        }
+        }
+      )
 
       return true
     }
