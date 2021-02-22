@@ -89,3 +89,7 @@ all the things that you see...
 ### Features
 * :arrow_up: Automatic update of dependencies by Kebechet (#152)
 * Fix/match packages check to verify the kernel packages matches the pipfile.lock in user notebook (#150)
+
+## Release 0.4.3 (2021-02-22T21:18:17)
+### Features
+* Fix/check runtime environment (#158)
