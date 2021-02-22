@@ -21,7 +21,7 @@ import { DependencyManagementInstallButton } from './dependencyManagementInstall
 import { DependencyManagementNewPackageButton } from './dependencyManagementAddPackageButton';
 
 import { get_python_version } from "../notebook";
-import { Source, Requirements, RequirementsLock } from '../types/requirements';
+import { Requirements, RequirementsLock } from '../types/requirements';
 
 import { RuntimeEnvornment, ThothConfig } from '../types/thoth';
 
@@ -123,7 +123,11 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         requirements: {
           packages: {},
           requires: { python_version: get_python_version( this.props.panel ) },
-          sources: [new Source()]
+          sources: [{
+            name: "pypi",
+            url: "https://pypi.org/simple",
+            verify_ssl: true,
+          }]
         },
         thoth_config: {
           host: "khemenu.thoth-station.ninja",
@@ -440,6 +444,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           delete_key_from_notebook_metadata( this.props.panel, "requirements" )
           delete_key_from_notebook_metadata( this.props.panel, "requirements_lock" )
           delete_key_from_notebook_metadata( this.props.panel, "thoth_config" )
+          delete_key_from_notebook_metadata( this.props.panel, "dependency_resolution_engine" )
 
           // Save all changes to disk.
           this.props.panel.context.save()
@@ -447,7 +452,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           var emptyRequirements: Requirements = {
             packages: total_packages,
             requires: notebookMetadataRequirements.requires,
-            sources: [new Source()]
+            sources: notebookMetadataRequirements.sources
           }
 
           this.changeUIstate(
@@ -528,17 +533,6 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
       }
       else {
-
-        var emptyRequirements: Requirements = {
-          packages: total_packages,
-          requires: notebookMetadataRequirements.requires,
-          sources: [new Source()]
-        }
-
-        console.log("Requirements are: ", emptyRequirements)
-
-        // Set requirements in notebook;
-        set_requirements( this.props.panel , emptyRequirements )
 
         this.changeUIstate(
           "failed_no_reqs",
