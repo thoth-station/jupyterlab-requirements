@@ -84,3 +84,8 @@ all the things that you see...
 * Fix missing depndency (#146)
 ### Improvements
 * Provide default source for requirements (#147)
+
+## Release 0.4.2 (2021-02-22T15:55:56)
+### Features
+* :arrow_up: Automatic update of dependencies by Kebechet (#152)
+* Fix/match packages check to verify the kernel packages matches the pipfile.lock in user notebook (#150)
