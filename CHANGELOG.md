@@ -61,3 +61,20 @@ all the things that you see...
 ## Release 0.3.7 (2021-02-15T21:52:53)
 ### Bug Fixes
 * Handle errors in a better way when requirements are missing (#120)
+
+## Release 0.4.0 (2021-02-22T07:25:37)
+### Features
+* :arrow_up: Automatic update of dependencies by Kebechet (#142)
+* Show activation message (#141)
+* Set dependency resolution engine (#137)
+* Change button position (#138)
+* Feature/ update thoth config with runtime environment reusing new thamos capabilities (#133)
+* :arrow_up: Automatic update of dependencies by Kebechet (#135)
+* :arrow_up: Automatic update of dependencies by Kebechet (#132)
+* :arrow_up: Automatic update of dependencies by Kebechet (#131)
+* Add GitHub templates (#129)
+* :arrow_up: Automatic update of dependencies by Kebechet (#128)
+* :arrow_up: Automatic update of dependencies by Kebechet (#127)
+* Remove space for showing link (#126)
+* Update README link for demos (#125)
+* :arrow_up: Automatic update of dependencies by Kebechet (#123)
