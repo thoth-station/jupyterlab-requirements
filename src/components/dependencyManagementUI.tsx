@@ -1044,8 +1044,25 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
               return
             }
 
+            // and thoth config loaded is null, go to stable state, nothing to be done
+            if ( thoth_config_loaded == null ) {
+
+              this.changeUIstate(
+                "stable",
+                this.state.packages,
+                initial_packages,
+                initial_packages,
+                this.state.deleted_packages,
+                initial_requirements,
+                kernel_name,
+                thoth_config
+                )
+
+              return
+            }
+
             // and thoth config is detected, user needs to relock because runtime environment is not the same
-            else {
+            if ( thoth_config_used == "detected" ) {
               this.changeUIstate(
                 "only_install_kernel_re",
                 this.state.packages,
