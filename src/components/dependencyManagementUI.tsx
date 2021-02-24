@@ -723,7 +723,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           }
           else {
 
-            console.log("Advise requirements packages received is empty", advise.requirements);
+            console.log("Advise requirements packages received is empty, falling back to pipenv", advise.requirements);
 
             this.lock_using_pipenv()
           }
