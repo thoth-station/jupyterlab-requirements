@@ -411,21 +411,29 @@
             "markers": "python_version >= '3.6'",
             "version": "==4.7.1"
         },
-        "jupyter-server": {
+        "jupyter-packaging": {
             "hashes": [
-                "sha256:023431125ffeae8330eb0daab78658dffc51b3886ec5621ee006dcb0f267cc49",
-                "sha256:c21f4a607aab1f3a1289209b5483ec42aeefaf6f9cc6f51ccdc23d9c09ea2387"
+                "sha256:b140325771881a7df7b7f2d14997b619063fe75ae756b9025852e4346000bbb8",
+                "sha256:e36efa5edd52b302f0b784ff2a4d1f2cd50f7058af331151315e98b73f947b8d"
             ],
             "markers": "python_version >= '3.6'",
-            "version": "==1.4.0"
+            "version": "==0.7.12"
+        },
+        "jupyter-server": {
+            "hashes": [
+                "sha256:af518ce295bfaa0d5c05031f963bdcfcd2ab156cb2223c0a70665219aed338da",
+                "sha256:b0126f237f679533eec46244cfc66d61e3a1f8ec0fad2d47352fa19d3e754e47"
+            ],
+            "markers": "python_version >= '3.6'",
+            "version": "==1.4.1"
         },
         "jupyterlab": {
             "hashes": [
-                "sha256:50da506d8881fb9137928341f8d7509d5d4110c94bed43116e14ec10de9e9e60",
-                "sha256:e2250dec8042bb824d9dd5381f38b2b34eff7f93bed693bd486b252abafddcbe"
+                "sha256:03dc942696eeb6ecebe3482dec1973a8287f1a3973aca04fb64f13497029280b",
+                "sha256:70aa808a1adc06e35701500a0b1cd2f472ad55b8d890153cb8bdfbd30b279646"
             ],
             "index": "pypi",
-            "version": "==3.0.8"
+            "version": "==3.0.9"
         },
         "jupyterlab-pygments": {
             "hashes": [
@@ -1050,11 +1058,10 @@
         },
         "thamos": {
             "hashes": [
-                "sha256:10e8ae8c4d622df1bfacbd9edaf0f26ebfa55091607e09a52b1934c9775420e2",
-                "sha256:3c3afda17ff6af467fc425bcf89fea2a1e3e823ca9a6875417245c81d537af50"
+                "sha256:6aee364066147474ffc19c4ce90448d8a79bd92fbb90430d6573b930ded823f4"
             ],
             "index": "pypi",
-            "version": "==1.12.0"
+            "version": "==1.13.0"
         },
         "thoth-analyzer": {
             "hashes": [
@@ -1072,10 +1079,10 @@
         },
         "thoth-python": {
             "hashes": [
-                "sha256:ed19a4d6ee43f0f7b2ec4cb7595bc3e617554f2a95c0e7c1b9b497b14e98581b"
+                "sha256:7a190512e8aec2a64e34c1d3d19960236f8c60ebb5b670d35c59e936af2f85d7"
             ],
             "index": "pypi",
-            "version": "==0.15.0"
+            "version": "==0.15.1"
         },
         "toml": {
             "hashes": [
@@ -1381,7 +1388,7 @@
                 "sha256:b140325771881a7df7b7f2d14997b619063fe75ae756b9025852e4346000bbb8",
                 "sha256:e36efa5edd52b302f0b784ff2a4d1f2cd50f7058af331151315e98b73f947b8d"
             ],
-            "index": "pypi",
+            "markers": "python_version >= '3.6'",
             "version": "==0.7.12"
         },
         "mypy": {
