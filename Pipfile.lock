@@ -947,11 +947,11 @@
         },
         "rsa": {
             "hashes": [
-                "sha256:74ba16e7ef58920b80b5c54c1c1066d391a2c1e812c466773f74c634eb12253b",
-                "sha256:9d74d1ff850745c9802cd6b53382bfeec7f6dbe4e26ee2759241ed1e7b0ecf5d"
+                "sha256:78f9a9bf4e7be0c5ded4583326e7461e3a3c5aae24073648b4bdfa797d78c9d2",
+                "sha256:9d689e6ca1b3038bc82bf8d23e944b6b6037bc02301a574935b2dd946e0353b9"
             ],
             "markers": "python_version >= '3.6'",
-            "version": "==4.7.1"
+            "version": "==4.7.2"
         },
         "ruamel.yaml": {
             "hashes": [
@@ -1072,17 +1072,17 @@
         },
         "thoth-common": {
             "hashes": [
-                "sha256:74d4fd18fd7b421e9384b548c5f024e8166f84230dfe5ef86ee869241d23bd94"
+                "sha256:0d478fa87e66aa1f54769826f1cef753ca5e7f01198f1536fa6724247f51deea"
             ],
             "index": "pypi",
-            "version": "==0.24.0"
+            "version": "==0.24.1"
         },
         "thoth-python": {
             "hashes": [
-                "sha256:7a190512e8aec2a64e34c1d3d19960236f8c60ebb5b670d35c59e936af2f85d7"
+                "sha256:116ae7e5501e6df58be0f06ee62de6c830b980aeeb14724b0ea4d6712ce3279e"
             ],
             "index": "pypi",
-            "version": "==0.15.1"
+            "version": "==0.15.2"
         },
         "toml": {
             "hashes": [
@@ -1335,7 +1335,7 @@
                 "sha256:fbb17c0d0822684b7d6c09915677a32319f16ff1115df5ec05bdcaaee40b35f3",
                 "sha256:fff1f3a586246110f34dc762098b5afd2de88de507559e63553d7da643053786"
             ],
-            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4.0'",
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'",
             "version": "==5.4"
         },
         "distlib": {
@@ -1354,11 +1354,11 @@
         },
         "hypothesis": {
             "hashes": [
-                "sha256:3458e095724535179a1f8362f3498fd59e16bd1d22ea6d1ab190ca3103567f70",
-                "sha256:9340fd2d183b3f092b47f5a593d88ca6ed7bf3b635ff08c0dd404645d52ff5a8"
+                "sha256:633e258bdc0fb7d6e41c8dba598f32cc8e3cbe4ebfe97da861442628c7b3ba38",
+                "sha256:6c782c4b7ffd49d718a44493cefd4e3b1acc189c9a546b895488f6d3033f11fb"
             ],
             "index": "pypi",
-            "version": "==6.3.0"
+            "version": "==6.3.1"
         },
         "hypothesis-auto": {
             "hashes": [
