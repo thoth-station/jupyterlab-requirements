@@ -113,6 +113,8 @@ class ThothAdviseHandler(APIHandler):
                     ]
 
                     advise['requirements'] = pipfile
+                    _LOGGER.info("Thoth requirements:", pipfile)
+                    
                     advise['requirement_lock'] = pipfile_lock
 
                     requirements_format = "pipenv"
