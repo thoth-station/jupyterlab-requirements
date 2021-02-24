@@ -93,3 +93,11 @@ all the things that you see...
 ## Release 0.4.3 (2021-02-22T21:18:17)
 ### Features
 * Fix/check runtime environment (#158)
+
+## Release 0.4.4 (2021-02-24T19:18:48)
+### Features
+* :arrow_up: Automatic update of dependencies by Kebechet (#164)
+* :arrow_up: Automatic update of dependencies by Kebechet (#162)
+### Improvements
+* Add more logs (#165)
+* Adjust one case and requirements.txt (#161)
