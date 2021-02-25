@@ -18,7 +18,7 @@ export interface IProps {
     packages: {
         [name: string]: string;
     };
-    initial_packages: {
+    loaded_packages: {
         [name: string]: string;
     };
     installed_packages: {
@@ -46,7 +46,7 @@ export class DependencyManagementForm extends React.Component<IProps> {
                 DependencyManagementTable,
                 {
                     packages: this.props.packages,
-                    initial_packages: this.props.initial_packages,
+                    loaded_packages: this.props.loaded_packages,
                     installed_packages: this.props.installed_packages,
                     editRow: this.props.editRow,
                     storeRow: this.props.storeRow,

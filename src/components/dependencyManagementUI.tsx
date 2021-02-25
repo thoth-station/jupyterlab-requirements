@@ -64,7 +64,7 @@ const CONTAINER_BUTTON_CENTRE = "thoth-container-button-centre";
 
 interface IProps {
   panel: NotebookPanel,
-  initial_requirements: Requirements,
+  loaded_requirements: Requirements,
   initial_requirements_lock: RequirementsLock,
   initial_config_file: ThothConfig
 }
@@ -79,7 +79,7 @@ export interface IState {
   status: string,
   packages: { [ name: string ]: string },
   installed_packages: { [ name: string ]: string },
-  initial_packages: { [ name: string ]: string },
+  loaded_packages: { [ name: string ]: string },
   deleted_packages: { [ name: string ]: string },
   requirements: Requirements,
   thoth_config: ThothConfig,
@@ -113,11 +113,11 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       this.setRecommendationType = this.setRecommendationType.bind(this)
 
       this.state = {
-        kernel_name: "jupyterlab_requirements",
+        kernel_name: get_kernel_name( this.props.panel ),
         recommendation_type: "latest",
         status: "loading",
         packages: {},  // editing
-        initial_packages: {},
+        loaded_packages: {},
         installed_packages: {},
         deleted_packages: {},
         requirements: {
@@ -154,7 +154,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
     changeUIstate(
       status: string,
       packages: { [ name: string ]: string },
-      initial_packages: { [ name: string ]: string },
+      loaded_packages: { [ name: string ]: string },
       installed_packages: { [ name: string ]: string },
       deleted_packages: { [ name: string ]: string },
       requirements: Requirements,
@@ -170,7 +170,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
       _.set(new_state, "packages", packages)
 
-      _.set(new_state, "initial_packages", initial_packages)
+      _.set(new_state, "loaded_packages", loaded_packages)
 
       _.set(new_state, "installed_packages", installed_packages)
 
@@ -238,7 +238,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       this.changeUIstate(
         "editing",
         packages,
-        this.state.initial_packages,
+        this.state.loaded_packages,
         this.state.installed_packages,
         this.state.deleted_packages,
         this.state.requirements,
@@ -263,7 +263,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       this.changeUIstate(
         "editing",
         packages,
-        this.state.initial_packages,
+        this.state.loaded_packages,
         this.state.installed_packages,
         this.state.deleted_packages,
         this.state.requirements,
@@ -279,19 +279,19 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
     editSavedRow(package_name: string, package_version: string) {
 
-      const initial_packages = this.state.initial_packages
+      const loaded_packages = this.state.loaded_packages
       const packages = this.state.packages
 
-      _.unset(initial_packages, package_name)
+      _.unset(loaded_packages, package_name)
       _.set(packages, package_name, package_version)
 
-      console.log("After editing (initial)", initial_packages)
+      console.log("After editing (initial)", loaded_packages)
       console.log("After editing (current)", packages)
 
       this.changeUIstate(
         "editing",
         packages,
-        initial_packages,
+        loaded_packages,
         this.state.installed_packages,
         this.state.deleted_packages,
         this.state.requirements,
@@ -323,7 +323,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       this.changeUIstate(
         "editing",
         packages,
-        this.state.initial_packages,
+        this.state.loaded_packages,
         this.state.installed_packages,
         deleted_packages,
         this.state.requirements,
@@ -339,7 +339,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
     deleteSavedRow(package_name: string) {
 
-      const saved_packages = this.state.initial_packages
+      const saved_packages = this.state.loaded_packages
 
       _.unset(saved_packages, package_name)
 
@@ -388,7 +388,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       this.changeUIstate(
         "editing",
         new_dict,
-        this.state.initial_packages,
+        this.state.loaded_packages,
         this.state.installed_packages,
         this.state.deleted_packages,
         this.state.requirements,
@@ -409,14 +409,14 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       const notebookMetadataRequirements = this.state.requirements
       const added_packages = this.state.packages
       console.log("added_packages", added_packages)
-      const initial_packages = this.state.initial_packages
-      console.log("initial_packages", initial_packages)
+      const loaded_packages = this.state.loaded_packages
+      console.log("loaded_packages", loaded_packages)
 
       // Evaluate total package from initial + added
       const total_packages = {}
 
-      _.forIn(initial_packages, function(value, key) {
-        if (_.has(initial_packages, "") == false) {
+      _.forIn(loaded_packages, function(value, key) {
+        if (_.has(loaded_packages, "") == false) {
           _.set(total_packages, key, value)
         }
       })
@@ -458,7 +458,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           this.changeUIstate(
             "initial",
             new_packages,
-            this.state.initial_packages,
+            this.state.loaded_packages,
             this.state.installed_packages,
             {},
             emptyRequirements,
@@ -489,7 +489,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           this.changeUIstate(
             "stable",
             {},
-            this.state.initial_packages,
+            this.state.loaded_packages,
             this.state.installed_packages,
             this.state.deleted_packages,
             this.state.requirements,
@@ -537,7 +537,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         this.changeUIstate(
           "failed_no_reqs",
           new_packages,
-          this.state.initial_packages,
+          this.state.loaded_packages,
           this.state.installed_packages,
           this.state.deleted_packages,
           this.state.requirements,
@@ -558,8 +558,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           this.changeUIstate(
             "setting_kernel",
             {},
-            this.state.initial_packages,
-            this.state.initial_packages,
+            this.state.loaded_packages,
+            this.state.loaded_packages,
             this.state.deleted_packages,
             this.state.requirements,
             this.state.kernel_name,
@@ -575,7 +575,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         this.changeUIstate(
           "failed",
           this.state.packages,
-          this.state.initial_packages,
+          this.state.loaded_packages,
           this.state.installed_packages,
           this.state.deleted_packages,
           this.state.requirements,
@@ -615,8 +615,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           this.changeUIstate(
             "ready",
             {},
-            this.state.initial_packages,
-            this.state.initial_packages,
+            this.state.loaded_packages,
+            this.state.loaded_packages,
             this.state.deleted_packages,
             this.state.requirements,
             this.state.kernel_name,
@@ -632,7 +632,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           this.changeUIstate(
             "failed",
             this.state.packages,
-            this.state.initial_packages,
+            this.state.loaded_packages,
             this.state.installed_packages,
             this.state.deleted_packages,
             this.state.requirements,
@@ -651,7 +651,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       this.changeUIstate(
         "locking_requirements",
         this.state.packages,
-        this.state.initial_packages,
+        this.state.loaded_packages,
         this.state.installed_packages,
         this.state.deleted_packages,
         this.state.requirements,
@@ -667,7 +667,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
       try {
 
-        const advise: Advise = await lock_requirements_with_thoth(
+        var advise: Advise = await lock_requirements_with_thoth(
           this.state.kernel_name,
           JSON.stringify(thothConfig),
           JSON.stringify(notebookMetadataRequirements)
@@ -685,60 +685,61 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
             // Save all changes to disk.
             this.props.panel.context.save()
-            try {
-              await this.store_dependencies_on_disk(
-                advise.requirements,
-                advise.requirement_lock,
-                'overlays',
-                false
-              )
-            } catch ( error ) {
 
-              console.log("Error storing dependencies in overlays", error)
-
-            }
-
-            try {
-              await update_thoth_config_on_disk(
-                this.state.thoth_config.runtime_environments[0],
-                true
-              )
-            } catch ( error ) {
-              console.log("Error updating thoth config on disk", error)
-            }
-
-            this.changeUIstate(
-              "installing_requirements",
-              {},
-              this.state.initial_packages,
-              this.state.installed_packages,
-              {},
-              advise.requirements,
-              this.state.kernel_name,
-              this.state.thoth_config
-            )
-
-            return
-
-          }
-          else {
+          } else {
 
             console.log("Advise requirements packages received is empty, falling back to pipenv", advise.requirements);
 
             this.lock_using_pipenv()
-          }
-        }
-        else {
+            }
 
+        } else {
+          console.log("Thoth could not solve your stack, falling back to pipenv...")
           this.lock_using_pipenv()
         }
 
       } catch ( error ) {
 
         console.log("Error locking requirements with Thoth", error)
-
         this.lock_using_pipenv()
       }
+
+      if ( advise.error == false ) {
+        try {
+          await this.store_dependencies_on_disk(
+            advise.requirements,
+            advise.requirement_lock,
+            'overlays',
+            false
+          )
+        } catch ( error ) {
+
+          console.log("Error storing dependencies in overlays", error)
+
+        }
+
+        try {
+          await update_thoth_config_on_disk(
+            this.state.thoth_config.runtime_environments[0],
+            true
+            )
+          } catch ( error ) {
+          console.log("Error updating thoth config on disk", error)
+        }
+      }
+
+      this.changeUIstate(
+        "installing_requirements",
+        {},
+        this.state.loaded_packages,
+        this.state.installed_packages,
+        {},
+        advise.requirements,
+        this.state.kernel_name,
+        this.state.thoth_config
+      )
+
+      return
 
     }
 
@@ -747,7 +748,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       this.changeUIstate(
         "locking_requirements_using_pipenv",
         this.state.packages,
-        this.state.initial_packages,
+        this.state.loaded_packages,
         this.state.installed_packages,
         this.state.deleted_packages,
         this.state.requirements,
@@ -761,7 +762,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
       try {
 
         // TODO: Add check to avoid relocking if dependencies are already locked.
-        const result = await lock_requirements_with_pipenv(
+        var result = await lock_requirements_with_pipenv(
           this.state.kernel_name,
           JSON.stringify(notebookMetadataRequirements)
         )
@@ -776,41 +777,6 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           // Save all changes to disk.
           this.props.panel.context.save()
 
-          try {
-            await this.store_dependencies_on_disk(
-              notebookMetadataRequirements,
-              result.requirements_lock,
-              'overlays',
-              false
-            )
-
-          } catch ( error ) {
-
-            console.log("Error storing dependencies in overlays", error)
-
-          }
-
-          try {
-            await update_thoth_config_on_disk(
-              this.state.thoth_config.runtime_environments[0],
-              true
-            )
-          } catch ( error ) {
-            console.log("Error updating thoth config on disk", error)
-          }
-
-          this.changeUIstate(
-            "installing_requirements",
-            {},
-            this.state.initial_packages,
-            this.state.installed_packages,
-            {},
-            notebookMetadataRequirements,
-            this.state.kernel_name,
-            this.state.thoth_config
-          )
-
-          return
         }
 
         else {
@@ -818,7 +784,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           this.changeUIstate(
             "failed",
             this.state.packages,
-            this.state.initial_packages,
+            this.state.loaded_packages,
             this.state.installed_packages,
             this.state.deleted_packages,
             this.state.requirements,
@@ -837,7 +803,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         this.changeUIstate(
           "failed",
           this.state.packages,
-          this.state.initial_packages,
+          this.state.loaded_packages,
           this.state.installed_packages,
           this.state.deleted_packages,
           this.state.requirements,
@@ -846,8 +812,48 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           "No resolution engine was able to install dependendices, please contact Thoth team."
         )
         return
-
       }
+      
+      if ( result.error == false ) {
+
+        try {
+          await this.store_dependencies_on_disk(
+            notebookMetadataRequirements,
+            result.requirements_lock,
+            'overlays',
+            false
+          )
+
+        } catch ( error ) {
+
+          console.log("Error storing dependencies in overlays", error)
+
+        }
+
+        try {
+          await update_thoth_config_on_disk(
+            this.state.thoth_config.runtime_environments[0],
+            true
+          )
+        } catch ( error ) {
+          console.log("Error updating thoth config on disk", error)
+        }
+      }
+
+
+      this.changeUIstate(
+        "installing_requirements",
+        {},
+        this.state.loaded_packages,
+        this.state.installed_packages,
+        {},
+        notebookMetadataRequirements,
+        this.state.kernel_name,
+        this.state.thoth_config
+      )
+
+      return
+
     }
 
     async onStart() {
@@ -928,6 +934,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         }
         else {
           var thoth_config = thoth_config_detected
+          console.log("No runtime environment loaded from notebook metadata. Detecting from source... ")
           var thoth_config_used = "detected"
         }
 
@@ -943,19 +950,20 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         console.log("initial thoth config", thoth_config)
 
         // Load requirements from notebook metadata, if any, otherwise receive default ones
-        var initial_requirements: Requirements = this.props.initial_requirements
-        console.log("initial requirements", initial_requirements)
-        var initial_packages = initial_requirements.packages
+        var loaded_requirements: Requirements = this.props.loaded_requirements
+        console.log("loaded requirements", loaded_requirements)
+        var loaded_packages = loaded_requirements.packages
+        console.log("loaded requirements packages", loaded_packages)
 
         // Check if any package is present in the loaded requirements otherwise go to initial state
-        if ( _.size( initial_packages ) == 0 ) {
+        if ( _.size( loaded_packages ) == 0 ) {
           this.changeUIstate(
             status="initial" ,
             this.state.packages,
-            initial_packages,
+            loaded_packages,
             this.state.installed_packages,
             this.state.deleted_packages,
-            initial_requirements,
+            loaded_requirements,
             this.state.kernel_name,
             thoth_config
           )
@@ -973,10 +981,10 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           this.changeUIstate(
             status="only_install" ,
             this.state.packages,
-            initial_packages,
+            loaded_packages,
             this.state.installed_packages,
             this.state.deleted_packages,
-            initial_requirements,
+            loaded_requirements,
             this.state.kernel_name,
             thoth_config
           )
@@ -995,37 +1003,38 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         // Retrieve kernel name from metadata
         const kernel_name = get_kernel_name( this.props.panel )
 
-        // Check if all package in requirements are also in requirements locked (both from notebook metadata)
+        // Check if all packages in requirements are also in requirements locked (both from notebook metadata)
         const check_packages = {}
 
-        _.forIn(initial_packages, function(version, name) {
-          if (_.has(initial_locked_packages, name.toLowerCase())) {
+        _.forIn(loaded_packages, function(version, name) {
+          if (_.has(initial_locked_packages, name.toLowerCase()) == true ) {
             _.set(check_packages, name, version)
           }
         })
 
-        console.log("initial packages", initial_packages)
+        console.log("initial packages", loaded_packages)
         console.log("packages in req and req lock", check_packages)
 
         const installed_packages = await this.retrieveInstalledPackages(kernel_name, initial_locked_packages)
 
         const initial_installed_packages = {}
 
-        _.forIn(initial_packages, function(version, name) {
-          if (_.has(installed_packages, name.toLowerCase())) {
+        _.forIn(loaded_packages, function(version, name) {
+          if (_.has(installed_packages, name.toLowerCase()) == true ) {
             _.set(initial_installed_packages, name, version)
           }
         })
 
         console.log("initial installed packages", initial_installed_packages)
 
-        if (_.isEqual(_.size(initial_packages), _.size(check_packages) )) {
+        // TODO: Create endpoints to rely on thoth-python library for any operation between dependency managements files
+        if (_.isEqual(_.size(loaded_packages), _.size(check_packages) )) {
 
           // check if all requirements locked are also installed in the current kernel
           const are_installed: boolean = await this.checkInstalledPackages(installed_packages, initial_locked_packages)
 
           // if locked requirements are present in the kernel (match packages installed)
-          if ( are_installed == true  ) {
+          if ( are_installed == true ) {
 
             // and thoth config is loaded, go to stable state
             if ( thoth_config_used == "loaded" ) {
@@ -1033,10 +1042,10 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
               this.changeUIstate(
                 "stable",
                 this.state.packages,
-                initial_packages,
-                initial_packages,
+                loaded_packages,
+                loaded_packages,
                 this.state.deleted_packages,
-                initial_requirements,
+                loaded_requirements,
                 kernel_name,
                 thoth_config
                 )
@@ -1050,10 +1059,10 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
               this.changeUIstate(
                 "stable",
                 this.state.packages,
-                initial_packages,
-                initial_packages,
+                loaded_packages,
+                loaded_packages,
                 this.state.deleted_packages,
-                initial_requirements,
+                loaded_requirements,
                 kernel_name,
                 thoth_config
                 )
@@ -1066,10 +1075,10 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
               this.changeUIstate(
                 "only_install_kernel_re",
                 this.state.packages,
-                initial_packages,
-                initial_packages,
+                loaded_packages,
+                loaded_packages,
                 this.state.deleted_packages,
-                initial_requirements,
+                loaded_requirements,
                 kernel_name,
                 thoth_config
                 )
@@ -1084,10 +1093,10 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             this.changeUIstate(
               "only_install_kernel",
               this.state.packages,
-              initial_packages,
+              loaded_packages,
               initial_installed_packages,
               this.state.deleted_packages,
-              initial_requirements,
+              loaded_requirements,
               kernel_name,
               thoth_config
               )
@@ -1099,10 +1108,10 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           this.changeUIstate(
             "only_install_kernel",
             this.state.packages,
-            initial_packages,
+            loaded_packages,
             initial_installed_packages,
             this.state.deleted_packages,
-            initial_requirements,
+            loaded_requirements,
             kernel_name,
             thoth_config
             )
@@ -1158,7 +1167,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
       let dependencyManagementform = <div>
                                         <DependencyManagementForm
-                                          initial_packages={this.state.initial_packages}
+                                          loaded_packages={this.state.loaded_packages}
                                           installed_packages={this.state.installed_packages}
                                           packages={this.state.packages}
                                           editRow={this.editRow}
@@ -1417,7 +1426,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
                 onClick={() => this.changeUIstate(
                   "loading",
                   this.state.packages,
-                  this.state.initial_packages,
+                  this.state.loaded_packages,
                   this.state.installed_packages,
                   this.state.deleted_packages,
                   this.state.requirements,
@@ -1465,7 +1474,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
                     onClick={() => this.changeUIstate(
                       "loading",
                       this.state.packages,
-                      this.state.initial_packages,
+                      this.state.loaded_packages,
                       this.state.installed_packages,
                       this.state.deleted_packages,
                       this.state.requirements,
@@ -1522,7 +1531,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
                       onClick={() => this.changeUIstate(
                         "stable",
                         this.state.packages,
-                        this.state.initial_packages,
+                        this.state.loaded_packages,
                         this.state.installed_packages,
                         this.state.deleted_packages,
                         this.state.requirements,
