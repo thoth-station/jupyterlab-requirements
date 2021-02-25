@@ -105,3 +105,8 @@ all the things that you see...
 ## Release 0.4.5 (2021-02-25T16:23:42)
 ### Features
 * Fix/Split errors management to avoid complete failure (#171)
+
+## Release 0.4.6 (2021-02-25T19:25:28)
+### Features
+* Correct path handling (#178)
+* Adjust check for packages match (#177)
