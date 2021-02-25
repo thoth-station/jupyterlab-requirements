@@ -1012,8 +1012,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           }
         })
 
-        console.log("initial packages", loaded_packages)
-        console.log("packages in req and req lock", check_packages)
+        console.log("loaded packages from pipfile", loaded_packages)
+        console.log("packages in pipfile and pipfile lock", check_packages)
 
         const installed_packages = await this.retrieveInstalledPackages(kernel_name, initial_locked_packages)
 
@@ -1027,8 +1027,8 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
         console.log("initial installed packages", initial_installed_packages)
 
-        // TODO: Create endpoints to rely on thoth-python/thamos libraries for any operation between dependency managements files
-        if (_.isEqual(_.size(loaded_packages), _.size(check_packages) )) {
+        // Check match for installed packages available in pipfile and pipfile.lock loaded 
+        if ( _.isEqual(_.size(initial_installed_packages), _.size(check_packages) )) {
 
           // check if all requirements locked are also installed in the current kernel
           const are_installed: boolean = await this.checkInstalledPackages(installed_packages, initial_locked_packages)
