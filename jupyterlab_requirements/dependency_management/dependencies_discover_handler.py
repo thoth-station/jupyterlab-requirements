@@ -39,6 +39,7 @@ class DependencyInstalledHandler(APIHandler):
         kernel_name: str = input_data["kernel_name"]
 
         home = Path.home()
+
         complete_path = home.joinpath(".local/share/thoth/kernels")
 
         process_output = subprocess.run(
