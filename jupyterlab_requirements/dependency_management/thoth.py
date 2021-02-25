@@ -49,6 +49,7 @@ class ThothAdviseHandler(APIHandler):
 
         # Get origin before changing path
         origin: str = _get_origin()
+        _LOGGER.info("Origin identified by thamos: %r", origin)
 
         home = Path.home()
         complete_path = home.joinpath(".local/share/thoth/kernels")
@@ -68,15 +69,16 @@ class ThothAdviseHandler(APIHandler):
         _LOGGER.info(f"Current path: %r ", env_path.as_posix())
         _LOGGER.info(f"Input Pipfile: \n{pipfile_string}")
 
-        advise = {"requirements": "", "requirement_lock": "", "error": False}
+        advise = {"requirements": {}, "requirement_lock": {}, "error": False}
 
         try:
             # TODO: Handle all errors
-            _LOGGER.info("Adviser inputs are:", {
+            adviser_inputs = {
                 "pipfile": pipfile_string,
                 "config": config,
                 "origin": origin
-            })
+            }
+            _LOGGER.info("Adviser inputs are: %r", adviser_inputs)
             response = advise_using_config(
                 pipfile=pipfile_string,
                 pipfile_lock="",  # TODO: Provide Pipfile.lock retrieved?
@@ -112,30 +114,31 @@ class ThothAdviseHandler(APIHandler):
                         "requirements_locked"
                     ]
 
-                    advise['requirements'] = pipfile
-                    _LOGGER.info("Thoth requirements:", pipfile)
-                    
-                    advise['requirement_lock'] = pipfile_lock
-
-                    requirements_format = "pipenv"
-
-                    project = Project.from_dict(pipfile, pipfile_lock)
-
-                    pipfile_path = env_path.joinpath("Pipfile")
-                    pipfile_lock_path = env_path.joinpath("Pipfile.lock")
-
-                    if requirements_format == "pipenv":
-                        _LOGGER.info("Writing to Pipfile/Pipfile.lock in %r", env_path.as_posix())
-                        project.to_files(
-                            pipfile_path=pipfile_path,
-                            pipfile_lock_path=pipfile_lock_path
-                        )
+                    advise = {"requirements": pipfile, "requirement_lock": pipfile_lock, "error": False}
 
         except Exception as api_error:
             _LOGGER.warning(f"error talking to Thoth: {api_error}")
             advise['error'] = True
 
-        _LOGGER.debug(f"advise received {advise}")
+        _LOGGER.info(f"advise received: {advise}")
+
+        if not advise['error']:
+            try:
+                requirements_format = "pipenv"
+
+                project = Project.from_dict(pipfile, pipfile_lock)
+
+                pipfile_path = env_path.joinpath("Pipfile")
+                pipfile_lock_path = env_path.joinpath("Pipfile.lock")
+
+                if requirements_format == "pipenv":
+                    _LOGGER.info("Writing to Pipfile/Pipfile.lock in %r", env_path.as_posix())
+                    project.to_files(
+                        pipfile_path=pipfile_path,
+                        pipfile_lock_path=pipfile_lock_path
+                    )
+            except Exception as e:
+                _LOGGER.warning("Requirements files have not been stored successfully %r", e)
 
         os.chdir(initial_path)
         self.finish(json.dumps(advise))

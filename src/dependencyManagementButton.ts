@@ -53,7 +53,7 @@ export class ManageDependenciesButtonExtension
             React.createElement(DependenciesManagementUI,
                 {
                     panel: this.panel,
-                    initial_requirements: initial_requirements,
+                    loaded_requirements: initial_requirements,
                     initial_requirements_lock: initial_requirements_lock,
                     initial_config_file: initial_config_file
                 })

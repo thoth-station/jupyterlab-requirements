@@ -24,7 +24,7 @@ export interface IProps {
     packages: {
         [name: string]: string;
     };
-    initial_packages: {
+    loaded_packages: {
         [name: string]: string;
     };
     installed_packages: {
@@ -76,10 +76,10 @@ export class DependencyManagementTable extends React.Component<IProps, IState> {
     renderRows() {
         var context = this;
         var packages = this.props.packages;
-        var initial_packages = this.props.initial_packages;
+        var loaded_packages = this.props.loaded_packages;
         var installed_packages = this.props.installed_packages;
         var rows: React.ReactNode[] = [];
-        for (let [name, version] of Object.entries(initial_packages)) {
+        for (let [name, version] of Object.entries(loaded_packages)) {
             if (_.has(installed_packages, name)) {
                 rows.push(
                     React.createElement(DependencyManagementTableRowSaved,

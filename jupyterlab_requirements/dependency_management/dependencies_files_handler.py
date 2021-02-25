@@ -74,12 +74,12 @@ class DependenciesFilesHandler(APIHandler):
         requirements: str = input_data["requirements"]
         requirements_lock: str = input_data["requirement_lock"]
 
-        home = Path.home()
-
         if using_home_path_base:
+            home = Path.home()
             complete_path = home.joinpath(path_to_store)
         else:
             git_root = get_git_root()
+            _LOGGER.info("Git root identified: %r", git_root)
             complete_path = Path(git_root).joinpath(path_to_store)
 
         _LOGGER.info("path to store dependencies is: %r", complete_path.as_posix())

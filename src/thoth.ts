@@ -80,7 +80,7 @@ export async function lock_requirements_with_thoth (
       body: JSON.stringify(dataToSend),
       method: 'POST'
     });
-    console.log(advise.requirements)
+    console.log("Advise requirements received: ", advise.requirements)
     return JSON.parse(JSON.stringify(advise));
   } catch (reason) {
     console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
