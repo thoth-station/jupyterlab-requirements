@@ -1027,7 +1027,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
         console.log("initial installed packages", initial_installed_packages)
 
-        // TODO: Create endpoints to rely on thoth-python library for any operation between dependency managements files
+        // TODO: Create endpoints to rely on thoth-python/thamos libraries for any operation between dependency managements files
         if (_.isEqual(_.size(loaded_packages), _.size(check_packages) )) {
 
           // check if all requirements locked are also installed in the current kernel
