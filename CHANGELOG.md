@@ -101,3 +101,7 @@ all the things that you see...
 ### Improvements
 * Add more logs (#165)
 * Adjust one case and requirements.txt (#161)
+
+## Release 0.4.5 (2021-02-25T16:23:42)
+### Features
+* Fix/Split errors management to avoid complete failure (#171)
