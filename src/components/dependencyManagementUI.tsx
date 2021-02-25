@@ -813,7 +813,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         )
         return
       }
-      
+
       if ( result.error == false ) {
 
         try {
