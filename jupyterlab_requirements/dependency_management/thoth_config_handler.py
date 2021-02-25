@@ -61,7 +61,7 @@ class ThothConfigHandler(APIHandler):
         config.load_config()
 
         thoth_config = config.content
-        _LOGGER.info("Thoth config:", thoth_config)
+        _LOGGER.info("Thoth config: %r", thoth_config)
         os.chdir(initial_path)
         self.finish(json.dumps(thoth_config))
 
@@ -81,7 +81,7 @@ class ThothConfigHandler(APIHandler):
         )
         configuration.save_config()
 
-        _LOGGER.info("Updated Thoth config:", configuration.content)
+        _LOGGER.info("Updated Thoth config: %r", configuration.content)
 
         self.finish(json.dumps({
             "message": f"Successfully updated thoth config at {initial_path}!"
