@@ -110,3 +110,7 @@ all the things that you see...
 ### Features
 * Correct path handling (#178)
 * Adjust check for packages match (#177)
+
+## Release 0.4.7 (2021-03-03T10:54:33)
+### Features
+* Adjust paths (#186)
