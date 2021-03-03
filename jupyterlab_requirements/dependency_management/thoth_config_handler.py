@@ -45,7 +45,7 @@ class ThothConfigHandler(APIHandler):
         env_path = complete_path.joinpath(kernel_name)
         env_path.mkdir(parents=True, exist_ok=True)
 
-        os.chdir(os.path.dirname(env_path))
+        os.chdir(env_path)
 
         _LOGGER.info(f"kernel_name selected: {kernel_name} and path: {env_path}")
 

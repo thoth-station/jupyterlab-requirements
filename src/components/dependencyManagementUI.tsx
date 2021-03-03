@@ -1027,7 +1027,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
         console.log("initial installed packages", initial_installed_packages)
 
-        // Check match for installed packages available in pipfile and pipfile.lock loaded 
+        // Check match for installed packages available in pipfile and pipfile.lock loaded
         if ( _.isEqual(_.size(initial_installed_packages), _.size(check_packages) )) {
 
           // check if all requirements locked are also installed in the current kernel
