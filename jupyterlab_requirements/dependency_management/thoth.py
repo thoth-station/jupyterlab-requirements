@@ -61,7 +61,7 @@ class ThothAdviseHandler(APIHandler):
                 f"rm -rf ./{kernel_name} ", shell=True, cwd=complete_path)
 
         env_path.mkdir(parents=True, exist_ok=True)
-        os.chdir(os.path.dirname(env_path))
+        os.chdir(env_path)
 
         _LOGGER.info("Resolution engine used: thoth")
         pipfile_string = Pipfile.from_dict(requirements).to_string()

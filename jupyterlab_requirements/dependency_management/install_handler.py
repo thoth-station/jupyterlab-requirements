@@ -44,11 +44,12 @@ class DependencyInstallHandler(APIHandler):
         home = Path.home()
         complete_path = home.joinpath(".local/share/thoth/kernels")
 
-        os.chdir(os.path.dirname(complete_path))
         env_name = kernel_name
         env_path = complete_path.joinpath(env_name)
 
         env_path.mkdir(parents=True, exist_ok=True)
+
+        os.chdir(complete_path)
 
         package_manager: str = 'micropipenv'
 
