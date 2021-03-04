@@ -965,20 +965,59 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
           if (_.isEmpty( notebook_content ) == false ) {
             var gathered_libraries: Array<string> = await gather_library_usage( notebook_content );
             console.log("gathered_libraries", gathered_libraries)
-          }
 
-          this.changeUIstate(
-            status="initial" ,
-            this.state.packages,
-            loaded_packages,
-            this.state.installed_packages,
-            this.state.deleted_packages,
-            loaded_requirements,
-            this.state.kernel_name,
-            thoth_config
-          )
-          return
-        }
+            if ( _.size(gathered_libraries) > 0 ) {
+
+              // Evaluate total package from initial + added
+              const identified_packages = {}
+
+              _.forEach(gathered_libraries, function(library) {
+                  _.set(identified_packages, library, "*")
+              })
+
+              console.log("identified_packages", identified_packages)
+
+              this.changeUIstate(
+                status="only_install_from_imports",
+                this.state.packages,
+                identified_packages,
+                this.state.installed_packages,
+                this.state.deleted_packages,
+                loaded_requirements,
+                this.state.kernel_name,
+                thoth_config
+              )
+              return
+            }
+            else {
+              this.changeUIstate(
+                status="initial" ,
+                this.state.packages,
+                loaded_packages,
+                this.state.installed_packages,
+                this.state.deleted_packages,
+                loaded_requirements,
+                this.state.kernel_name,
+                thoth_config
+              )
+              return
+            }
+
+          }
+          else {
+              this.changeUIstate(
+                status="initial" ,
+                this.state.packages,
+                loaded_packages,
+                this.state.installed_packages,
+                this.state.deleted_packages,
+                loaded_requirements,
+                this.state.kernel_name,
+                thoth_config
+              )
+              return
+            }
+          }
 
         // requirements is present in notebook metadata
 
@@ -1343,6 +1382,24 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
               <fieldset>
                 <p>Pinned down software stack found in notebook metadata!<br></br>
                 The runtime environment found in the notebook does not match your environment. <br></br>
+                Please use install button.</p>
+              </fieldset>
+            </div>
+            {optionsForm}
+          </div>
+        );
+      }
+
+      if ( this.state.status == "only_install_from_imports" ) {
+
+        return (
+          <div>
+            {dependencyManagementform}
+            {addPlusInstallContainers}
+            <div>
+              <fieldset>
+                <p>No dependencied found in notebook metadata!<br></br>
+                But thoth identified the packages that are required to run this notebook. <br></br>
                 Please use install button.</p>
               </fieldset>
             </div>
