@@ -29,7 +29,8 @@ import {
   discover_installed_packages,
   store_dependencies,
   install_packages,
-  create_new_kernel
+  create_new_kernel,
+  gather_library_usage
 } from '../kernel';
 
 import {
@@ -45,7 +46,8 @@ import {
   set_requirement_lock,
   set_resolution_engine,
   set_thoth_configuration,
-  delete_key_from_notebook_metadata
+  delete_key_from_notebook_metadata,
+  take_notebook_content
 } from "../notebook"
 
 import { Advise } from "../types/thoth";
@@ -63,7 +65,7 @@ const CONTAINER_BUTTON_CENTRE = "thoth-container-button-centre";
  */
 
 interface IProps {
-  panel: NotebookPanel,
+  panel: NotebookPanel
   loaded_requirements: Requirements,
   initial_requirements_lock: RequirementsLock,
   initial_config_file: ThothConfig
@@ -857,7 +859,6 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
     }
 
     async onStart() {
-
         // Load thoth_config from notebook metadata, if any, otherwise get default one
         var thoth_config_loaded: ThothConfig = this.props.initial_config_file
         var thoth_config_used: string = "loaded"
@@ -955,8 +956,17 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
         var loaded_packages = loaded_requirements.packages
         console.log("loaded requirements packages", loaded_packages)
 
-        // Check if any package is present in the loaded requirements otherwise go to initial state
+        // Check if any package is present in the loaded requirements
         if ( _.size( loaded_packages ) == 0 ) {
+          
+          // Check if any package import is present (only when notebook without dependencies in metadata)
+          const notebook_content = take_notebook_content( this.props.panel )
+
+          if (_.isEmpty( notebook_content ) == false ) {
+            var gathered_libraries: Array<string> = await gather_library_usage( notebook_content );
+            console.log("gathered_libraries", gathered_libraries)
+          }
+
           this.changeUIstate(
             status="initial" ,
             this.state.packages,
@@ -1208,7 +1218,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
                                       </div>
                                     </div>
 
-    let optionsForm = <div>
+      let optionsForm = <div>
                         <section>
                           <h2>OPTIONS</h2>
                         </section>
