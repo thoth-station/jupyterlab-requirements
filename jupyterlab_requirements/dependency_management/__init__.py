@@ -23,6 +23,7 @@ from .install_handler import DependencyInstallHandler
 from .pipenv import PipenvHandler
 from .thoth import ThothAdviseHandler
 from .thoth_config_handler import ThothConfigHandler
+from .thoth_invectio import ThothInvectioHandler
 
 __all__ = [
     "DependenciesFilesHandler",
@@ -32,4 +33,5 @@ __all__ = [
     "PipenvHandler",
     "ThothAdviseHandler",
     "ThothConfigHandler",
+    "ThothInvectioHandler"
 ]
