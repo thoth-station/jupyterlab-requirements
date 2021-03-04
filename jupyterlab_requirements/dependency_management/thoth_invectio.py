@@ -42,8 +42,8 @@ class ThothInvectioHandler(APIHandler):
         input_data = self.get_json_body()
         notebook_content: str = input_data["notebook_content"]
 
-        _STD_LIB_PATH = Path(distutils.sysconfig.get_python_lib(standard_lib=True))
-        _STD_LIB = {p.name.rstrip(".py") for p in _STD_LIB_PATH.iterdir()}
+        std_lib_path = Path(distutils.sysconfig.get_python_lib(standard_lib=True))
+        std_lib = {p.name.rstrip(".py") for p in std_lib_path.iterdir()}
 
         tree = ast.parse(textwrap.dedent(notebook_content))
 
@@ -53,7 +53,7 @@ class ThothInvectioHandler(APIHandler):
         report = visitor.get_module_report()
 
         libs = filter(
-            lambda k: k not in _STD_LIB | set(sys.builtin_module_names), report
+            lambda k: k not in std_lib | set(sys.builtin_module_names), report
         )
         library_gathered = list(libs)
         _LOGGER.info("Thoth invectio library gathered: %r", library_gathered)

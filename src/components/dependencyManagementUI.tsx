@@ -958,7 +958,7 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
 
         // Check if any package is present in the loaded requirements
         if ( _.size( loaded_packages ) == 0 ) {
-          
+
           // Check if any package import is present (only when notebook without dependencies in metadata)
           const notebook_content = take_notebook_content( this.props.panel )
 

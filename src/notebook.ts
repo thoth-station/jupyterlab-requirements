@@ -274,7 +274,7 @@ export function take_notebook_content( notebook: NotebookPanel): string {
     const default_python_indent = 4
     let number_of_cells = notebook.model.cells.length
 
-    var array = _.range(0, number_of_cells); 
+    var array = _.range(0, number_of_cells);
 
     // Iterate over cells
     let cells: Array<string> = []
@@ -282,13 +282,13 @@ export function take_notebook_content( notebook: NotebookPanel): string {
     _.each(array, function (cell_number, key) {
         let cell = notebook.model.cells.get(cell_number)
         if ( (cell.type === "code") && ( !cell.value.text.startsWith( "%%" )) ) {
-            
+
             const cell_text = cell.value.text
                 .trim()
                 .replace( "?", "" )  // remove Jupyter magic to display help
                 .replace( /^[%!]{1}[^%]{1}.*$/gm, "\n" )  // remove lines starting with single % or !
                 .replace( /^\s*\n/gm, "" )     // remove empty lines
-    
+
             console.log("cell n.", cell_number, cell_text);
             cells.push(cell_text)
         }
