@@ -1398,9 +1398,9 @@ export class DependenciesManagementUI extends React.Component<IProps, IState> {
             {addPlusInstallContainers}
             <div>
               <fieldset>
-                <p>No dependencied found in notebook metadata!<br></br>
-                But thoth identified the packages that are required to run this notebook. <br></br>
-                Please use install button.</p>
+                <p>No dependencies found in notebook metadata!<br></br>
+                Thoth identified the packages that are required to run this notebook from your code. <br></br>
+                Please use install button to create dependencies.</p>
               </fieldset>
             </div>
             {optionsForm}
