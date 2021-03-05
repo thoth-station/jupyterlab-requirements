@@ -14,6 +14,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
+
 // Customizations
 import { ManageDependenciesButtonExtension } from './dependencyManagementButton';
 
@@ -27,7 +28,8 @@ import { ManageDependenciesButtonExtension } from './dependencyManagementButton'
 /**
  * Initialization data for the jupyterlab_requirements extension.
  */
-const extension: JupyterFrontEndPlugin<void> = {
+
+const extension: JupyterFrontEndPlugin<string> = {
   id: 'jupyterlab_requirements',
   autoStart: true,
   activate
@@ -39,9 +41,9 @@ const extension: JupyterFrontEndPlugin<void> = {
  * @param app Jupyter Front End
  */
 
-function activate (
+async function activate (
   app: JupyterFrontEnd,
-): void {
+): Promise<string> {
 
   // Add button in notebook menu
   console.log('jupyterlab-requirements extension is activated!');
@@ -49,6 +51,7 @@ function activate (
   const buttonExtension = new ManageDependenciesButtonExtension();
   app.docRegistry.addWidgetExtension('Notebook', buttonExtension);
 
+  return "ready";
 }
 
 export default extension;

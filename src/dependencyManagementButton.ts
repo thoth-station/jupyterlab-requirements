@@ -10,7 +10,8 @@
  */
 import React from 'react';
 
-import { ToolbarButton, ReactWidget, Dialog } from '@jupyterlab/apputils';
+import { ToolbarButton, ReactWidget } from '@jupyterlab/apputils';
+import { Dialog } from '@jupyterlab/apputils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
 
@@ -31,9 +32,6 @@ export class ManageDependenciesButtonExtension
     private panel: NotebookPanel;
 
     openWidget = async (): Promise<void> => {
-        const metadata = this.panel.content.model.toString();
-        console.log('metadata', metadata);
-
         // Check if any requirements are stored in notebook metadata
         const initial_requirements = await get_requirements(this.panel);
         console.log("requirements", initial_requirements);

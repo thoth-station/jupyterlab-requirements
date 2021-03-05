@@ -1,6 +1,6 @@
 {
   "name": "jupyterlab_requirements",
-  "version": "0.4.7",
+  "version": "0.5.0",
   "description": "JupyterLab Extension for dependency management and optimization",
   "keywords": [
     "jupyter",
@@ -63,9 +63,13 @@
     "@lumino/datagrid": "^0.5.2",
     "@lumino/disposable": "^1.4.3",
     "@lumino/widgets": "^1.14.0",
+    "@material-ui/core": "latest",
     "@types/lodash": "^4.14.165",
     "axios": "^0.21.1",
-    "js-logger": "^1.6.1"
+    "js-logger": "^1.6.1",
+    "react": "^16.0.0",
+    "react-dom": "^16.8.0",
+    "yarn-deduplicate": "^3.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7",
@@ -73,6 +77,7 @@
     "@jupyterlab/builder": "^3.0.0",
     "@jupyterlab/testutils": "^3.0.0",
     "@types/jest": "^24",
+    "@types/react": "^17.0.2",
     "@typescript-eslint/eslint-plugin": "^2.27.0",
     "@typescript-eslint/parser": "^2.27.0",
     "eslint": "^7.5.0",

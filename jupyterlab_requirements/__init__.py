@@ -22,7 +22,7 @@ from pathlib import Path
 from jupyter_server.utils import url_path_join
 
 from .dependency_management import DependenciesFilesHandler, PipenvHandler
-from .dependency_management import ThothConfigHandler, ThothAdviseHandler
+from .dependency_management import ThothConfigHandler, ThothAdviseHandler, ThothInvectioHandler
 from .dependency_management import JupyterKernelHandler, DependencyInstalledHandler, DependencyInstallHandler
 
 HERE = Path(__file__).parent.resolve()
@@ -72,6 +72,7 @@ def _load_jupyter_server_extension(lab_app):
     custom_handlers = [
         (url_path_join(base_url, f"/{url_path}/thoth/config"), ThothConfigHandler),
         (url_path_join(base_url, f"/{url_path}/thoth/resolution"), ThothAdviseHandler),
+        (url_path_join(base_url, f"/{url_path}/thoth/invectio"), ThothInvectioHandler),
         (url_path_join(base_url, f"/{url_path}/pipenv"), PipenvHandler),
         (url_path_join(base_url, f"/{url_path}/kernel/packages"), DependencyInstalledHandler),
         (url_path_join(base_url, f"/{url_path}/kernel/install"), DependencyInstallHandler),

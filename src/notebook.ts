@@ -15,7 +15,7 @@ import { NotebookPanel } from '@jupyterlab/notebook';
 
 import { Source, Requirements, RequirementsLock } from './types/requirements';
 import { ThothConfig } from "./types/thoth";
-
+import * as utils from "./utils";
 
 /**
  * Function: Get Python version from language information.
@@ -263,4 +263,43 @@ export function set_resolution_engine( notebook: NotebookPanel, dependency_resol
     }
 
     console.log( "Dependency resolution engine used for requirements have been set successfully." )
+  }
+
+
+ /**
+ * Function: Take notebook content from cells.
+ */
+
+export function take_notebook_content( notebook: NotebookPanel): string {
+    const default_python_indent = 4
+    let number_of_cells = notebook.model.cells.length
+
+    var array = _.range(0, number_of_cells);
+
+    // Iterate over cells
+    let cells: Array<string> = []
+
+    _.each(array, function (cell_number, key) {
+        let cell = notebook.model.cells.get(cell_number)
+        if ( (cell.type === "code") && ( !cell.value.text.startsWith( "%%" )) ) {
+
+            const cell_text = cell.value.text
+                .trim()
+                .replace( "?", "" )  // remove Jupyter magic to display help
+                .replace( /^[%!]{1}[^%]{1}.*$/gm, "\n" )  // remove lines starting with single % or !
+                .replace( /^\s*\n/gm, "" )     // remove empty lines
+
+            console.log("cell n.", cell_number, cell_text);
+            cells.push(cell_text)
+        }
+    });
+
+    let notebook_content: string = cells.join( "\n" )
+
+    notebook_content = utils.indent( notebook_content, default_python_indent * 3 )
+
+    console.log("notebook content", notebook_content)
+
+    return notebook_content
+
   }

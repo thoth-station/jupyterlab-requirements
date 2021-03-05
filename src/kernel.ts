@@ -11,6 +11,7 @@
 
 
 import { requestAPI, THOTH_JUPYTER_INTEGRATION_API_BASE_NAME } from './handler';
+import * as utils from "./utils";
 
 /**
  * Function: Install dependencies in the new kernel.
@@ -127,3 +128,32 @@ export async function store_dependencies (
       console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
     }
   }
+
+
+/**
+ * Function: Gather library usage from notebook cells.
+ */
+
+export async function gather_library_usage(
+  notebook_content: string,
+  init: RequestInit = {},
+): Promise<Array<string>> {
+
+  // POST request
+  const dataToSend = {
+    notebook_content: utils.escape( notebook_content ),
+  };
+
+  const endpoint: string = 'thoth/invectio'
+
+  try {
+    const gathered_packages = await requestAPI<any>(endpoint, {
+      body: JSON.stringify(dataToSend),
+      method: 'POST'
+    });
+    return JSON.parse(JSON.stringify(gathered_packages));
+  } catch (reason) {
+    console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
+  }
+
+}
