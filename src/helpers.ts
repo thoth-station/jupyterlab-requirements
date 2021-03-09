@@ -13,20 +13,20 @@ import _ from "lodash"
 
 import { NotebookPanel } from "@jupyterlab/notebook";
 
-import { 
+import {
     discover_installed_packages,
     gather_library_usage,
-    store_dependencies 
+    store_dependencies
 } from "./kernel";
 
-import { 
+import {
     delete_key_from_notebook_metadata,
     get_kernel_name,
     set_requirements,
     set_requirement_lock,
     set_resolution_engine,
     set_thoth_configuration,
-    take_notebook_content 
+    take_notebook_content
 } from "./notebook";
 
 import { retrieve_config_file } from "./thoth"
@@ -45,7 +45,7 @@ async function  create_config(
         try {
             const config_file = await retrieve_config_file( kernel_name );
             console.debug("Config file", config_file);
-            
+
             resolve( config_file )
 
         } catch ( err ) {
@@ -230,7 +230,7 @@ export async function _handle_requirements(
               else {
                 _.set(identified_packages, library, "*")
               }
-              
+
             })
 
             console.debug("identified_packages", identified_packages)
@@ -424,7 +424,7 @@ export async function  _handle_requirements_lock(
                 _.set(ui_state, "status", "stable")
                 _.set(ui_state, "installed_packages", ui_state.loaded_packages)
                 _.set(ui_state, "kernel_name", kernel_name)
-        
+
                 return ui_state
 
             }
@@ -435,7 +435,7 @@ export async function  _handle_requirements_lock(
                 _.set(ui_state, "status", "only_install_kernel_re")
                 _.set(ui_state, "installed_packages", ui_state.loaded_packages)
                 _.set(ui_state, "kernel_name", kernel_name)
-        
+
                 return ui_state
             }
         }
