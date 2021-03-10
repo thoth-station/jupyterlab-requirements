@@ -92,41 +92,44 @@ export async function  _handle_thoth_config(
         try {
             // Load thoth_config from notebook metadata, if any, otherwise get default one
             var thoth_config_loaded: ThothConfig = loaded_config_file
-            var thoth_config_used: string = "loaded"
 
-            if ( thoth_config_loaded == null ) {
-                // No Thoth config found in notebook metadata, create default one
-                console.debug("No initial thoth config found in notebook metadata.")
-            }
-            else {
-                var runtime_environment_loaded = thoth_config_loaded.runtime_environments[0]
-
-                var operating_system_name_loaded = runtime_environment_loaded.operating_system.name
-                var operating_system_version_loaded = runtime_environment_loaded.operating_system.version
-                var python_version_loaded = runtime_environment_loaded.python_version
-            }
-
+            // Define detected config
             var thoth_config_detected: ThothConfig = await create_config( default_kernel_name );
 
             var is_default_config = false
             // If the endpoint cannot be reached or there are issues with thamos config creation
-            if (_.isUndefined(thoth_config_detected)) {
+            if ( _.isUndefined(thoth_config_detected) ) {
                 var thoth_config_detected: ThothConfig = default_config_file;
                 console.warn("Thoth config is undefined, using default config file", default_config_file)
                 var is_default_config = true
             }
+            // End
 
             if ( thoth_config_loaded == null ) {
+                // No Thoth config found in notebook metadata, create default one
+                console.debug("No initial thoth config found in notebook metadata.")
                 var thoth_config = thoth_config_detected
                 console.debug("No runtime environment loaded from notebook metadata. Using the one detected from source... ")
                 var thoth_config_used = "detected"
             }
             else {
+
+                // Loaded config
+                var runtime_environment_loaded = thoth_config_loaded.runtime_environments[0]
+
+                var operating_system_name_loaded = runtime_environment_loaded.operating_system.name
+                var operating_system_version_loaded = runtime_environment_loaded.operating_system.version
+                var python_version_loaded = runtime_environment_loaded.python_version
+                // End
+
+                // Detected config
                 var runtime_environment_detected: RuntimeEnvironment = thoth_config_detected.runtime_environments[0]
 
                 var operating_system_name_detected = runtime_environment_detected.operating_system.name
                 var operating_system_version_detected = runtime_environment_detected.operating_system.version
                 var python_version_detected = runtime_environment_detected.python_version
+
+                // End
 
                 console.debug("runtime environment used", runtime_environment_loaded)
                 console.debug("runtime environment detected", runtime_environment_detected)
@@ -172,7 +175,6 @@ export async function  _handle_thoth_config(
                         var thoth_config_used = "default"
                     }
                 }
-
                 else {
                     console.debug("Runtime environment loaded is the same as detected one")
                     var thoth_config = thoth_config_loaded
