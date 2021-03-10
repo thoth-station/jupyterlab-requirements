@@ -9,7 +9,6 @@
  * @since  0.0.1
  */
 
-
 import { requestAPI, THOTH_JUPYTER_INTEGRATION_API_BASE_NAME } from './handler';
 import * as utils from "./utils";
 

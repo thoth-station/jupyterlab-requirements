@@ -52,8 +52,8 @@ export class ManageDependenciesButtonExtension
                 {
                     panel: this.panel,
                     loaded_requirements: initial_requirements,
-                    initial_requirements_lock: initial_requirements_lock,
-                    initial_config_file: initial_config_file
+                    loaded_requirements_lock: initial_requirements_lock,
+                    loaded_config_file: initial_config_file
                 })
             );
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);

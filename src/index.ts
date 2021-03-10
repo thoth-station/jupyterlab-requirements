@@ -46,12 +46,16 @@ async function activate (
 ): Promise<string> {
 
   // Add button in notebook menu
-  console.log('jupyterlab-requirements extension is activated!');
-  // ManageDependenciesButtonExtension initialization code
-  const buttonExtension = new ManageDependenciesButtonExtension();
-  app.docRegistry.addWidgetExtension('Notebook', buttonExtension);
+  try {
+    // ManageDependenciesButtonExtension initialization code
+    const buttonExtension = new ManageDependenciesButtonExtension();
+    app.docRegistry.addWidgetExtension('Notebook', buttonExtension);
+    console.log('jupyterlab-requirements extension is activated!');
+  } catch (reason) {
+    console.error('Error on setting the jupyterlab-requirements extension');
+  }
 
-  return "ready";
+  return "ready"
 }
 
 export default extension;
