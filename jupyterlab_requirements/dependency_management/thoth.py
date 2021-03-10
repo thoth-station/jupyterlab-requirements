@@ -20,6 +20,7 @@ import json
 import os
 import logging
 import subprocess
+import tempfile
 
 from pathlib import Path
 
@@ -45,6 +46,7 @@ class ThothAdviseHandler(APIHandler):
 
         config: str = input_data["thoth_config"]
         kernel_name: str = input_data["kernel_name"]
+        notebook_content: str = input_data["notebook_content"]
         requirements: dict = json.loads(input_data["requirements"])
 
         # Get origin before changing path
@@ -71,6 +73,8 @@ class ThothAdviseHandler(APIHandler):
 
         advise = {"requirements": {}, "requirement_lock": {}, "error": False}
 
+        temp = tempfile.NamedTemporaryFile(prefix="jl_thoth_", mode='w+t')
+
         try:
             # TODO: Handle all errors
             adviser_inputs = {
@@ -79,6 +83,10 @@ class ThothAdviseHandler(APIHandler):
                 "origin": origin
             }
             _LOGGER.info("Adviser inputs are: %r", adviser_inputs)
+
+            temp.write(notebook_content)
+            _LOGGER.info("path to temporary file is:", temp.name)
+
             response = advise_using_config(
                 pipfile=pipfile_string,
                 pipfile_lock="",  # TODO: Provide Pipfile.lock retrieved?
@@ -87,7 +95,8 @@ class ThothAdviseHandler(APIHandler):
                 origin=origin,
                 nowait=False,
                 source_type=ThothAdviserIntegrationEnum.JUPYTER_NOTEBOOK,
-                no_static_analysis=True
+                no_static_analysis=False,
+                src_path=temp.name
             )
 
             _LOGGER.info(f"Response: {response}")
@@ -119,6 +128,8 @@ class ThothAdviseHandler(APIHandler):
         except Exception as api_error:
             _LOGGER.warning(f"error talking to Thoth: {api_error}")
             advise['error'] = True
+        finally:
+            temp.close()
 
         _LOGGER.info(f"advise received: {advise}")
 
