@@ -19,7 +19,7 @@ import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { IDisposable } from '@lumino/disposable';
 
-import { get_requirements, get_requirement_lock, get_thoth_configuration, } from "./notebook";
+import { get_requirements, get_requirement_lock, get_thoth_configuration, get_resolution_engine } from "./notebook";
 import { DependenciesManagementUI } from './components/dependencyManagementUI';
 import { THOTH_TOOLBAR_BUTTON_POSITION } from './constants';
 
@@ -32,6 +32,10 @@ export class ManageDependenciesButtonExtension
     private panel: NotebookPanel;
 
     openWidget = async (): Promise<void> => {
+        // Check what resolution engine was used from notebook metadata (if any)
+        const initial_resolution_engine = await get_resolution_engine(this.panel);
+        console.log('Resolution engine from notebook metadata', initial_resolution_engine);
+
         // Check if any requirements are stored in notebook metadata
         const initial_requirements = await get_requirements(this.panel);
         console.log("requirements", initial_requirements);
@@ -53,7 +57,8 @@ export class ManageDependenciesButtonExtension
                     panel: this.panel,
                     loaded_requirements: initial_requirements,
                     loaded_requirements_lock: initial_requirements_lock,
-                    loaded_config_file: initial_config_file
+                    loaded_config_file: initial_config_file,
+                    loaded_resolution_engine: initial_resolution_engine
                 })
             );
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
