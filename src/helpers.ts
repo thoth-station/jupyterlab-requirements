@@ -86,7 +86,7 @@ export async function  _handle_thoth_config(
     return new Promise( async ( resolve, reject ) => {
 
         if ( resolution_engine != "thoth" ) {
-            resolve({"thoth_config": loaded_config_file, "thoth_config_type": "unusued"})
+            resolve({"thoth_config": loaded_config_file, "thoth_config_type": "unused"})
         }
 
         try {
@@ -444,7 +444,7 @@ export async function  _handle_requirements_lock(
                     _.set(ui_state, "kernel_name", kernel_name)
                     return ui_state
 
-                case "unusued":
+                case "unused":
                     // and thoth config is not used because a different resolution engine was selected, go to stable state with no runtime environment
                     _.set(ui_state, "status", "stable_no_runenv")
                     _.set(ui_state, "installed_packages", ui_state.loaded_packages)
