@@ -79,10 +79,15 @@ export async function  _handle_thoth_config(
     loaded_config_file: ThothConfig,
     default_kernel_name: string,
     default_config_file: ThothConfig,
-    default_recommendation_type: string
+    default_recommendation_type: string,
+    resolution_engine: string
 ): Promise<{"thoth_config": ThothConfig, "thoth_config_type": string}> {
 
     return new Promise( async ( resolve, reject ) => {
+
+        if ( resolution_engine != "thoth" ) {
+            resolve({"thoth_config": loaded_config_file, "thoth_config_type": "unusued"})
+        }
 
         try {
             // Load thoth_config from notebook metadata, if any, otherwise get default one
@@ -209,7 +214,7 @@ export async function _handle_requirements(
     if ( _.size( loaded_packages ) == 0 ) {
 
         // Check if any package import is present (only when notebook without dependencies in metadata)
-        const notebook_content = take_notebook_content( panel )
+        const notebook_content = await take_notebook_content( panel )
 
         if (_.isEmpty( notebook_content ) == false ) {
             var gathered_libraries: Array<string> = await gather_library_usage( notebook_content );
@@ -237,6 +242,8 @@ export async function _handle_requirements(
 
             _.set(ui_state, "status", "only_install_from_imports")
             _.set(ui_state, "loaded_packages", identified_packages)
+
+            _.set(loaded_requirements, "packages", identified_packages)
             _.set(ui_state, "requirements", loaded_requirements)
             _.set(ui_state, "thoth_config", thoth_config)
 
@@ -278,13 +285,15 @@ export async function parse_inputs_from_metadata(
     panel: NotebookPanel,
     initial_loaded_thoth_config: ThothConfig,
     initial_loaded_requirements: Requirements,
-    initial_loaded_requirements_lock: RequirementsLock
+    initial_loaded_requirements_lock: RequirementsLock,
+    initial_resolution_engine: string
 ): Promise<IDependencyManagementUIState> {
     const result = await _handle_thoth_config(
         initial_loaded_thoth_config,
         ui_state.kernel_name,
         ui_state.thoth_config,
-        ui_state.recommendation_type
+        ui_state.recommendation_type,
+        initial_resolution_engine
     )
 
     const output = await _handle_requirements(
@@ -418,25 +427,30 @@ export async function  _handle_requirements_lock(
         // if locked requirements are present in the kernel (match packages installed)
         if ( are_installed == true ) {
 
-            // and thoth config is loaded, go to stable state
-            if ( thoth_config_selected == "loaded" ) {
+            switch(thoth_config_selected) {
 
-                _.set(ui_state, "status", "stable")
-                _.set(ui_state, "installed_packages", ui_state.loaded_packages)
-                _.set(ui_state, "kernel_name", kernel_name)
+                case "detected":
+                    // and thoth config is detected, user needs to relock because runtime environment is not the same
+                    _.set(ui_state, "status", "only_install_kernel_runenv")
+                    _.set(ui_state, "installed_packages", ui_state.loaded_packages)
+                    _.set(ui_state, "kernel_name", kernel_name)
 
-                return ui_state
+                    return ui_state
 
-            }
+                case "loaded":
+                    // and thoth config is loaded, go to stable state
+                    _.set(ui_state, "status", "stable")
+                    _.set(ui_state, "installed_packages", ui_state.loaded_packages)
+                    _.set(ui_state, "kernel_name", kernel_name)
+                    return ui_state
 
-            // and thoth config is detected, user needs to relock because runtime environment is not the same
-            else {
+                case "unusued":
+                    // and thoth config is not used because a different resolution engine was selected, go to stable state with no runtime environment
+                    _.set(ui_state, "status", "stable_no_runenv")
+                    _.set(ui_state, "installed_packages", ui_state.loaded_packages)
+                    _.set(ui_state, "kernel_name", kernel_name)
+                    return ui_state
 
-                _.set(ui_state, "status", "only_install_kernel_re")
-                _.set(ui_state, "installed_packages", ui_state.loaded_packages)
-                _.set(ui_state, "kernel_name", kernel_name)
-
-                return ui_state
             }
         }
 
@@ -450,7 +464,7 @@ export async function  _handle_requirements_lock(
             return ui_state
 
         }
-        }
+    }
 
     else {
         _.set(ui_state, "status", "only_install_kernel")
@@ -496,16 +510,16 @@ export async function set_notebook_metadata(
     thoth_config?: ThothConfig
   ) {
 
-    set_resolution_engine( panel , resolution_engine )
-    set_requirements( panel , requirements )
-    set_requirement_lock( panel , requirements_lock )
+    await set_resolution_engine( panel , resolution_engine )
+    await set_requirements( panel , requirements )
+    await set_requirement_lock( panel , requirements_lock )
 
     if (resolution_engine == "thoth" ) {
-      set_thoth_configuration( panel , thoth_config )
+        await set_thoth_configuration( panel , thoth_config )
     }
 
     // Save all changes to disk.
-    panel.context.save()
+    await panel.context.save()
 }
 
 
