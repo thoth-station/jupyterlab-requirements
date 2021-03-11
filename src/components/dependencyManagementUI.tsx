@@ -20,7 +20,7 @@ import { DependencyManagementSaveButton } from './dependencyManagementSaveButton
 import { DependencyManagementInstallButton } from './dependencyManagementInstallButton'
 import { DependencyManagementNewPackageButton } from './dependencyManagementAddPackageButton';
 
-import { get_python_version } from "../notebook";
+import { get_python_version, take_notebook_content } from "../notebook";
 import { Requirements, RequirementsLock } from '../types/requirements';
 
 import { ThothConfig } from '../types/thoth';
@@ -69,7 +69,8 @@ export interface IDependencyManagementUIProps {
   panel: NotebookPanel
   loaded_requirements: Requirements,
   loaded_requirements_lock: RequirementsLock,
-  loaded_config_file: ThothConfig
+  loaded_config_file: ThothConfig,
+  loaded_resolution_engine: string
 }
 
 /**
@@ -520,10 +521,13 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       _.set(ui_state, "status", "locking_requirements")
       await this.setNewState(ui_state);
 
+      const notebook_content = await take_notebook_content( this.props.panel )
+
       try {
 
         var advise: Advise = await lock_requirements_with_thoth(
           this.state.kernel_name,
+          notebook_content,
           JSON.stringify(this.state.thoth_config),
           JSON.stringify(this.state.requirements)
         );
@@ -541,6 +545,20 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         _.set(ui_state, "status", "locking_requirements_using_pipenv")
         await this.setNewState(ui_state);
         return
+      }
+
+      try {
+
+        await set_notebook_metadata(
+          this.props.panel,
+          "thoth",
+          advise.requirements,
+          advise.requirement_lock,
+          this.state.thoth_config
+        )
+
+      } catch ( error ) {
+        console.debug("Error updating notebook metadata", error)
       }
 
       try {
@@ -564,20 +582,6 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
           )
         } catch ( error ) {
         console.debug("Error updating thoth config on disk", error)
-      }
-
-      try {
-
-        await set_notebook_metadata(
-          this.props.panel,
-          "thoth",
-          advise.requirements,
-          advise.requirement_lock,
-          this.state.thoth_config
-        )
-
-      } catch ( error ) {
-        console.debug("Error updating notebook metadata", error)
       }
 
       _.set(ui_state, "status", "installing_requirements" )
@@ -610,14 +614,18 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         console.debug("Error locking requirements with pipenv", error)
 
         _.set(ui_state, "status", "failed")
-        _.set(ui_state, "error_msg", "Error asking advise to Thoth, please contact Thoth team.")
+        _.set(ui_state, "error_msg", "Error asking advise to Thoth, , please contact Thoth team using: ")
         await this.setNewState(ui_state);
         return
       }
 
       if ( result.error == true ) {
         _.set(ui_state, "status", "failed")
-        _.set(ui_state, "error_msg", "No resolution engine was able to install dependendices, please contact Thoth team.")
+        _.set(
+          ui_state,
+          "error_msg",
+          "No resolution engine was able to install dependendices, please contact Thoth team using: "
+        )
         await this.setNewState(ui_state);
         return
       }
@@ -669,10 +677,10 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
     async onStart() {
 
-      const script = `
-      print("This is jupyterlab-requirements")
-      `
-      await this.execute_code_in_kernel(script)
+      // const script = `
+      // print("This is jupyterlab-requirements")
+      // `
+      // await this.execute_code_in_kernel(script)
 
       var ui_on_start_state = await parse_inputs_from_metadata(
         this.state,
@@ -680,6 +688,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         this.props.loaded_config_file,
         this.props.loaded_requirements,
         this.props.loaded_requirements_lock,
+        this.props.loaded_resolution_engine
       )
 
       await this.setNewState(ui_on_start_state);
@@ -838,7 +847,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
             </div>
           );
 
-        case "only_install_kernel_re":
+        case "only_install_kernel_runenv":
           return (
             <div>
               {dependencyManagementform}
@@ -864,7 +873,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                 <fieldset>
                   <p>No dependencies found in notebook metadata!<br></br>
                   Thoth identified the packages that are required to run this notebook from your code. <br></br>
-                  Please use install button to create dependencies.</p>
+                  Please use install button to install dependencies identified.</p>
                 </fieldset>
               </div>
               {optionsForm}
@@ -1014,6 +1023,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
               <div>
                 <p>{this.state.error_msg}</p>
               </div>
+              <a href={"https://github.com/thoth-station/core/issues/new?assignees=&labels=&template=bug_report.md"}> Issue link</a>
             </div>
         );
 
@@ -1034,6 +1044,27 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
               </div>
             </div>
           );
+
+          case "stable_no_runenv":
+            // TODO: Provide relock button option if the resolution engine is different from thoth
+            return (
+              <div>
+              {dependencyManagementform}
+              <div className={CONTAINER_BUTTON}>
+                <div className={CONTAINER_BUTTON_CENTRE}>
+                <DependencyManagementNewPackageButton addNewRow={this.addNewRow} />
+                </div>
+              </div>
+              <div>
+                <fieldset>
+                <p>Everything installed and ready to use!<br></br>
+                    Keep in mind no runtime environment is present in the notebook metadata. <br></br>
+                    Therefore your software stack might not be optimized for your environment. <br></br>
+                    </p>
+                </fieldset>
+              </div>
+            </div>
+            );
 
         case"ready":
 

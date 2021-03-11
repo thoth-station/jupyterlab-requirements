@@ -131,7 +131,7 @@ export function get_requirements( notebook: NotebookPanel ):  Promise<Requiremen
  * Function: Set Python requirements into notebook metadata.
  */
 
-export function set_requirements( notebook: NotebookPanel, requirements: Requirements ): void {
+export async function set_requirements( notebook: NotebookPanel, requirements: Requirements ): Promise<void> {
     const notebook_metadata = notebook.model.metadata
 
     if ( notebook_metadata.has("requirements") == false ) {
@@ -150,7 +150,6 @@ export function set_requirements( notebook: NotebookPanel, requirements: Require
         }
 
         notebook_metadata.set('requirements', JSON.stringify(requirements) )
-        return
     }
 }
 
@@ -184,7 +183,7 @@ export function get_requirement_lock( notebook: NotebookPanel ): Promise<Require
  * Function: Set Python requirements into notebook metadata.
  */
 
-export function set_requirement_lock( notebook: NotebookPanel, requirements_lock: RequirementsLock ): void {
+export async function set_requirement_lock( notebook: NotebookPanel, requirements_lock: RequirementsLock ): Promise<void> {
     const notebook_metadata = notebook.model.metadata
 
     if ( notebook_metadata.has("requirements_lock") == false ) {
@@ -230,7 +229,7 @@ export function get_thoth_configuration( notebook: NotebookPanel ): Promise<Thot
  * Function: Set Thoth config file requirements into notebook metadata.
  */
 
-export function set_thoth_configuration( notebook: NotebookPanel, config_file: ThothConfig ): void {
+export async function set_thoth_configuration( notebook: NotebookPanel, config_file: ThothConfig ): Promise<void> {
     const metadata = notebook.model.metadata
 
     if ( metadata.has("thoth_config") == false ) {
@@ -245,12 +244,36 @@ export function set_thoth_configuration( notebook: NotebookPanel, config_file: T
     console.debug( "Notebook Thoth config have been set successfully." )
   }
 
+/**
+ * Function: Get resolution engine from notebook metadata.
+ */
+ export function get_resolution_engine( notebook: NotebookPanel ): Promise<string|null> {
+
+    return new Promise( async ( resolve, reject ) => {
+        const notebook_metadata = notebook.model.metadata
+
+        try {
+            if ( notebook_metadata.has("dependency_resolution_engine") == false ) {
+                console.debug("dependency_resolution_engine key is not in notebook metadata!")
+                resolve( null )
+            }
+
+            const dependency_resolution_engine = notebook_metadata.get("dependency_resolution_engine")
+            var notebookMetadataResolutionEngine: string = dependency_resolution_engine.toString()
+            console.debug("dependency_resolution_engine key is in notebook metadata!")
+            resolve ( notebookMetadataResolutionEngine )
+
+        } catch ( err ) {
+            reject( err )
+        }
+    })
+    }
 
 /**
  * Function: Set resolution engine name used into notebook metadata.
  */
 
-export function set_resolution_engine( notebook: NotebookPanel, dependency_resolution_engine: string ): void {
+export async function set_resolution_engine( notebook: NotebookPanel, dependency_resolution_engine: string ): Promise<void> {
     const metadata = notebook.model.metadata
 
     if ( metadata.has("dependency_resolution_engine") == false ) {
@@ -270,7 +293,7 @@ export function set_resolution_engine( notebook: NotebookPanel, dependency_resol
  * Function: Take notebook content from cells.
  */
 
-export function take_notebook_content( notebook: NotebookPanel): string {
+export async function take_notebook_content( notebook: NotebookPanel): Promise<string> {
     const default_python_indent = 4
     let number_of_cells = notebook.model.cells.length
 
