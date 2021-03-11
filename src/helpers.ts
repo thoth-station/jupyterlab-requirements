@@ -55,11 +55,11 @@ async function  create_config(
     })
 }
 
-function  _handle_runtime_environment(
+async function _handle_runtime_environment(
     processed_thoth_config: ThothConfig,
     kernel_name: string,
     recommendation_type: string,
-): ThothConfig {
+): Promise<ThothConfig> {
 
     const runtime_environments: RuntimeEnvironment[] = processed_thoth_config.runtime_environments
     const runtime_environment: RuntimeEnvironment = processed_thoth_config.runtime_environments[0]
@@ -70,7 +70,7 @@ function  _handle_runtime_environment(
     _.set(runtime_environments, 0, runtime_environment)
     _.set(processed_thoth_config, "runtime_environments", runtime_environments)
 
-    console.debug("initial thoth config", processed_thoth_config)
+    console.log("initial thoth config", processed_thoth_config)
 
     return processed_thoth_config
 }
@@ -85,7 +85,7 @@ export async function  _handle_thoth_config(
 
     return new Promise( async ( resolve, reject ) => {
 
-        if ( resolution_engine != "thoth" ) {
+        if ( resolution_engine == "pipenv" ) {
             resolve({"thoth_config": loaded_config_file, "thoth_config_type": "unused"})
         }
 
@@ -183,7 +183,7 @@ export async function  _handle_thoth_config(
 
             }
 
-            const final_thoth_config = _handle_runtime_environment(
+            const final_thoth_config = await _handle_runtime_environment(
                 thoth_config,
                 default_kernel_name,
                 default_recommendation_type

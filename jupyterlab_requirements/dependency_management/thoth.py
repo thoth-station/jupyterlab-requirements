@@ -85,7 +85,7 @@ class ThothAdviseHandler(APIHandler):
             _LOGGER.info("Adviser inputs are: %r", adviser_inputs)
 
             temp.write(notebook_content)
-            _LOGGER.info("path to temporary file is:", temp.name)
+            _LOGGER.info("path to temporary file is: %r", temp.name)
 
             response = advise_using_config(
                 pipfile=pipfile_string,

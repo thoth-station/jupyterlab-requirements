@@ -677,10 +677,10 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
     async onStart() {
 
-      const script = `
-      print("This is jupyterlab-requirements")
-      `
-      await this.execute_code_in_kernel(script)
+      // const script = `
+      // print("This is jupyterlab-requirements")
+      // `
+      // await this.execute_code_in_kernel(script)
 
       var ui_on_start_state = await parse_inputs_from_metadata(
         this.state,
@@ -1059,7 +1059,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                 <fieldset>
                 <p>Everything installed and ready to use!<br></br>
                     Keep in mind no runtime environment is present in the notebook metadata. <br></br>
-                    Therefore your software stack might be not optimized for your environment. <br></br>
+                    Therefore your software stack might not be optimized for your environment. <br></br>
                     </p>
                 </fieldset>
               </div>
