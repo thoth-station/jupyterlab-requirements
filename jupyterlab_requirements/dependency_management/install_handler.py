@@ -39,6 +39,7 @@ class DependencyInstallHandler(APIHandler):
         initial_path = Path.cwd()
         input_data = self.get_json_body()
         kernel_name: str = input_data["kernel_name"]
+        resolution_engine: str = input_data["resolution_engine"]
         _LOGGER.info(f"kernel_name selected: {kernel_name}")
 
         home = Path.home()
@@ -53,12 +54,13 @@ class DependencyInstallHandler(APIHandler):
 
         package_manager: str = 'micropipenv'
 
-        # TODO: Check if micropipenv is installed
         _LOGGER.info(f"Installing requirements using {package_manager} in virtualenv at {env_path}." )
 
         #1. Creating new environment
-        cli_run([str(env_path)])
+        if resolution_engine != "pipenv":
+            cli_run([str(env_path)])
 
+        # TODO: Check if micropipenv is installed
         #2. Install using micropipenv
         _ = subprocess.call(
             f". {kernel_name}/bin/activate "

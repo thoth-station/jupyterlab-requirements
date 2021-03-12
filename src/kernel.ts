@@ -17,13 +17,15 @@ import * as utils from "./utils";
  */
 
 export async function install_packages (
-  kernel_name?: string,
+  kernel_name: string,
+  resolution_engine: string,
   init: RequestInit = {},
 ): Promise<string> {
 
   // POST request
   const dataToSend = {
-    kernel_name: kernel_name
+    kernel_name: kernel_name,
+    resolution_engine: resolution_engine
   };
 
   const endpoint: string = 'kernel/install'

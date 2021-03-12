@@ -28,6 +28,8 @@ from tornado import web
 
 from thoth.python import Pipfile, PipfileLock
 
+from virtualenv import cli_run
+
 _LOGGER = logging.getLogger("jupyterlab_requirements.pipenv")
 
 
@@ -54,6 +56,11 @@ class PipenvHandler(APIHandler):
 
         env_path.mkdir(parents=True, exist_ok=True)
 
+        result = {"requirements_lock": "", "error": False}
+
+        ## Create virtualenv
+        cli_run([str(env_path)])
+
         pipfile_path = env_path.joinpath("Pipfile")
 
         pipfile_string = Pipfile.from_dict(requirements).to_string()
@@ -62,30 +69,53 @@ class PipenvHandler(APIHandler):
         with open(pipfile_path, "w") as pipfile_file:
             pipfile_file.write(pipfile_string)
 
-        _LOGGER.info(f"Current path: {env_path}")
+        _LOGGER.info(f"kernel path: {env_path}")
         _LOGGER.info(f"Input Pipfile: \n{pipfile_string}")
 
-        result = {"requirements_lock": "", "error": False}
+        try:
+            # TODO: check if pipenv is installed
+            subprocess.run(
+                f". {kernel_name}/bin/activate && cd {kernel_name} && pip install pipenv",
+                cwd=complete_path,
+                shell=True
+            )
+        except Exception as pipenv_error:
+            _LOGGER.warning("error installing pipenv: %r", pipenv_error)
+            result['error'] = True
+            os.chdir(initial_path)
+            self.finish(json.dumps(result))
+
+        os.chdir(env_path)
 
         try:
-            subprocess.run(["pipenv", "lock"], env={"PIPENV_CACHE_DIR": "/tmp"}, cwd=env_path, check=True)
-
+            subprocess.run(
+                "pipenv lock",
+                env=dict(os.environ, PIPENV_CACHE_DIR='/tmp'),
+                shell=True
+            )
         except Exception as pipenv_error:
-            _LOGGER.warning("error locking using pipenv: %r", pipenv_error)
+            _LOGGER.warning("error locking dependencies using Pipenv: %r", pipenv_error)
             result['error'] = True
 
         if not result['error']:
+
             pipfile_lock_path = env_path.joinpath("Pipfile.lock")
 
-            with open(pipfile_lock_path, "r") as pipfile_lock_file:
-                pipfile_lock_str = pipfile_lock_file.read()
+            if pipfile_lock_path.exists():
 
-            pipfile = Pipfile.from_string(pipfile_string)
-            pipfile_lock_str: PipfileLock = PipfileLock.from_string(pipfile_lock_str, pipfile=pipfile)
+                with open(pipfile_lock_path, "r") as pipfile_lock_file:
+                    pipfile_lock_str = pipfile_lock_file.read()
 
-            result["requirements_lock"] = pipfile_lock_str.to_dict()
+                pipfile = Pipfile.from_string(pipfile_string)
+                pipfile_lock_str: PipfileLock = PipfileLock.from_string(pipfile_lock_str, pipfile=pipfile)
 
-            _LOGGER.debug(f"result from pipenv received: {result}")
+                result["requirements_lock"] = pipfile_lock_str.to_dict()
+
+                _LOGGER.debug(f"result from pipenv received: {result}")
+
+            else:
+                _LOGGER.warning("Pipfile.lock cannot be found at: %r", str(pipfile_lock_path))
+                result['error'] = True
 
         os.chdir(initial_path)
         self.finish(json.dumps(result))
