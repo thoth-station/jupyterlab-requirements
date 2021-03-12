@@ -87,7 +87,8 @@ export interface IDependencyManagementUIState {
   deleted_packages: { [ name: string ]: string },
   requirements: Requirements,
   thoth_config: ThothConfig,
-  error_msg: string
+  error_msg: string,
+  resolution_engine: string
 }
 
 /**
@@ -150,7 +151,8 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
             recommendation_type: "latest"
         }]
         },
-        error_msg: undefined
+        error_msg: undefined,
+        resolution_engine: "thoth"
       }
     }
 
@@ -469,7 +471,10 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
       try {
           // Create new virtual environment and install dependencies using selected dependency manager (micropipenv by default)
-          const install_message = await install_packages( this.state.kernel_name );
+          const install_message = await install_packages(
+            this.state.kernel_name,
+            this.state.resolution_engine
+          );
           console.debug("Install message", install_message);
 
           _.set(ui_state, "status", "setting_kernel" )
@@ -588,6 +593,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       _.set(ui_state, "packages", {} )
       _.set(ui_state, "deleted_packages", {} )
       _.set(ui_state, "requirements", advise.requirements )
+      _.set(ui_state, "resolution_engine", "thoth" )
 
       await this.setNewState(ui_state);
       return
@@ -670,6 +676,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       _.set(ui_state, "packages", {} )
       _.set(ui_state, "deleted_packages", {} )
       _.set(ui_state, "requirements", notebookMetadataRequirements )
+      _.set(ui_state, "resolution_engine", "pipenv" )
 
       await this.setNewState(ui_state);
       return
@@ -1023,7 +1030,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
               <div>
                 <p>{this.state.error_msg}</p>
               </div>
-              <a href={"https://github.com/thoth-station/core/issues/new?assignees=&labels=&template=bug_report.md"}> Issue link</a>
+              <a href={"https://github.com/thoth-station/core/issues/new?assignees=&labels=&template=bug_report.md"} target="_blank"> Issue link </a>
             </div>
         );
 

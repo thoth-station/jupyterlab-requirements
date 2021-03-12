@@ -126,7 +126,7 @@ class ThothAdviseHandler(APIHandler):
                     advise = {"requirements": pipfile, "requirement_lock": pipfile_lock, "error": False}
 
         except Exception as api_error:
-            _LOGGER.warning(f"error talking to Thoth: {api_error}")
+            _LOGGER.warning(f"error locking dependencies using Thoth: {api_error}")
             advise['error'] = True
         finally:
             temp.close()

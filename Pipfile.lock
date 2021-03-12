@@ -568,10 +568,10 @@
         },
         "micropipenv": {
             "hashes": [
-                "sha256:908098c2bdd705ec72c920fa7e6346c3ed2c37bb01c8b2674324413c3baf0c8d",
-                "sha256:fe7711bd604d55223eb50d3e3a136abefe5a7da268b2f214817d4914206e7875"
+                "sha256:9bd7290c5d57868c6a54759d43bb57269f525e0ed2ae2f42d29b310f222889b1",
+                "sha256:d9fb9f946e34ba88058ac6013323febcfc418f0426684d81da7984c46c72e107"
             ],
-            "version": "==1.0.2"
+            "version": "==1.0.3"
         },
         "mistune": {
             "hashes": [
