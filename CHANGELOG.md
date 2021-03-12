@@ -114,3 +114,27 @@ all the things that you see...
 ## Release 0.4.7 (2021-03-03T10:54:33)
 ### Features
 * Adjust paths (#186)
+
+## Release 0.5.0 (2021-03-12T13:40:33)
+### Features
+* :arrow_up: Automatic update of dependencies by Kebechet (#211)
+* Move cachedir pipenv (#208)
+* Add utils to parse file (#207)
+* Submit static analysis of invectio to thoth when asking for advise (#199)
+* :arrow_up: Automatic update of dependencies by Kebechet (#195)
+* Create .prow.yaml
+* Update .aicoe-ci.yaml
+* Make pre-commit happy
+* rename variables
+* update js dependencies
+* Introduce kernel model
+* :arrow_up: Automatic update of dependencies by Kebechet
+* :arrow_up: Automatic update of dependencies by Kebechet (#193)
+* :arrow_up: Automatic update of dependencies by Kebechet (#191)
+* :arrow_up: Automatic update of dependencies by Kebechet (#188)
+* Update OWNERS
+### Bug Fixes
+* Automatically detect libraries when dependencies are not present in the metadata (#192)
+### Improvements
+* refactor async methods
+* use debug for console
