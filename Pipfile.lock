@@ -321,11 +321,11 @@
         },
         "google-auth": {
             "hashes": [
-                "sha256:63a5636d7eacfe6ef5b7e36e112b3149fa1c5b5ad77dd6df54910459bcd6b89f",
-                "sha256:d8958af6968e4ecd599f82357ebcfeb126f826ed0656126ad68416f810f7531e"
+                "sha256:9bd436d19ab047001a1340720d2b629eb96dd503258c524921ec2af3ee88a80e",
+                "sha256:dcaba3aa9d4e0e96fd945bf25a86b6f878fcb05770b67adbeb50a63ca4d28a5e"
             ],
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5'",
-            "version": "==1.27.1"
+            "version": "==1.28.0"
         },
         "idna": {
             "hashes": [
@@ -437,11 +437,11 @@
         },
         "jupyterlab": {
             "hashes": [
-                "sha256:971e863415742b66cf46bcc5d22aaafaa0e8da177149b8f50c6cc04772fe2c53",
-                "sha256:fdc6020d81e8888755ac4b30a08a89520c210d2eda400cfea0c0972d2591cfec"
+                "sha256:1e152b635cd86a637a40c92f0b04399ec6e121bd6e11404cf74a06ec708cad26",
+                "sha256:ce4cf4f31163ce51aed013c01a857c05d43a93c46ed690166e48644f6e7947de"
             ],
             "index": "pypi",
-            "version": "==3.0.10"
+            "version": "==3.0.11"
         },
         "jupyterlab-pygments": {
             "hashes": [
@@ -958,7 +958,7 @@
                 "sha256:9004f6449c89abadf689dad6f92393e760b8c3a8a8c4ea6d8d474066307c0e66",
                 "sha256:d59e94a0e3e686f0d268fe5c7060baa1bd6744abca71b45351f5850a3aaa6764"
             ],
-            "markers": "python_version >= '3.6' and python_version < '4.0'",
+            "markers": "python_version >= '3.6' and python_version < '4'",
             "version": "==9.13.0"
         },
         "rsa": {
@@ -1184,7 +1184,7 @@
                 "sha256:2f4da4594db7e1e110a944bb1b551fdf4e6c136ad42e4234131391e21eb5b0df",
                 "sha256:e7b021f7241115872f92f43c6508082facffbd1c048e3c6e2bb9c2a157e28937"
             ],
-            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4.0'",
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'",
             "version": "==1.26.4"
         },
         "virtualenv": {
