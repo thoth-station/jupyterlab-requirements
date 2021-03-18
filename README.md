@@ -49,7 +49,7 @@ jupyter labextension list
 
 ## Usage
 
-jupyter-nbrequirements extension for JupyterLab can be easily used directly from the notebook in JupyterLab.
+jupyter-nbrequirements extension for JupyterLab can be easily used from the notebook in JupyterLab.
 
 ### Extension Button
 
@@ -59,7 +59,19 @@ This jupyterlab extension provides a button directly in the notebook to manage t
 <img alt="JupyterLab Requirements Extension" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/JupyterLabRequirementsExtension.jpg">
 </div>
 
-### Start adding dependencies
+### Start notebook without information about dependencies in metadata
+
+If you have notebooks with code and you want to start using this extension, there is a nice feature that can be interesting.
+
+Thoth relies on a library called [invectio](https://github.com/thoth-station/invectio). This library statically analyzes sources and extract information about called or exported library functions in Python applications.
+
+jupyterlab-requirements extension uses this information to provide users with list of packages to be installed if they have never used the extension before.
+
+<div style="text-align:center">
+<img alt="User with code" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/FirstTimeUser.png">
+</div>
+
+### Start adding dependencies from empty notebook
 
 Clicking the above button you will receive the following dialog form initially:
 
@@ -197,10 +209,10 @@ jupyter lab build --minimize=False
 pip uninstall jupyterlab-requirements
 ```
 
-# Demo development status
+# Demo development status and new features
 
-* [v0.4.0] (WIP) [TBD]
+* [v0.5.0] (https://www.youtube.com/watch?v=A3W48aHubkE) [Mar 15 2021]
 
-* [v0.3.6](https://www.youtube.com/watch?v=-_dtDAAyMlU&t=190s) [Feb 10 2021]
+* [v0.3.7](https://www.youtube.com/watch?v=-_dtDAAyMlU&t) [Feb 10 2021]
 
 * [v0.1.0](https://www.youtube.com/watch?v=IBzTOP4TCdA) [Dec 8 2020]
