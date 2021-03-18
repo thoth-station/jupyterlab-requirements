@@ -211,7 +211,7 @@ pip uninstall jupyterlab-requirements
 
 # Demo development status and new features
 
-* [v0.5.0] (https://www.youtube.com/watch?v=A3W48aHubkE) [Mar 15 2021]
+* [v0.5.0](https://www.youtube.com/watch?v=A3W48aHubkE) [Mar 15 2021]
 
 * [v0.3.7](https://www.youtube.com/watch?v=-_dtDAAyMlU&t) [Feb 10 2021]
 
