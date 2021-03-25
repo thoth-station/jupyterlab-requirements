@@ -54,6 +54,11 @@ export function get_kernel_name( notebook: NotebookPanel ): string {
 
     console.debug('kernel_name identified:', kernel_name)
 
+    if ( kernel_name == "python3" ) {
+        console.warn('kernel_name python3 cannot be used, assigning default one')
+        return "jupyterlab-requirements"
+    }
+
     return kernel_name
 }
 
