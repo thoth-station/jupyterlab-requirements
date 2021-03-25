@@ -450,13 +450,13 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         _.get(packages_parsed, "new_packages")
       )
 
-      if ( _.get(deleted_case, "relock") == true ) {
+      if ( _.get(deleted_case, "action_required") == "relock" ) {
         await this.lock_using_thoth()
         return
       }
 
-      if ( _.get(deleted_case, "go_to_state") == true ) {
-        await this.setNewState(_.get(deleted_case, "new_state"));
+      if ( _.get(deleted_case, "action_required") == "go_to_state" ) {
+        await this.setNewState( _.get(deleted_case, "new_state" ) );
         return
       }
 
@@ -467,7 +467,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       )
 
       await this.setNewState(new_state);
-
+      return
     }
 
     async install() {
@@ -602,7 +602,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
       await this.setNewState(ui_state);
       return
-  }
+    }
 
 
     async lock_using_pipenv () {
@@ -704,6 +704,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       )
 
       await this.setNewState(ui_on_start_state);
+      return
     }
 
     render(): React.ReactNode {
@@ -1080,7 +1081,14 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
         case"ready":
 
-          this.props.panel.sessionContext.session.changeKernel({"name": this.state.kernel_name})
+          // Check if kernel name is already assigned to notebook and if yes, do nothing
+
+          if ( get_kernel_name( this.props.panel ) == this.state.kernel_name ) {
+            console.log("kernel name already set for the notebook, do not restart kernel...")
+          }
+          else {
+            this.props.panel.sessionContext.session.changeKernel({"name": this.state.kernel_name})
+          }
 
           return (
             <div>

@@ -50,7 +50,7 @@ class PipenvHandler(APIHandler):
         env_path = complete_path.joinpath(kernel_name)
 
         # Delete and recreate folder
-        if env_path.exists():
+        if not env_path.exists():
             _ = subprocess.call(
                 f"rm -rf ./{kernel_name} ", shell=True, cwd=complete_path)
 
