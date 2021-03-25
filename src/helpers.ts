@@ -70,7 +70,7 @@ async function _handle_runtime_environment(
     _.set(runtime_environments, 0, runtime_environment)
     _.set(processed_thoth_config, "runtime_environments", runtime_environments)
 
-    console.log("initial thoth config", processed_thoth_config)
+    console.info("processed thoth config", processed_thoth_config)
 
     return processed_thoth_config
 }
@@ -98,7 +98,7 @@ export async function  _handle_thoth_config(
 
             var is_default_config = false
             // If the endpoint cannot be reached or there are issues with thamos config creation
-            if ( _.isUndefined(thoth_config_detected) ) {
+            if ( _.isUndefined(thoth_config_detected) == true ) {
                 var thoth_config_detected: ThothConfig = default_config_file;
                 console.warn("Thoth config is undefined, using default config file", default_config_file)
                 var is_default_config = true
@@ -308,7 +308,7 @@ export async function parse_inputs_from_metadata(
     const output = await _handle_requirements(
         initial_loaded_requirements,
         panel,
-        _.get(result, "thoth_config") ,
+        _.get(result, "thoth_config"),
         ui_state
     )
 
