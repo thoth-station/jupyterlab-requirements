@@ -905,6 +905,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                 <fieldset>
                   <p>No dependencies found in notebook metadata!<br></br>
                   Thoth identified the packages that are required to run this notebook from your code. <br></br>
+                  (Please verify the names of the packages, in the future this won't be necessary). <br></br>
                   Please use install button to install dependencies identified.</p>
                 </fieldset>
               </div>
