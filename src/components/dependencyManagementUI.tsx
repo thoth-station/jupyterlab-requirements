@@ -242,7 +242,12 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
     setKernelName(event: React.ChangeEvent<HTMLInputElement>) {
 
-      const kernel_name = event.target.value
+      var kernel_name = event.target.value
+
+      if ( event.target.value == "python3" ) {
+        console.warn('kernel_name python3 cannot be used assigning default one')
+        var kernel_name = "jupyterlab-requirements"
+      }
 
       this.setState(
         {

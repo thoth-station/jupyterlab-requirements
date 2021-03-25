@@ -290,9 +290,16 @@ export async function parse_inputs_from_metadata(
     initial_loaded_requirements_lock: RequirementsLock,
     initial_resolution_engine: string
 ): Promise<IDependencyManagementUIState> {
+    var kernel_name = ui_state.kernel_name
+
+    if ( ui_state.kernel_name == "python3" ) {
+        console.warn('kernel_name python3 cannot be used, assigning default one')
+        var kernel_name: string = "jupyterlab-requirements"
+    }
+
     const result = await _handle_thoth_config(
         initial_loaded_thoth_config,
-        ui_state.kernel_name,
+        kernel_name,
         ui_state.thoth_config,
         ui_state.recommendation_type,
         initial_resolution_engine
@@ -321,7 +328,7 @@ export async function parse_inputs_from_metadata(
  * Function: Retrieve installed packages from kernel.
  */
 
-async function retrieveInstalledPackages(kernel_name:string, packages: {}): Promise<{}> {
+async function retrieveInstalledPackages(kernel_name: string, packages: {}): Promise<{}> {
 
     // Retrieve installed packages
     const retrieved_packages = await discover_installed_packages( kernel_name )
