@@ -50,7 +50,8 @@ import {
   store_dependencies_on_disk,
   _parse_packages_from_state,
   _handle_deleted_packages_case,
-  _handle_total_packages_case
+  _handle_total_packages_case,
+  _handle_thoth_config
 } from "../helpers";
 
 /**
@@ -247,6 +248,11 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       if ( event.target.value == "python3" ) {
         console.warn('kernel_name python3 cannot be used assigning default one')
         var kernel_name = "jupyterlab-requirements"
+      }
+
+      if ( event.target.value.match(":") ) {
+        console.warn('kernel_name cannot contain `:` due to configurations limits.')
+        var kernel_name = event.target.value.replace(":", "-")
       }
 
       this.setState(
@@ -517,7 +523,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
           console.debug("Error creating jupyter kernel", error)
 
           _.set(ui_state, "status", "failed")
-          _.set(ui_state, "error_msg", "Error setting new environment in a jupyter kernel, please contact Thoth team.")
+          _.set(ui_state, "error_msg", "Error setting new environment in a jupyter kernel, please contact Thoth team: ")
           await this.setNewState(ui_state);
           return
 
@@ -533,12 +539,25 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
       const notebook_content = await take_notebook_content( this.props.panel )
 
+      if ( this.props.loaded_resolution_engine == "pipenv" ) {
+        console.debug("thoth previously failed!")
+
+        const result = await _handle_thoth_config(
+          this.props.loaded_config_file,
+          this.state.kernel_name,
+          ui_state.thoth_config,
+          ui_state.recommendation_type,
+          "thoth"
+        )
+        var thoth_config: ThothConfig = _.get(result, "thoth_config")
+      }
+
       try {
 
         var advise: Advise = await lock_requirements_with_thoth(
           this.state.kernel_name,
           notebook_content,
-          JSON.stringify(this.state.thoth_config),
+          JSON.stringify(thoth_config),
           JSON.stringify(this.state.requirements)
         );
         console.debug("Advise received", advise);
@@ -625,7 +644,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         console.debug("Error locking requirements with pipenv", error)
 
         _.set(ui_state, "status", "failed")
-        _.set(ui_state, "error_msg", "Error asking advise to Thoth, , please contact Thoth team using: ")
+        _.set(ui_state, "error_msg", "Error asking advise to Thoth, please contact Thoth team: ")
         await this.setNewState(ui_state);
         return
       }
@@ -635,7 +654,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         _.set(
           ui_state,
           "error_msg",
-          "No resolution engine was able to install dependendices, please contact Thoth team using: "
+          "No resolution engine was able to install dependendices, please contact Thoth team: "
         )
         await this.setNewState(ui_state);
         return
@@ -1036,7 +1055,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
               <div>
                 <p>{this.state.error_msg}</p>
               </div>
-              <a href={"https://github.com/thoth-station/core/issues/new?assignees=&labels=&template=bug_report.md"} target="_blank"> Issue link </a>
+              <a href={"https://github.com/thoth-station/core/issues/new?assignees=&labels=&template=bug_report.md"} target="_blank"> Open Issue </a>
             </div>
         );
 
