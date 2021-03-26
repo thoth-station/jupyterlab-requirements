@@ -20,6 +20,7 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add other screenshots to help explain your problem:
 e.g. outputs from https://github.com/thoth-station/jupyterlab-requirements#troubleshoot
+e.g. output from `jupyter kernelspec list`
 e.g. logs from browser
 e.g. logs from jupyter
 
@@ -34,7 +35,7 @@ Describe the environment from where you are using the extension:
 
 
 **Stack information**
-If you have issue for resolving your stack with thoth resolution engine. 
+If you have issue for resolving your stack with thoth resolution engine.
 Please state the dependencies in your stack below.
 
 **Additional context**
