@@ -162,3 +162,7 @@ all the things that you see...
 * :arrow_up: Automatic update of dependencies by Kebechet
 ### Improvements
 * make pre-commmit happy
+
+## Release 0.6.1 (2021-03-26T18:29:53)
+### Features
+* Adjust NPM dependencies (#241)
