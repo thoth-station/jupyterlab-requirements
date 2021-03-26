@@ -46,6 +46,7 @@ class ThothAdviseHandler(APIHandler):
 
         config: str = input_data["thoth_config"]
         kernel_name: str = input_data["kernel_name"]
+        timeout: str = input_data["thoth_timeout"]
         notebook_content: str = input_data["notebook_content"]
         requirements: dict = json.loads(input_data["requirements"])
 
@@ -76,7 +77,6 @@ class ThothAdviseHandler(APIHandler):
         temp = tempfile.NamedTemporaryFile(prefix="jl_thoth_", mode='w+t')
 
         try:
-            # TODO: Handle all errors
             adviser_inputs = {
                 "pipfile": pipfile_string,
                 "config": config,
@@ -96,6 +96,7 @@ class ThothAdviseHandler(APIHandler):
                 nowait=False,
                 source_type=ThothAdviserIntegrationEnum.JUPYTER_NOTEBOOK,
                 no_static_analysis=False,
+                timeout=timeout,
                 src_path=temp.name
             )
 

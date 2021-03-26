@@ -58,7 +58,6 @@ import {
  * The class name added to the new package button (CSS).
  */
 const OK_BUTTON_CLASS = "thoth-ok-button";
-const THOTH_KERNEL_NAME_INPUT = "thoth-kernel-name-input";
 const CONTAINER_BUTTON = "thoth-container-button";
 const CONTAINER_BUTTON_CENTRE = "thoth-container-button-centre";
 
@@ -89,7 +88,8 @@ export interface IDependencyManagementUIState {
   requirements: Requirements,
   thoth_config: ThothConfig,
   error_msg: string,
-  resolution_engine: string
+  resolution_engine: string,
+  thoth_timeout: number
 }
 
 /**
@@ -118,6 +118,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       this.setKernel = this.setKernel.bind(this),
       this.setKernelName = this.setKernelName.bind(this)
       this.setRecommendationType = this.setRecommendationType.bind(this)
+      this.setTimeout = this.setTimeout.bind(this)
 
       this._model = new KernelModel ( this.props.panel.sessionContext )
 
@@ -153,7 +154,8 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         }]
         },
         error_msg: undefined,
-        resolution_engine: "thoth"
+        resolution_engine: "thoth",
+        thoth_timeout: 60
       }
     }
 
@@ -258,6 +260,27 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       this.setState(
         {
           kernel_name: kernel_name
+        }
+      );
+
+    }
+
+    /**
+     * Function: Set timeout for thoth resolution engine
+     */
+
+     setTimeout(event: React.ChangeEvent<HTMLInputElement>) {
+
+      var thoth_timeout = Number(event.target.value)
+
+      if ( Number(event.target.value) > 300 ) {
+        console.warn('kernel_name python3 cannot be used assigning default one')
+        var thoth_timeout: number = 300
+      }
+
+      this.setState(
+        {
+          thoth_timeout: thoth_timeout
         }
       );
 
@@ -556,6 +579,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
         var advise: Advise = await lock_requirements_with_thoth(
           this.state.kernel_name,
+          this.state.thoth_timeout,
           notebook_content,
           JSON.stringify(thoth_config),
           JSON.stringify(this.state.requirements)
@@ -772,36 +796,47 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                                     </div>
 
       let optionsForm = <div>
-                        <section>
-                          <h2>OPTIONS</h2>
-                        </section>
+                          <section>
+                            <h2>OPTIONS</h2>
+                          </section>
 
-                        <form>
-                          <label>
-                            Kernel name:
-                            <input
-                              title="Kernel name"
-                              type="text"
-                              name="kernel_name"
-                              value={this.state.kernel_name}
-                              onChange={this.setKernelName}
-                            />
-                          </label>
-                          <br />
-                          <label>
-                            Recommendation type:
-                            <select onChange={() => this.changeRecommendationType}>
-                              title="Recommendation Type"
-                              name="recommendation_type"
-                              value={this.state.recommendation_type}
-                              <option value="latest">latest</option>
-                              <option value="performance">performance</option>
-                              <option value="security">security</option>
-                              <option value="stable">stable</option>
-                            </select>
-                          </label>
+                          <form>
+                            <label>
+                              Kernel name:
+                              <input
+                                title="Kernel name"
+                                type="text"
+                                name="kernel_name"
+                                value={this.state.kernel_name}
+                                onChange={this.setKernelName}
+                              />
+                            </label>
+                            <br />
+                            <label>
+                              Recommendation type:
+                              <select onChange={() => this.changeRecommendationType}>
+                                title="Recommendation Type"
+                                name="recommendation_type"
+                                value={this.state.recommendation_type}
+                                <option value="latest">latest</option>
+                                <option value="performance">performance</option>
+                                <option value="security">security</option>
+                                <option value="stable">stable</option>
+                              </select>
+                            </label>
+                            <br />
+                            <label>
+                              Thoth timeout [s]:
+                              <input
+                                title="Thoth timeout"
+                                type="text"
+                                name="thoth_timeout"
+                                value={this.state.thoth_timeout}
+                                onChange={this.setTimeout}
+                              />
+                            </label>
                           </form>
-                      </div>
+                        </div>
 
       var ui_status = this.state.status
 
@@ -858,7 +893,6 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                   <p>Dependencies found in notebook metadata but lock file is missing. </p>
                 </fieldset>
               </div>
-
               {optionsForm}
             </div>
           );
@@ -927,17 +961,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
             <div>
               {dependencyManagementform}
               {addPlusInstallContainers}
-
-              OPTIONS
-              <div> Kernel name
-                <input title="Kernel name"
-                  className={THOTH_KERNEL_NAME_INPUT}
-                  type="text"
-                  name="kernel_name"
-                  value={this.state.kernel_name}
-                  onChange={this.setKernelName}
-                />
-              </div>
+              {optionsForm}
             </div>
           );
 
@@ -1008,7 +1032,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
               </div>
               <div>
                 <fieldset>
-                  <p>No requirements have been added please click add after inserting package name!</p>
+                  <p>No requirements have been added please click add from actions after inserting a package!</p>
                 </fieldset>
               </div>
             </div>

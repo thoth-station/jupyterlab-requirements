@@ -25,7 +25,7 @@ from pathlib import Path
 from jupyter_server.base.handlers import APIHandler
 from tornado import web
 
-from thamos.cli import _load_files
+from thamos.lib import load_files
 from thoth.python import Project
 from jupyterlab_requirements.dependency_management.common import get_git_root
 
@@ -47,7 +47,7 @@ class DependenciesFilesHandler(APIHandler):
         requirements_format = "pipenv"
 
         try:
-            project = _load_files(requirements_format=requirements_format)
+            project = load_files(requirements_format=requirements_format)
             requirements = project.pipfile.to_dict()
             requirements_lock = project.pipfile_lock.to_dict()
 

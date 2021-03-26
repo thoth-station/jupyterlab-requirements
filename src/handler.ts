@@ -8,8 +8,9 @@
  * @author Francesco Murdaca <fmurdaca@redhat.com>
  * @since  0.0.1
  */
+
 /**
- * Jupyterlab tutorials
+ * Jupyterlab tutorials: https://github.com/jupyterlab/extension-examples/blob/master/server-extension/src/handler.ts
  */
 
 import { URLExt } from '@jupyterlab/coreutils';
@@ -22,12 +23,12 @@ export const THOTH_JUPYTER_INTEGRATION_API_BASE_NAME = "jupyterlab_requirements"
  * Call the API extension
  *
  * @param endPoint API REST end point for the extension
- * @param init Initial values for the request
+ * @param requestInit Initial values for the request
  * @returns The response body interpreted as JSON
  */
 export async function requestAPI<T>(
   endPoint = '',
-  init: RequestInit = {}
+  requestInit: RequestInit = {}
 ): Promise<T> {
   // Make request to Jupyter API
 
@@ -41,20 +42,46 @@ export async function requestAPI<T>(
     endPoint
   );
 
-  let response: Response;
+  /**
+ * Function: https://github.com/elyra-ai/elyra/blob/5664d53029b57ed25067cd454d5c1e16de98b282/packages/services/src/requests.ts#L186.
+ */
 
-  // Make actual request
-  try {
-    response = await ServerConnection.makeRequest(requestUrl, init, settings);
-  } catch (error) {
-    throw new ServerConnection.NetworkError(error);
-  }
+  const getServerResponse: Promise<any> = new Promise((resolve, reject) => {
+    ServerConnection.makeRequest(requestUrl, requestInit, settings).then(
+      (response: any) => {
 
-  const data = await response.json();
+        response.json().then(
+          // handle cases where the server returns a valid response
+          (result: any) => {
+            if (response.status < 200 || response.status >= 300) {
+              return reject(result);
+            }
 
-  if (!response.ok) {
-    throw new ServerConnection.ResponseError(response, data.message);
-  }
+            resolve(result);
+          },
+          // handle 404 if the server is not found
+          (reason: any) => {
+            if (response.status == 404) {
+              response['requestUrl'] = requestUrl;
+              return reject(response);
+            } else if (response.status == 204) {
+              resolve({});
+            } else {
+              return reject(reason);
+            }
+          }
+        );
+      },
 
-  return data;
+      // something unexpected went wrong with the request
+      (reason: any) => {
+        console.error(reason);
+        return reject(reason);
+      }
+    );
+  });
+
+  const serverResponse: any = await getServerResponse;
+  return serverResponse;
+
 }

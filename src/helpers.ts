@@ -60,7 +60,6 @@ async function _handle_runtime_environment(
     kernel_name: string,
     recommendation_type: string,
 ): Promise<ThothConfig> {
-
     const runtime_environments: RuntimeEnvironment[] = processed_thoth_config.runtime_environments
     const runtime_environment: RuntimeEnvironment = processed_thoth_config.runtime_environments[0]
 
@@ -70,7 +69,7 @@ async function _handle_runtime_environment(
     _.set(runtime_environments, 0, runtime_environment)
     _.set(processed_thoth_config, "runtime_environments", runtime_environments)
 
-    console.info("processed thoth config", processed_thoth_config)
+    console.debug("processed thoth config", processed_thoth_config)
 
     return processed_thoth_config
 }
@@ -361,8 +360,7 @@ async function checkInstalledPackages(installed_packages: {}, packages: {}): Pro
         else {
             return false
         }
-    }
-    )
+    })
     return true
 }
 
@@ -376,7 +374,6 @@ export async function  _handle_requirements_lock(
     if ( is_final_state == true) {
         return ui_state
     }
-
     // requirements is present in notebook metadata
 
     // Load requirements lock from notebook metadata ( if any )
@@ -398,7 +395,6 @@ export async function  _handle_requirements_lock(
     _.forIn(initial_requirements_lock.default, function(value, package_name) {
       _.set(initial_locked_packages, package_name, value.version.replace("==", ""))
     })
-    console.debug(initial_locked_packages)
 
     // Retrieve kernel name from metadata
     const kernel_name = get_kernel_name( panel )
@@ -413,22 +409,25 @@ export async function  _handle_requirements_lock(
     })
 
     console.debug("loaded packages from pipfile", ui_state.loaded_packages)
+    console.debug("loaded packages from pipfile lock", initial_locked_packages)
     console.debug("packages in pipfile and pipfile lock", check_packages)
 
     const installed_packages = await retrieveInstalledPackages(kernel_name, initial_locked_packages)
 
+    console.debug("packages from kernel and pipfile lock", installed_packages)
+
     const initial_installed_packages = {}
 
     _.forIn(ui_state.loaded_packages, function(version, name) {
-      if (_.has(installed_packages, name.toLowerCase()) == true ) {
+      if ( _.has(installed_packages, name.toLowerCase()) == true ) {
         _.set(initial_installed_packages, name, version)
       }
     })
 
-    console.debug("initial installed packages", initial_installed_packages)
+    console.debug("packages from kernel and in pipfile lock and in pipfile", initial_installed_packages)
 
     // Check match for installed packages available in pipfile and pipfile.lock loaded
-    if ( _.isEqual(_.size(initial_installed_packages), _.size(check_packages) )) {
+    if ( _.isEqual(_.size(ui_state.loaded_packages), _.size(check_packages) )) {
 
         // check if all requirements locked are also installed in the current kernel
         const are_installed: boolean = await checkInstalledPackages(installed_packages, initial_locked_packages)
