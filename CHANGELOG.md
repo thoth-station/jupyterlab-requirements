@@ -138,3 +138,27 @@ all the things that you see...
 ### Improvements
 * refactor async methods
 * use debug for console
+
+## Release 0.6.0 (2021-03-26T17:30:05)
+### Features
+* Introduce timeout for resolution engine
+* Add constraint
+* :arrow_up: Automatic update of dependencies by Kebechet (#236)
+* ask more information
+* invert-order
+* Add more info for bugs
+* Add warning on using invectio (#231)
+* Prevent user from using : (#230)
+* Do not recreate kernel every time (#228)
+* Fix no kernel issue (#227)
+* :arrow_up: Automatic update of dependencies by Kebechet (#226)
+* Add link youtube
+* Fix name image
+* update readme
+* :arrow_up: Automatic update of dependencies by Kebechet (#221)
+* :arrow_up: Automatic update of dependencies by Kebechet (#218)
+* :arrow_up: Automatic update of dependencies by Kebechet (#216)
+* Add smart changelog (#215)
+* :arrow_up: Automatic update of dependencies by Kebechet
+### Improvements
+* make pre-commmit happy
