@@ -3,7 +3,7 @@ ipykernel
 ipython
 jupyter-require>=0.4.0
 jupyterlab>=3.*
-thamos
+thamos>=1.16.1
 invectio
 thoth-python
 thoth-common
