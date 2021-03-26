@@ -62,6 +62,7 @@ export async function update_thoth_config_on_disk (
 
 export async function lock_requirements_with_thoth (
   kernel_name: string,
+  thoth_timeout: number,
   notebook_content: string,
   thoth_config: string,
   requirements: string,
@@ -71,6 +72,7 @@ export async function lock_requirements_with_thoth (
   // POST request
   const dataToSend = {
     kernel_name: kernel_name,
+    thoth_timeout: thoth_timeout,
     notebook_content: notebook_content,
     thoth_config: thoth_config,
     requirements: requirements
