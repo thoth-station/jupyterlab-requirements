@@ -42,46 +42,64 @@ export async function requestAPI<T>(
     endPoint
   );
 
-  /**
- * Function: https://github.com/elyra-ai/elyra/blob/5664d53029b57ed25067cd454d5c1e16de98b282/packages/services/src/requests.ts#L186.
- */
+  let response: Response;
 
-  const getServerResponse: Promise<any> = new Promise((resolve, reject) => {
-    ServerConnection.makeRequest(requestUrl, requestInit, settings).then(
-      (response: any) => {
+  // Make actual request
+  try {
+    response = await ServerConnection.makeRequest(requestUrl, requestInit, settings);
+  } catch (error) {
+    throw new ServerConnection.NetworkError(error);
+  }
 
-        response.json().then(
-          // handle cases where the server returns a valid response
-          (result: any) => {
-            if (response.status < 200 || response.status >= 300) {
-              return reject(result);
-            }
+  const data = await response.json();
 
-            resolve(result);
-          },
-          // handle 404 if the server is not found
-          (reason: any) => {
-            if (response.status == 404) {
-              response['requestUrl'] = requestUrl;
-              return reject(response);
-            } else if (response.status == 204) {
-              resolve({});
-            } else {
-              return reject(reason);
-            }
-          }
-        );
-      },
+  if (!response.ok) {
+    throw new ServerConnection.ResponseError(response, data.message);
+  }
 
-      // something unexpected went wrong with the request
-      (reason: any) => {
-        console.error(reason);
-        return reject(reason);
-      }
-    );
-  });
+  return data;
 
-  const serverResponse: any = await getServerResponse;
-  return serverResponse;
+// TODO: Differentiate between response status
 
+//   /**
+//  * Function: https://github.com/elyra-ai/elyra/blob/5664d53029b57ed25067cd454d5c1e16de98b282/packages/services/src/requests.ts#L186.
+//  */
+
+//   const getServerResponse: Promise<any> = new Promise((resolve, reject) => {
+//     ServerConnection.makeRequest(requestUrl, requestInit, settings).then(
+//       (response: any) => {
+
+//         response.json().then(
+//           // handle cases where the server returns a valid response
+//           (result: any) => {
+//             if (response.status < 200 || response.status >= 300) {
+//               return reject(result);
+//             }
+
+//             resolve(result);
+//           },
+//           // handle 404 if the server is not found
+//           (reason: any) => {
+//             if (response.status == 404) {
+//               response['requestUrl'] = requestUrl;
+//               return reject(response);
+//             } else if (response.status == 204) {
+//               resolve({});
+//             } else {
+//               return reject(reason);
+//             }
+//           }
+//         );
+//       },
+
+//       // something unexpected went wrong with the request
+//       (reason: any) => {
+//         console.error(reason);
+//         return reject(reason);
+//       }
+//     );
+//   });
+
+//   const serverResponse: any = await getServerResponse;
+//   return serverResponse;
 }

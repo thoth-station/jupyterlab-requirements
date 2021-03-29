@@ -112,3 +112,7 @@ venv.bak/
 # mypy
 .mypy_cache/
 .thoth_last_analysis_id
+
+examples
+test.py
+overlays
