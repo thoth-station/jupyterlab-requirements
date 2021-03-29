@@ -562,6 +562,8 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
       const notebook_content = await take_notebook_content( this.props.panel )
 
+      var thoth_config: ThothConfig = this.state.thoth_config
+
       if ( this.props.loaded_resolution_engine == "pipenv" ) {
         console.debug("thoth previously failed!")
 

@@ -35,6 +35,7 @@
     "build:lib": "tsc",
     "build:labextension": "jupyter labextension build .",
     "build:labextension:dev": "jupyter labextension build --development True .",
+    "test": "jest",
     "clean": "jlpm run clean:lib",
     "clean:all": "jlpm run clean:lib && jlpm run clean:labextension",
     "clean:labextension": "rimraf jupyterlab_requirements/labextension",
@@ -53,10 +54,10 @@
   "dependencies": {
     "@jupyterlab/application": "^3.0.7",
     "@jupyterlab/launcher": "^3.0.5",
+    "@jupyterlab/logconsole": "^3.0.6",
     "@jupyterlab/mainmenu": "^3.0.5",
     "@jupyterlab/nbformat": "^3.0.3",
     "@jupyterlab/notebook": "^3.0.7",
-    "@jupyterlab/logconsole": "^3.0.6",
     "@jupyterlab/services": "^6.0.5",
     "@jupyterlab/translation": "^3.0.5",
     "@lumino/algorithm": "^1.3.3",
@@ -74,7 +75,7 @@
     "@babel/preset-env": "^7",
     "@jupyterlab/builder": "^3.0.6",
     "@jupyterlab/testutils": "^3.0.7",
-    "@types/jest": "^26.0.20",
+    "@types/jest": "^26.0.22",
     "@typescript-eslint/eslint-plugin": "^2.27.0",
     "@typescript-eslint/parser": "^2.27.0",
     "eslint": "^7.5.0",
@@ -85,7 +86,7 @@
     "npm-run-all": "^4.1.5",
     "prettier": "^1.19.0",
     "rimraf": "^3.0.2",
-    "ts-jest": "^26.4.4",
+    "ts-jest": "^26.5.4",
     "typescript": "~4.1.3"
   },
   "sideEffects": [
