@@ -85,17 +85,18 @@ class PipenvHandler(APIHandler):
             os.chdir(initial_path)
             self.finish(json.dumps(result))
 
-        os.chdir(env_path)
-
         try:
             subprocess.run(
-                "pipenv lock",
+                f". {kernel_name}/bin/activate && cd {kernel_name} && pipenv lock",
                 env=dict(os.environ, PIPENV_CACHE_DIR='/tmp'),
+                cwd=complete_path,
                 shell=True
             )
         except Exception as pipenv_error:
             _LOGGER.warning("error locking dependencies using Pipenv: %r", pipenv_error)
             result['error'] = True
+
+        os.chdir(env_path)
 
         if not result['error']:
 
