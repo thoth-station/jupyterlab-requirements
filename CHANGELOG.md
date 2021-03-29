@@ -174,3 +174,7 @@ all the things that you see...
 * :arrow_up: Automatic update of dependencies by Kebechet (#246)
 ### Improvements
 * introduce jast for unit tests
+
+## Release 0.6.3 (2021-03-29T11:25:50)
+### Features
+* Not all images have pipenv, install it (#252)
