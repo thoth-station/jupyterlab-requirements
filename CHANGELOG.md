@@ -166,3 +166,11 @@ all the things that you see...
 ## Release 0.6.1 (2021-03-26T18:29:53)
 ### Features
 * Adjust NPM dependencies (#241)
+
+## Release 0.6.2 (2021-03-29T10:24:09)
+### Features
+* add default value for thoth config
+* Adjust handler
+* :arrow_up: Automatic update of dependencies by Kebechet (#246)
+### Improvements
+* introduce jast for unit tests
