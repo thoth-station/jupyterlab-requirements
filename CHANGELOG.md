@@ -178,3 +178,9 @@ all the things that you see...
 ## Release 0.6.3 (2021-03-29T11:25:50)
 ### Features
 * Not all images have pipenv, install it (#252)
+
+## Release 0.6.4 (2021-04-14T18:50:14)
+### Features
+* Fix/python version (#257)
+* :arrow_up: Automatic update of dependencies by Kebechet (#256)
+* Fix paths to store dependencies and .thoth.yaml in container (#255)
