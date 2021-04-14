@@ -69,6 +69,26 @@ export async function discover_installed_packages (
 }
 
 /**
+ * Function: Discover Python version.
+ */
+
+ export async function discover_python_version (
+  init: RequestInit = {},
+): Promise<string> {
+
+  const endpoint: string = '/kernel/python'
+
+  try {
+    const packages = await requestAPI<any>(endpoint, {
+      method: 'GET'
+    });
+    return JSON.parse(JSON.stringify(packages));
+  } catch (reason) {
+    console.error('Error on GET /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
+  }
+}
+
+/**
  * Function: Create new kernel.
  */
 
