@@ -22,10 +22,12 @@ import logging
 
 from pathlib import Path
 
+from thamos.discover import discover_python_version
+
 from jupyter_server.base.handlers import APIHandler
 from tornado import web
 
-_LOGGER = logging.getLogger("jupyterlab_requirements.dependencies_discover_handler")
+_LOGGER = logging.getLogger("jupyterlab_requirements.discover_handler")
 
 
 class DependencyInstalledHandler(APIHandler):
@@ -33,7 +35,7 @@ class DependencyInstalledHandler(APIHandler):
 
     @web.authenticated
     def post(self):
-        """Discover list of packages installed."""
+        """Discover python version available."""
         input_data = self.get_json_body()
 
         kernel_name: str = input_data["kernel_name"]
@@ -60,20 +62,13 @@ class DependencyInstalledHandler(APIHandler):
         self.finish(json.dumps(packages))
 
 
-def list_installed_packages() -> dict:
-    """List packages installed."""
-    # this import has to be scoped
-    from pip._internal.commands.list import get_installed_distributions, format_for_json
+class PythonVersionHandler(APIHandler):
+    """Dependency management handler to discover Python version present."""
 
-    packages = get_installed_distributions()
-    packages = sorted(
-        packages,
-        key=lambda dist: dist.project_name.lower(),
-    )
+    @web.authenticated
+    def get(self):
+        """Discover list of packages installed."""
+        python_version = discover_python_version()
 
-    class ListOptions:
-        verbose  = False
-        outdated = False
+        self.finish(json.dumps(python_version))
 
-    list_packages = json.loads(format_for_json(packages, options=ListOptions))
-    return { element['name']: element['version'] for element in list_packages}
