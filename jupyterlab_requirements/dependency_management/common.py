@@ -16,13 +16,28 @@
 
 """Common methods for jupyterlab requirements."""
 
-
+import logging
 import subprocess
+from pathlib import Path
 
 
-def get_git_root():
-    """Get Git root."""
-    return subprocess.Popen(
-        ['git', 'rev-parse', '--show-toplevel'],
-        stdout=subprocess.PIPE
-    ).communicate()[0].rstrip().decode('utf-8')
+_LOGGER = logging.getLogger("jupyterlab_requirements.common")
+
+
+def select_complete_path():
+    """Select complete path (git or home)."""
+    try:
+        process_output = subprocess.run(
+            'git rev-parse --show-toplevel',
+            capture_output=True,
+            shell=True
+        )
+        git_root = process_output.stdout.decode("utf-8").strip()
+        complete_path = Path(git_root)
+        _LOGGER.info("complete path used is: %r", complete_path.as_posix())
+
+    except Exception as not_git_exc:
+        _LOGGER.error("Using home path because there was an error to identify root of git repository: %r", not_git_exc)
+        complete_path = Path.home()
+
+    return complete_path

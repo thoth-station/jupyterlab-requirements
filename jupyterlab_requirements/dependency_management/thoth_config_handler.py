@@ -27,6 +27,8 @@ from tornado import web
 
 from thamos.config import _Configuration
 
+from jupyterlab_requirements.dependency_management.common import select_complete_path
+
 _LOGGER = logging.getLogger("jupyterlab_requirements.thoth_config_handler")
 
 
@@ -73,7 +75,18 @@ class ThothConfigHandler(APIHandler):
         new_runtime_environment: str = input_data["runtime_environment"]
         force: bool = input_data["force"]
 
+        complete_path = select_complete_path()
+
+        os.chdir(complete_path)
+
         configuration = _Configuration()
+
+        if not configuration.config_file_exists():
+            _LOGGER.info("Thoth config does not exist, creating it...")
+            try:
+                configuration.create_default_config()
+            except Exception as e:
+                raise Exception("Thoth config file could not be created! %r", e)
 
         configuration.set_runtime_environment(
             runtime_environment=new_runtime_environment,
@@ -83,6 +96,7 @@ class ThothConfigHandler(APIHandler):
 
         _LOGGER.info("Updated Thoth config: %r", configuration.content)
 
+        os.chdir(initial_path)
         self.finish(json.dumps({
             "message": f"Successfully updated thoth config at {initial_path}!"
         }))

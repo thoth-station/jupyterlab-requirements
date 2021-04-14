@@ -27,7 +27,7 @@ from tornado import web
 
 from thamos.lib import load_files
 from thoth.python import Project
-from jupyterlab_requirements.dependency_management.common import get_git_root
+from jupyterlab_requirements.dependency_management.common import select_complete_path
 
 _LOGGER = logging.getLogger("jupyterlab_requirements.dependencies_files_handler")
 
@@ -77,15 +77,12 @@ class DependenciesFilesHandler(APIHandler):
         home = Path.home()
 
         if using_home_path_base:
-            complete_path = home.joinpath(path_to_store)
+            env_path =  home.joinpath(path_to_store).joinpath(kernel_name)
         else:
-            git_root = get_git_root()
-            _LOGGER.info("Git root identified: %r", git_root)
-            complete_path = Path(git_root).joinpath(path_to_store)
+            complete_path = select_complete_path()
+            env_path = complete_path.joinpath(path_to_store).joinpath(kernel_name)
 
-        _LOGGER.info("path to store dependencies is: %r", complete_path.as_posix())
-
-        env_path = complete_path.joinpath(kernel_name)
+        _LOGGER.info("path used to store dependencies is: %r", env_path.as_posix())
         env_path.mkdir(parents=True, exist_ok=True)
 
         os.chdir(env_path)

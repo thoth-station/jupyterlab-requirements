@@ -38,7 +38,7 @@ import { IDependencyManagementUIState } from "./components/dependencyManagementU
  * Function: Create Thoth configuration file using thamos library on the backend
  */
 
-async function  create_config(
+export async function  create_config(
     kernel_name: string
 ): Promise<ThothConfig> {
     return new Promise( async ( resolve, reject ) => {
