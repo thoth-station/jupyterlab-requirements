@@ -71,4 +71,3 @@ class PythonVersionHandler(APIHandler):
         python_version = discover_python_version()
 
         self.finish(json.dumps(python_version))
-
