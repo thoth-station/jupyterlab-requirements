@@ -46,6 +46,7 @@ import { Advise } from "../types/thoth";
 
 import {
   parse_inputs_from_metadata,
+  create_config,
   set_notebook_metadata,
   store_dependencies_on_disk,
   _parse_packages_from_state,
@@ -562,7 +563,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
       const notebook_content = await take_notebook_content( this.props.panel )
 
-      var thoth_config: ThothConfig = this.state.thoth_config
+      var thoth_config: ThothConfig = await create_config( this.state.kernel_name );
 
       if ( this.props.loaded_resolution_engine == "pipenv" ) {
         console.debug("thoth previously failed!")
@@ -597,6 +598,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       }
 
       if ( advise.error == true ) {
+        _.set(ui_state, "resolution_engine", "pipenv" )
         _.set(ui_state, "status", "locking_requirements_using_pipenv")
         await this.setNewState(ui_state);
         return
@@ -711,15 +713,6 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
       } catch ( error ) {
         console.debug("Error storing dependencies in overlays", error)
-      }
-
-      try {
-        await update_thoth_config_on_disk(
-          this.state.thoth_config.runtime_environments[0],
-          true
-        )
-      } catch ( error ) {
-        console.debug("Error updating thoth config on disk", error)
       }
 
       _.set(ui_state, "status", "installing_requirements" )
