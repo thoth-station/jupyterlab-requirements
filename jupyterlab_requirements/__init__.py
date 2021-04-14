@@ -21,7 +21,7 @@ from pathlib import Path
 
 from jupyter_server.utils import url_path_join
 
-from .dependency_management import DependenciesFilesHandler, PipenvHandler
+from .dependency_management import DependenciesFilesHandler, PipenvHandler, PythonVersionHandler
 from .dependency_management import ThothConfigHandler, ThothAdviseHandler, ThothInvectioHandler
 from .dependency_management import JupyterKernelHandler, DependencyInstalledHandler, DependencyInstallHandler
 
@@ -76,6 +76,7 @@ def _load_jupyter_server_extension(lab_app):
         (url_path_join(base_url, f"/{url_path}/pipenv"), PipenvHandler),
         (url_path_join(base_url, f"/{url_path}/kernel/packages"), DependencyInstalledHandler),
         (url_path_join(base_url, f"/{url_path}/kernel/install"), DependencyInstallHandler),
+        (url_path_join(base_url, f"/{url_path}/kernel/python"), PythonVersionHandler),
         (url_path_join(base_url, f"/{url_path}/kernel/create"), JupyterKernelHandler),
         (url_path_join(base_url, f"/{url_path}/file/dependencies"), DependenciesFilesHandler),
     ]

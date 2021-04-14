@@ -15,6 +15,7 @@ import { NotebookPanel } from '@jupyterlab/notebook';
 
 import { Source, Requirements, RequirementsLock } from './types/requirements';
 import { ThothConfig } from "./types/thoth";
+import { get_discovered_python_version } from "./helpers";
 import * as utils from "./utils";
 
 /**
@@ -30,7 +31,7 @@ export function get_python_version( notebook: NotebookPanel ): string {
 
     if ( python_version == null ) {
         console.debug( `Python version '${ python_version }' is null.` )
-        return null  // TODO: Discover automatically Python version present
+        return null
     }
 
     const match = python_version.match( /\d.\d/ )
@@ -69,9 +70,9 @@ export function get_kernel_name( notebook: NotebookPanel ): string {
 export function delete_key_from_notebook_metadata( notebook: NotebookPanel , key_to_remove: string):  Promise<string> {
     return new Promise( async ( resolve, reject ) => {
 
-    try {
-        notebook.model.metadata.delete(key_to_remove)
-        return resolve( "Removed correctly " + key_to_remove + " from notebook metadata" )
+        try {
+            notebook.model.metadata.delete(key_to_remove)
+            return resolve( "Removed correctly " + key_to_remove + " from notebook metadata" )
 
         } catch ( err ) {
             reject( err )
@@ -88,7 +89,14 @@ export function get_requirements( notebook: NotebookPanel ):  Promise<Requiremen
             if ( notebook.model.metadata.has("requirements") == false ) {
                 console.debug("requirements key is not in notebook metadata! Initialize requirements for user...")
                 const python_packages: { [ name: string ]: string } = {}
-                const requires = { python_version: get_python_version( notebook ) }
+
+                var python_version: string = get_python_version( notebook )
+
+                if ( python_version == null ) {
+                    var python_version: string = await get_discovered_python_version()
+                }
+
+                const requires = { python_version: python_version }
 
                 var requirements: Requirements = {
                     packages: python_packages,
@@ -109,7 +117,14 @@ export function get_requirements( notebook: NotebookPanel ):  Promise<Requiremen
                 console.debug("requirements key is not in notebook metadata! Initialize requirements for user...")
 
                 const python_packages: { [ name: string ]: string } = {}
-                const requires = { python_version: get_python_version( notebook ) }
+
+                var python_version: string = get_python_version( notebook )
+
+                if ( python_version == null ) {
+                    var python_version: string = await get_discovered_python_version()
+                }
+
+                const requires = { python_version: python_version }
 
                 var requirements: Requirements = {
                     packages: python_packages,

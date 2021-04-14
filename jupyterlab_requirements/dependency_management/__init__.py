@@ -17,7 +17,8 @@
 """Dependency Management APIs for jupyter server."""
 
 from .dependencies_files_handler import DependenciesFilesHandler
-from .dependencies_discover_handler import DependencyInstalledHandler
+from .discover_handler import DependencyInstalledHandler
+from .discover_handler import PythonVersionHandler
 from .kernel_handler import JupyterKernelHandler
 from .install_handler import DependencyInstallHandler
 from .pipenv import PipenvHandler
@@ -31,6 +32,7 @@ __all__ = [
     "DependencyInstalledHandler",
     "JupyterKernelHandler",
     "PipenvHandler",
+    "PythonVersionHandler",
     "ThothAdviseHandler",
     "ThothConfigHandler",
     "ThothInvectioHandler"

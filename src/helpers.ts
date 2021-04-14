@@ -15,6 +15,7 @@ import { NotebookPanel } from "@jupyterlab/notebook";
 
 import {
     discover_installed_packages,
+    discover_python_version,
     gather_library_usage,
     store_dependencies
 } from "./kernel";
@@ -208,6 +209,7 @@ export async function _handle_requirements(
     // Load requirements from notebook metadata, if any, otherwise receive default ones
     var loaded_requirements: Requirements = initial_loaded_requirements
     console.debug("loaded requirements", loaded_requirements)
+
     var loaded_packages = loaded_requirements.packages
     console.debug("loaded requirements packages", loaded_packages)
 
@@ -681,4 +683,24 @@ export async function _handle_total_packages_case(
 
         return ui_state
     }
+}
+
+
+/**
+ * Function: Discover python version.
+ */
+ export async function get_discovered_python_version( ): Promise<string> {
+    return new Promise( async ( resolve, reject ) => {
+        console.info( `Python version is null, discovering it....` )
+
+        try {
+            const python_version_discovered: string = await discover_python_version()
+            console.info( `Python version discovered is '${ python_version_discovered }'.` )
+            resolve(python_version_discovered)
+
+        } catch ( err ) {
+            reject( null )
+        }
+
+    })
 }
