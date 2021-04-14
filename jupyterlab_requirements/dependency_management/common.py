@@ -32,9 +32,9 @@ def select_complete_path():
             capture_output=True,
             shell=True
         )
-        git_root = process_output.stdout.decode("utf-8")
-        _LOGGER.info("git path identified is: %r", git_root)
+        git_root = process_output.stdout.decode("utf-8").strip()
         complete_path = Path(git_root)
+        _LOGGER.info("complete path used is: %r", complete_path.as_posix())
 
     except Exception as not_git_exc:
         _LOGGER.error("Using home path because there was an error to identify root of git repository: %r", not_git_exc)
