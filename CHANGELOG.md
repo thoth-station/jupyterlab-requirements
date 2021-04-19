@@ -184,3 +184,9 @@ all the things that you see...
 * Fix/python version (#257)
 * :arrow_up: Automatic update of dependencies by Kebechet (#256)
 * Fix paths to store dependencies and .thoth.yaml in container (#255)
+
+## Release 0.6.5 (2021-04-19T17:00:53)
+### Features
+* :arrow_up: Automatic update of dependencies by Kebechet (#262)
+### Bug Fixes
+* fix requirements files missing from source build (#260)
