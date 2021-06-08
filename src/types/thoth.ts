@@ -14,12 +14,14 @@ import { Requirements, RequirementsLock } from "./requirements";
 
 export interface Advise {
     error: boolean,
+    error_msg: string,
     requirements: Requirements,
     requirement_lock: RequirementsLock
 }
 
 export interface PipenvResult {
     error: boolean,
+    error_msg: string,
     requirements_lock: RequirementsLock
 }
 

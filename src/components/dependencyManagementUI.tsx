@@ -93,7 +93,7 @@ export interface IDependencyManagementUIState {
   error_msg: string,
   resolution_engine: string,
   thoth_timeout: number,
-  isLoading: boolean
+  isEditing: boolean
 }
 
 /**
@@ -140,7 +140,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         error_msg: undefined,
         resolution_engine: "thoth",
         thoth_timeout: 180,
-        isLoading: false
+        isEditing: false,
       }
 
       this.onStart = this.onStart.bind(this),
@@ -321,8 +321,12 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
     editRow(package_name: string) {
 
       const packages = this.state.packages
+      const loaded_packages = this.state.loaded_packages
+      const installed_packages = this.state.installed_packages
 
       _.unset(packages, package_name)
+      _.unset(loaded_packages, package_name)
+      _.unset(installed_packages, package_name)
       _.set(packages, "", "*")
 
       console.debug("After editing (current)", packages)
@@ -330,8 +334,8 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       this.changeUIstate(
         "editing",
         packages,
-        this.state.loaded_packages,
-        this.state.installed_packages,
+        loaded_packages,
+        installed_packages,
         this.state.deleted_packages,
         this.state.requirements,
         this.state.kernel_name,
@@ -348,9 +352,12 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
       const loaded_packages = this.state.loaded_packages
       const packages = this.state.packages
+      const installed_packages = this.state.installed_packages
 
+      _.unset(packages, package_name)
       _.unset(loaded_packages, package_name)
-      _.set(packages, package_name, package_version)
+      _.unset(installed_packages, package_name)
+      _.set(packages, "", "*")
 
       console.debug("After editing (initial)", loaded_packages)
       console.debug("After editing (current)", packages)
@@ -359,7 +366,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         "editing",
         packages,
         loaded_packages,
-        this.state.installed_packages,
+        installed_packages,
         this.state.deleted_packages,
         this.state.requirements,
         this.state.kernel_name,
@@ -602,6 +609,9 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       }
 
       if ( advise == undefined || advise.error == true ) {
+        if ( advise != undefined ) {
+          console.log("Thoth resolution engine error:", advise.error_msg)
+        }
         _.set(ui_state, "resolution_engine", "pipenv" )
         _.set(ui_state, "status", "locking_requirements_using_pipenv")
         await this.setNewState(ui_state);
@@ -682,6 +692,10 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       }
 
       if ( result == undefined || result.error == true ) {
+
+        if ( result != undefined ) {
+          console.log("Pipenv resolution engine error:", result.error_msg)
+        }
         _.set(ui_state, "status", "failed")
         _.set(
           ui_state,
@@ -1079,7 +1093,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
               <div>
                 <p>{this.state.error_msg}</p>
               </div>
-              <a href={"https://github.com/thoth-station/core/issues/new?assignees=&labels=&template=bug_report.md"} target="_blank"> Open Issue </a>
+              <a href={"https://github.com/thoth-station/jupyterlab-requirements/issues/new?assignees=&labels=bug&template=bug_report.md"} target="_blank"> Open Issue </a>
             </div>
         );
 
@@ -1101,7 +1115,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
             </div>
           );
 
-          case "stable_no_runenv":
+        case "stable_no_runenv":
             // TODO: Provide relock button option if the resolution engine is different from thoth
             return (
               <div>
@@ -1122,12 +1136,12 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
             </div>
             );
 
-        case"ready":
+        case "ready":
 
           // Check if kernel name is already assigned to notebook and if yes, do nothing
-
-          if ( get_kernel_name( this.props.panel ) == this.state.kernel_name ) {
-            console.log("kernel name already set for the notebook, do not restart kernel...")
+          const current_kernel = get_kernel_name( this.props.panel, true )
+          if ( current_kernel == this.state.kernel_name ) {
+            console.log("kernel name to be assigned " + this.state.kernel_name + " already set for the notebook " + current_kernel + ", do not restart kernel...")
           }
           else {
             this.props.panel.sessionContext.session.changeKernel({"name": this.state.kernel_name})

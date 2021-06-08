@@ -47,7 +47,7 @@ export function get_python_version( notebook: NotebookPanel ): string {
 /**
  * Function: Get kernel name from kernel spec.
  */
-export function get_kernel_name( notebook: NotebookPanel ): string {
+export function get_kernel_name( notebook: NotebookPanel , is_final: boolean = false): string {
     const kernelspec = notebook.content.model.metadata.get( 'kernelspec' )
     console.debug('kernel info:', kernelspec)
 
@@ -55,7 +55,7 @@ export function get_kernel_name( notebook: NotebookPanel ): string {
 
     console.debug('kernel_name identified:', kernel_name)
 
-    if ( kernel_name == "python3" ) {
+    if ( (kernel_name == "python3") && (is_final == false) ) {
         console.warn('kernel_name python3 cannot be used, assigning default one')
         return "jupyterlab-requirements"
     }
