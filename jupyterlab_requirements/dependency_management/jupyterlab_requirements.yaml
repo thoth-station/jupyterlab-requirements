@@ -110,7 +110,7 @@ paths:
         "202":
           description: "Redirect long running task"
     get:
-      tags: ["Thoth Resolution Engine"]
+      tags: ["Pipenv Resolution Engine"]
       summary: "Get long running task result for pipenv resolution"
       produces:
         - "application/json"
