@@ -9,7 +9,7 @@
  * @since  0.0.1
  */
 
-import { requestAPI, THOTH_JUPYTER_INTEGRATION_API_BASE_NAME } from './handler';
+import { requestAPI, THOTH_JUPYTER_INTEGRATION_API_BASE_NAME, AsyncTaskHandler } from './handler';
 import { Advise, PipenvResult, ThothConfig, RuntimeEnvironment } from './types/thoth';
 
 export async function retrieve_config_file (
@@ -60,57 +60,81 @@ export async function update_thoth_config_on_disk (
 
 }
 
-export async function lock_requirements_with_thoth (
+export async function lock_requirements_with_thoth(
   kernel_name: string,
   thoth_timeout: number,
   notebook_content: string,
   thoth_config: string,
   requirements: string,
-  init: RequestInit = {},
-): Promise<Advise> {
-
-  // POST request
-  const dataToSend = {
-    kernel_name: kernel_name,
-    thoth_timeout: thoth_timeout,
-    notebook_content: notebook_content,
-    thoth_config: thoth_config,
-    requirements: requirements
-  };
-
-  const endpoint: string = 'thoth/resolution'
+): Promise<Advise|undefined> {
   try {
-    const advise = await requestAPI<any>(endpoint, {
+    // POST request
+    const dataToSend = {
+      kernel_name: kernel_name,
+      thoth_timeout: thoth_timeout,
+      notebook_content: notebook_content,
+      thoth_config: thoth_config,
+      requirements: requirements
+    };
+    const request: RequestInit = {
       body: JSON.stringify(dataToSend),
       method: 'POST'
-    });
-    return JSON.parse(JSON.stringify(advise));
-  } catch (reason) {
-    console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
+    };
+    var endpoint = "thoth/resolution"
+    const { promise } = AsyncTaskHandler(
+      endpoint,
+      request
+    );
+    const response = await promise;
+    if (response) {
+      // this._uiStateChanged.emit({
+      //   type: 'locked'
+      // });
+      return JSON.parse(JSON.stringify(response));
+    }
+  } catch (error) {
+      let message: string = error.message || error.toString();
+
+      if ( message !== 'cancelled') {
+        console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', message);
+        message = `An error occurred while asking advise to Thoth.`;
+    }
   }
 }
 
-export async function lock_requirements_with_pipenv (
+
+export async function lock_requirements_with_pipenv(
   kernel_name: string,
   requirements: string,
-  init: RequestInit = {},
-): Promise<PipenvResult> {
-
-  // POST request
-  const dataToSend = {
-    kernel_name: kernel_name,
-    requirements: requirements
-  };
-
-  const endpoint: string = 'pipenv'
-
+): Promise<PipenvResult|undefined> {
   try {
-    const result = await requestAPI<any>(endpoint, {
+    // POST request
+    const dataToSend = {
+      kernel_name: kernel_name,
+      requirements: requirements
+    };
+    const request: RequestInit = {
       body: JSON.stringify(dataToSend),
       method: 'POST'
-    });
-    return JSON.parse(JSON.stringify(result));
-  } catch (reason) {
-    console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
+    };
+    var endpoint = "pipenv"
+    const { promise } = AsyncTaskHandler(
+      endpoint,
+      request
+    );
+    const response = await promise;
+    if (response) {
+      // this._uiStateChanged.emit({
+      //   type: 'locked'
+      // });
+      return JSON.parse(JSON.stringify(response));
+    }
+  } catch (error) {
+      let message: string = error.message || error.toString();
+
+      if ( message !== 'cancelled') {
+        console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', message);
+        message = `An error occurred while locking dependencies with pipenv.`;
+    }
   }
 }

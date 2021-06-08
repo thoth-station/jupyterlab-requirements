@@ -267,9 +267,9 @@ export async function set_thoth_configuration( notebook: NotebookPanel, config_f
 /**
  * Function: Get resolution engine from notebook metadata.
  */
- export function get_resolution_engine( notebook: NotebookPanel ): Promise<string|null> {
+export function get_resolution_engine( notebook: NotebookPanel ): Promise<string|null> {
 
-    return new Promise( async ( resolve, reject ) => {
+    return new Promise( ( resolve, reject ) => {
         const notebook_metadata = notebook.model.metadata
 
         try {

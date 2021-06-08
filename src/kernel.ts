@@ -9,35 +9,46 @@
  * @since  0.0.1
  */
 
-import { requestAPI, THOTH_JUPYTER_INTEGRATION_API_BASE_NAME } from './handler';
+import { requestAPI, THOTH_JUPYTER_INTEGRATION_API_BASE_NAME, AsyncTaskHandler } from './handler';
 import * as utils from "./utils";
 
 /**
  * Function: Install dependencies in the new kernel.
  */
 
-export async function install_packages (
+ export async function install_packages(
   kernel_name: string,
   resolution_engine: string,
-  init: RequestInit = {},
-): Promise<string> {
-
-  // POST request
-  const dataToSend = {
-    kernel_name: kernel_name,
-    resolution_engine: resolution_engine
-  };
-
-  const endpoint: string = 'kernel/install'
-
+): Promise<string|undefined> {
   try {
-    const message = await requestAPI<any>(endpoint, {
+    // POST request
+    const dataToSend = {
+      kernel_name: kernel_name,
+      resolution_engine: resolution_engine
+    };
+    const request: RequestInit = {
       body: JSON.stringify(dataToSend),
       method: 'POST'
-    });
-    return message;
-  } catch (reason) {
-    console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
+    };
+    var endpoint = "kernel/install"
+    const { promise } = AsyncTaskHandler(
+      endpoint,
+      request
+    );
+    const response = await promise;
+    if (response) {
+      // this._uiStateChanged.emit({
+      //   type: 'installed'
+      // });
+      return JSON.parse(JSON.stringify(response));
+    }
+  } catch (error) {
+      let message: string = error.message || error.toString();
+
+      if ( message !== 'cancelled') {
+        console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', message);
+        message = `An error occurred while installing dependencies.`;
+    }
   }
 }
 
