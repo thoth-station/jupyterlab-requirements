@@ -36,6 +36,8 @@ import {
   lock_requirements_with_pipenv
 } from '../thoth';
 
+// import { INotification } from 'jupyterlab_toastify';
+
 import {
   get_kernel_name
 } from "../notebook"
@@ -90,7 +92,8 @@ export interface IDependencyManagementUIState {
   thoth_config: ThothConfig,
   error_msg: string,
   resolution_engine: string,
-  thoth_timeout: number
+  thoth_timeout: number,
+  isLoading: boolean
 }
 
 /**
@@ -102,26 +105,6 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       props: IDependencyManagementUIProps
     ) {
       super(props);
-
-      this.onStart = this.onStart.bind(this),
-      this.execute_code_in_kernel = this.execute_code_in_kernel.bind(this),
-      this.changeUIstate = this.changeUIstate.bind(this),
-      this.addNewRow = this.addNewRow.bind(this),
-      this.editRow = this.editRow.bind(this),
-      this.editSavedRow = this.editSavedRow.bind(this),
-      this.storeRow = this.storeRow.bind(this),
-      this.deleteRow = this.deleteRow.bind(this),
-      this.deleteSavedRow = this.deleteSavedRow.bind(this),
-      this.onSave = this.onSave.bind(this),
-      this.lock_using_thoth = this.lock_using_thoth.bind(this),
-      this.lock_using_pipenv = this.lock_using_pipenv.bind(this),
-      this.install = this.install.bind(this),
-      this.setKernel = this.setKernel.bind(this),
-      this.setKernelName = this.setKernelName.bind(this)
-      this.setRecommendationType = this.setRecommendationType.bind(this)
-      this.setTimeout = this.setTimeout.bind(this)
-
-      this._model = new KernelModel ( this.props.panel.sessionContext )
 
       this.state = {
         kernel_name: get_kernel_name( this.props.panel ),
@@ -152,12 +135,33 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
             },
             python_version: "3.8",
             recommendation_type: "latest"
-        }]
+          }]
         },
         error_msg: undefined,
         resolution_engine: "thoth",
-        thoth_timeout: 60
+        thoth_timeout: 180,
+        isLoading: false
       }
+
+      this.onStart = this.onStart.bind(this),
+      this.execute_code_in_kernel = this.execute_code_in_kernel.bind(this),
+      this.changeUIstate = this.changeUIstate.bind(this),
+      this.addNewRow = this.addNewRow.bind(this),
+      this.editRow = this.editRow.bind(this),
+      this.editSavedRow = this.editSavedRow.bind(this),
+      this.storeRow = this.storeRow.bind(this),
+      this.deleteRow = this.deleteRow.bind(this),
+      this.deleteSavedRow = this.deleteSavedRow.bind(this),
+      this.onSave = this.onSave.bind(this),
+      this.lock_using_thoth = this.lock_using_thoth.bind(this),
+      this.lock_using_pipenv = this.lock_using_pipenv.bind(this),
+      this.install = this.install.bind(this),
+      this.setKernel = this.setKernel.bind(this),
+      this.setKernelName = this.setKernelName.bind(this)
+      this.setRecommendationType = this.setRecommendationType.bind(this)
+      this.setTimeout = this.setTimeout.bind(this)
+
+      this._model = new KernelModel ( this.props.panel.sessionContext )
     }
 
     /**
@@ -580,7 +584,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
       try {
 
-        var advise: Advise = await lock_requirements_with_thoth(
+        var advise: Advise | undefined = await lock_requirements_with_thoth(
           this.state.kernel_name,
           this.state.thoth_timeout,
           notebook_content,
@@ -597,7 +601,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         return
       }
 
-      if ( advise.error == true ) {
+      if ( advise == undefined || advise.error == true ) {
         _.set(ui_state, "resolution_engine", "pipenv" )
         _.set(ui_state, "status", "locking_requirements_using_pipenv")
         await this.setNewState(ui_state);
@@ -677,7 +681,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         return
       }
 
-      if ( result.error == true ) {
+      if ( result == undefined || result.error == true ) {
         _.set(ui_state, "status", "failed")
         _.set(
           ui_state,
