@@ -26,22 +26,12 @@ import { ManageDependenciesButtonExtension } from './dependencyManagementButton'
 };
 
 /**
- * Initialization data for the jupyterlab_requirements extension.
- */
-
-const extension: JupyterFrontEndPlugin<string> = {
-  id: 'jupyterlab_requirements',
-  autoStart: true,
-  activate
-};
-
-/**
  * Activate the JupyterLab extension.
  *
  * @param app Jupyter Front End
  */
 
-async function activate (
+ async function activate (
   app: JupyterFrontEnd,
 ): Promise<string> {
 
@@ -57,5 +47,15 @@ async function activate (
 
   return "ready"
 }
+
+/**
+ * Initialization data for the jupyterlab_requirements extension.
+ */
+
+const extension: JupyterFrontEndPlugin<string> = {
+  id: 'jupyterlab_requirements',
+  autoStart: true,
+  activate
+};
 
 export default extension;
