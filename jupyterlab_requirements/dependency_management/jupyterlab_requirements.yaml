@@ -137,7 +137,7 @@ paths:
   /kernel/install:
     post:
       tags: ["Install dependencies in the kernel"]
-      summary: Lock dependencies with Pipenv Resolution Engine
+      summary: Install dependencies with micropipenv.
       parameters:
         - name: "kernel_name"
           description: "Jupyter Kernel name where advise will be requested."
@@ -152,7 +152,7 @@ paths:
           description: "Redirect long running task"
     get:
       tags: ["Install dependencies in the kernel"]
-      summary: "Get long running task result for pipenv resolution"
+      summary: "Get status of installation with micropipenv."
       produces:
         - "application/json"
       parameters:
@@ -242,6 +242,7 @@ components:
       required:
         - requirement_lock
         - error
+        - error_msg
       type: object
       properties:
         requirement_lock:
