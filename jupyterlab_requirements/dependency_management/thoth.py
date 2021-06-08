@@ -19,12 +19,12 @@
 import json
 import os
 import logging
-import subprocess
+import tornado
 import tempfile
 
 from pathlib import Path
 
-from jupyter_server.base.handlers import APIHandler
+from jupyterlab_requirements.dependency_management.base import DependencyManagementBaseHandler
 from tornado import web
 
 from thamos.lib import advise_using_config, _get_origin
@@ -35,14 +35,20 @@ from thoth.common import ThothAdviserIntegrationEnum
 _LOGGER = logging.getLogger("jupyterlab_requirements.thoth")
 
 
-class ThothAdviseHandler(APIHandler):
+class ThothAdviseHandler(DependencyManagementBaseHandler):
     """Thoth handler to receive optimized software stack."""
 
     @web.authenticated
-    async def post(self):
+    def post(self):
+        input_data = self.get_json_body()
+
+        task_index = self._tasks.create_task(self.lock_using_thoth, input_data)
+
+        self.redirect_to_task(task_index)
+
+    async def lock_using_thoth(self, input_data):
         """Lock dependencies using Thoth service."""
         initial_path = Path.cwd()
-        input_data = self.get_json_body()
 
         config: str = input_data["thoth_config"]
         kernel_name: str = input_data["kernel_name"]
@@ -58,11 +64,6 @@ class ThothAdviseHandler(APIHandler):
         complete_path = home.joinpath(".local/share/thoth/kernels")
         env_path = complete_path.joinpath(kernel_name)
 
-        # Delete and recreate folder
-        if not env_path.exists():
-            _ = subprocess.call(
-                f"rm -rf ./{kernel_name} ", shell=True, cwd=complete_path)
-
         env_path.mkdir(parents=True, exist_ok=True)
         os.chdir(env_path)
 
@@ -72,7 +73,8 @@ class ThothAdviseHandler(APIHandler):
         _LOGGER.info(f"Current path: %r ", env_path.as_posix())
         _LOGGER.info(f"Input Pipfile: \n{pipfile_string}")
 
-        advise = {"requirements": {}, "requirement_lock": {}, "error": False}
+        advise = {"requirements": {}, "requirement_lock": {}, "error": False, "error_msg": ""}
+        returncode = 0
 
         temp = tempfile.NamedTemporaryFile(prefix="jl_thoth_", mode='w+t')
 
@@ -109,6 +111,8 @@ class ThothAdviseHandler(APIHandler):
 
             if error_result:
                 advise['error'] = True
+                advise["error_msg"] = error_result
+                returncode = 1
 
             else:
                 # Use report of the best one, therefore index 0
@@ -124,11 +128,14 @@ class ThothAdviseHandler(APIHandler):
                         "requirements_locked"
                     ]
 
-                    advise = {"requirements": pipfile, "requirement_lock": pipfile_lock, "error": False}
+                    advise = {"requirements": pipfile, "requirement_lock": pipfile_lock, "error": False }
 
         except Exception as api_error:
             _LOGGER.warning(f"error locking dependencies using Thoth: {api_error}")
             advise['error'] = True
+            advise["error_msg"] = "Error locking dependencies, check pod logs for more details about the error."
+            returncode = 1
+
         finally:
             temp.close()
 
@@ -153,4 +160,5 @@ class ThothAdviseHandler(APIHandler):
                 _LOGGER.warning("Requirements files have not been stored successfully %r", e)
 
         os.chdir(initial_path)
-        self.finish(json.dumps(advise))
+
+        return returncode, advise

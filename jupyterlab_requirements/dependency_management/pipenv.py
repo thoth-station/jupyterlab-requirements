@@ -23,7 +23,7 @@ import subprocess
 
 from pathlib import Path
 
-from jupyter_server.base.handlers import APIHandler
+from jupyterlab_requirements.dependency_management.base import DependencyManagementBaseHandler
 from tornado import web
 
 from thoth.python import Pipfile, PipfileLock
@@ -33,14 +33,20 @@ from virtualenv import cli_run
 _LOGGER = logging.getLogger("jupyterlab_requirements.pipenv")
 
 
-class PipenvHandler(APIHandler):
+class PipenvHandler(DependencyManagementBaseHandler):
     """pipenv handler to receive optimized software stack."""
 
     @web.authenticated
-    async def post(self):
+    def post(self):
+        input_data = self.get_json_body()
+
+        task_index = self._tasks.create_task(self.lock_using_pipenv, input_data)
+
+        self.redirect_to_task(task_index)
+
+    async def lock_using_pipenv(self, input_data):
         """Lock and install dependencies using pipenv."""
         initial_path = Path.cwd()
-        input_data = self.get_json_body()
 
         kernel_name: str = input_data["kernel_name"]
         requirements: dict = json.loads(input_data["requirements"])
@@ -57,6 +63,7 @@ class PipenvHandler(APIHandler):
         env_path.mkdir(parents=True, exist_ok=True)
 
         result = {"requirements_lock": "", "error": False}
+        returncode = 0
 
         ## Create virtualenv
         cli_run([str(env_path)])
@@ -82,8 +89,10 @@ class PipenvHandler(APIHandler):
         except Exception as pipenv_error:
             _LOGGER.warning("error installing pipenv: %r", pipenv_error)
             result['error'] = True
+            returncode = 1
             os.chdir(initial_path)
-            self.finish(json.dumps(result))
+
+            return returncode, result
 
         try:
             subprocess.run(
@@ -95,6 +104,7 @@ class PipenvHandler(APIHandler):
         except Exception as pipenv_error:
             _LOGGER.warning("error locking dependencies using Pipenv: %r", pipenv_error)
             result['error'] = True
+            returncode = 1
 
         os.chdir(env_path)
 
@@ -119,4 +129,5 @@ class PipenvHandler(APIHandler):
                 result['error'] = True
 
         os.chdir(initial_path)
-        self.finish(json.dumps(result))
+
+        return returncode, result

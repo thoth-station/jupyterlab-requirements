@@ -24,20 +24,26 @@ from virtualenv import cli_run
 
 from pathlib import Path
 
-from jupyter_server.base.handlers import APIHandler
+from jupyterlab_requirements.dependency_management.base import DependencyManagementBaseHandler
 from tornado import web
 
 _LOGGER = logging.getLogger("jupyterlab_requirements.install_handler")
 
 
-class DependencyInstallHandler(APIHandler):
+class DependencyInstallHandler(DependencyManagementBaseHandler):
     """Dependency management handler to install dependencies."""
 
     @web.authenticated
     def post(self):
+        input_data = self.get_json_body()
+
+        task_index = self._tasks.create_task(self.install_dependencies, input_data)
+
+        self.redirect_to_task(task_index)
+
+    async def install_dependencies(self, input_data):
         """Install packages using selected package manager."""
         initial_path = Path.cwd()
-        input_data = self.get_json_body()
         kernel_name: str = input_data["kernel_name"]
         resolution_engine: str = input_data["resolution_engine"]
         _LOGGER.info(f"kernel_name selected: {kernel_name}")
@@ -67,7 +73,11 @@ class DependencyInstallHandler(APIHandler):
             f"&& cd {kernel_name} && micropipenv install --dev", shell=True, cwd=complete_path)
 
         os.chdir(initial_path)
-        self.finish(json.dumps({
+
+        result = {
             "message": "installed with micropipenv",
-            "kernel_name": env_name
-        }))
+            "kernel_name": env_name,
+            "error": False
+        }
+
+        return 0, result
