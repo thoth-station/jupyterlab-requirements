@@ -23,29 +23,31 @@ from tornado import web
 
 
 class BaseSpecHandler(web.StaticFileHandler, APIHandler):
+    """Base class handler."""
 
     @staticmethod
     def get_resource_metadata():
-        """Returns the (resource, mime-type) for the handlers spec.
-        """
+        """Return the (resource, mime-type) for the handlers spec."""
         pass
 
     def initialize(self):
+        """Initialize class."""
         web.StaticFileHandler.initialize(self, path=os.path.dirname(__file__))
 
     @web.authenticated
     def get(self):
+        """Get method."""
         return web.StaticFileHandler.get(self, self.get_resource_metadata()[0])
 
     def get_content_type(self):
+        """Get content type."""
         return self.get_resource_metadata()[1]
 
 
 class YamlSpecHandler(BaseSpecHandler):
-    """Exposes the ability to return specifications from static files"""
+    """Expose the ability to return specifications from static files."""
 
     @staticmethod
     def get_resource_metadata():
-        """Returns the (resource, mime-type) for the handlers spec.
-        """
+        """Return the (resource, mime-type) for the handlers spec."""
         return 'jupyterlab_requirements.yaml', 'text/x-yaml'

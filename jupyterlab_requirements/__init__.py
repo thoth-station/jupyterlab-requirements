@@ -71,7 +71,14 @@ def _load_jupyter_server_extension(lab_app):
 
     # Prepend the base_url so that it works in a jupyterhub setting
     custom_handlers = [
-        (url_path_join(base_url, r'/jupyterlab_requirements/{}'.format(YamlSpecHandler.get_resource_metadata()[0])), YamlSpecHandler),
+        (
+            url_path_join(
+                base_url,
+                r'/jupyterlab_requirements/{}'.format(
+                    YamlSpecHandler.get_resource_metadata()[0]
+                )
+            ), YamlSpecHandler
+        ),
         (url_path_join(base_url, f"/{url_path}/thoth/config"), ThothConfigHandler),
         (url_path_join(base_url, f"/{url_path}/thoth/resolution"), ThothAdviseHandler),
         (url_path_join(base_url, f"/{url_path}/thoth/invectio"), ThothInvectioHandler),
@@ -81,7 +88,13 @@ def _load_jupyter_server_extension(lab_app):
         (url_path_join(base_url, f"/{url_path}/kernel/python"), PythonVersionHandler),
         (url_path_join(base_url, f"/{url_path}/kernel/create"), JupyterKernelHandler),
         (url_path_join(base_url, f"/{url_path}/file/dependencies"), DependenciesFilesHandler),
-        (url_path_join(base_url, r"/jupyterlab_requirements/jupyterlab_requirements/tasks/%s" % r"(?P<index>\d+)"), DependencyManagementBaseHandler),  # GET / DELETE
+        (
+            url_path_join(
+                base_url,
+                r"/jupyterlab_requirements/jupyterlab_requirements/tasks/%s" % r"(?P<index>\d+)"
+            ),
+            DependencyManagementBaseHandler
+        ),  # GET / DELETE
     ]
 
     web_app.add_handlers(host_pattern, custom_handlers)

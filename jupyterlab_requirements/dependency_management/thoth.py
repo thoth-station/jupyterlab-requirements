@@ -19,7 +19,6 @@
 import json
 import os
 import logging
-import tornado
 import tempfile
 
 from pathlib import Path
@@ -40,6 +39,7 @@ class ThothAdviseHandler(DependencyManagementBaseHandler):
 
     @web.authenticated
     def post(self):
+        """Post method for class."""
         input_data = self.get_json_body()
 
         task_index = self._tasks.create_task(self.lock_using_thoth, input_data)

@@ -24,7 +24,7 @@ import tornado
 import json
 
 from tornado import web
-from typing import Any, Dict, Callable, NoReturn
+from typing import Any, Dict, Callable
 
 from jupyter_server.base.handlers import APIHandler
 
@@ -39,6 +39,7 @@ class AsyncTasks:
     task_index = 0
 
     def __init__(self):
+        """Init."""
         self.tasks: Dict[int, asyncio.Task] = dict()
 
     def create_task(self, task: Callable, task_inputs) -> int:
@@ -55,7 +56,7 @@ class AsyncTasks:
             except Exception as e:
                 exc_type, _, exc_traceback = sys.exc_info()
                 result = {
-                    "type": exc_type.__qualname__,
+                    "type": exc_type.__qualname__,  # type: ignore
                     "error": str(e),
                     "task_inputs": task_inputs,
                     "traceback": traceback.format_tb(exc_traceback)
@@ -66,12 +67,14 @@ class AsyncTasks:
 
             return result
 
-        self.tasks[task_index] = asyncio.ensure_future(_run_task(task_index, task, task_inputs))
+        self.tasks[task_index] = asyncio.ensure_future(
+            _run_task(task_index, task, task_inputs)
+        )  # type: ignore
 
         return task_index
 
     def get_task(self, task_index: int) -> Any:
-        """Get the task `idx` results or None"""
+        """Get the task `idx` results or None."""
         if task_index not in self.tasks:
             raise ValueError(f"Task index {task_index} does not exists.")
 
@@ -81,7 +84,7 @@ class AsyncTasks:
         else:
             return None
 
-    def delete_task(self, task_index: int) -> NoReturn:
+    def delete_task(self, task_index: int) -> None:
         """Delete the task using task_index."""
         _LOGGER.debug(f"Cancel task index {task_index}.")
         if task_index not in self.tasks:
@@ -90,6 +93,7 @@ class AsyncTasks:
         self.tasks[task_index].cancel()
 
     def __del__(self):
+        """Destructor."""
         for task in filter(lambda t: not t.cancelled(), self.tasks.values()):
             task.cancel()
 
@@ -114,6 +118,7 @@ class DependencyManagementBaseHandler(APIHandler):
 
         Raises:
             404 if task `index` does not exist
+
         """
         try:
             r = self._tasks.get_task(int(index))

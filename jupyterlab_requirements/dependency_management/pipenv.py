@@ -38,6 +38,7 @@ class PipenvHandler(DependencyManagementBaseHandler):
 
     @web.authenticated
     def post(self):
+        """Post method for class."""
         input_data = self.get_json_body()
 
         task_index = self._tasks.create_task(self.lock_using_pipenv, input_data)

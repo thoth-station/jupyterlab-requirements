@@ -16,7 +16,6 @@
 
 """Install API for jupyterlab requirements."""
 
-import json
 import os
 import subprocess
 import logging
@@ -35,6 +34,7 @@ class DependencyInstallHandler(DependencyManagementBaseHandler):
 
     @web.authenticated
     def post(self):
+        """Post method for class."""
         input_data = self.get_json_body()
 
         task_index = self._tasks.create_task(self.install_dependencies, input_data)
