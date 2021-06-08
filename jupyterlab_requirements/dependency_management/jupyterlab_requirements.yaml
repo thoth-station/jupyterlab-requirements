@@ -1,0 +1,273 @@
+# jupyterlab-requirements
+# Copyright(C) 2021 Francesco Murdaca
+#
+# This program is free software: you can redistribute it and / or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+openapi: 3.0.1
+info:
+  title: Jupyterlab Requirements API
+  version: "1"
+  description: The API for the Jupyterlab Requirements extensions.
+  contact:
+    name: Thoth
+    url: https://github.com/thoth-station/jupyterlab-requirements
+basePath: "/jupyterlab_requirements"
+paths:
+  /jupyterlab_requirements.yaml:
+    get:
+      tags:
+      - api
+      summary: Get API information (yaml).
+      responses:
+        200:
+          description: Returns a swagger specification in yaml.
+          content:
+            text/x-yaml:
+              schema:
+                type: string
+        500:
+          description: Unexpected error.
+
+  /thoth/resolution:
+    post:
+      tags: ["Thoth Resolution Engine"]
+      summary: Submit request to Thoth advise
+      parameters:
+        - name: "kernel_name"
+          description: "Jupyter Kernel name where advise will be requested."
+          required: true
+          type: "string"
+        - name: "thoth_timeout"
+          description: "Timeout for Thoth Resolution Engine."
+          required: true
+          type: "integer"
+        - name: "notebook_content"
+          description: "Jupyter Notebook content for Thoth advise."
+          required: true
+          type: "string"
+        - name: "thoth_config"
+          description: "Thoth configuration file to be submitted to Thoth."
+          required: true
+          type: "string"
+        - name: "requirements"
+          description: "Requirements to be submitted to Thoth for advise."
+          required: true
+          type: "string"
+      responses:
+        "202":
+          description: "Redirect long running task"
+    get:
+      tags: ["Thoth Resolution Engine"]
+      summary: "Get long running task result for thoth resolution"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "taskId"
+          in: "path"
+          description: "Task ID"
+          required: true
+          type: "integer"
+      responses:
+        "200":
+          description: "Successful execution of the task - returns its result"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThothAdvise'
+        "202":
+          description: "Task still running"
+        "404":
+          description: "Task not found"
+        "500":
+          description: "An error occurred when executing the task"
+
+
+  /pipenv:
+    post:
+      tags: ["Pipenv Resolution Engine"]
+      summary: Lock dependencies with Pipenv Resolution Engine
+      parameters:
+        - name: "kernel_name"
+          description: "Jupyter Kernel name where advise will be requested."
+          required: true
+          type: "string"
+        - name: "requirements"
+          description: "Requirements to be submitted to Thoth for advise."
+          required: true
+          type: "string"
+      responses:
+        "202":
+          description: "Redirect long running task"
+    get:
+      tags: ["Thoth Resolution Engine"]
+      summary: "Get long running task result for pipenv resolution"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "taskId"
+          in: "path"
+          description: "Task ID"
+          required: true
+          type: "integer"
+      responses:
+        "200":
+          description: "Successful execution of the task - returns its result"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipenvResult'
+        "202":
+          description: "Task still running"
+        "404":
+          description: "Task not found"
+        "500":
+          description: "An error occurred when executing the task"
+
+  /kernel/install:
+    post:
+      tags: ["Install dependencies in the kernel"]
+      summary: Lock dependencies with Pipenv Resolution Engine
+      parameters:
+        - name: "kernel_name"
+          description: "Jupyter Kernel name where advise will be requested."
+          required: true
+          type: "string"
+        - name: "resolution_engine"
+          description: "Resolution engine used to lock dependencies."
+          required: true
+          type: "string"
+      responses:
+        "202":
+          description: "Redirect long running task"
+    get:
+      tags: ["Install dependencies in the kernel"]
+      summary: "Get long running task result for pipenv resolution"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "taskId"
+          in: "path"
+          description: "Task ID"
+          required: true
+          type: "integer"
+      responses:
+        "200":
+          description: "Successful execution of the task - returns its result"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PipenvResult'
+        "202":
+          description: "Task still running"
+        "404":
+          description: "Task not found"
+        "500":
+          description: "An error occurred when executing the task"
+
+  /tasks/{taskId}:
+    get:
+      tags:
+        - "task"
+      summary: "Get long running task result"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "taskId"
+          in: "path"
+          description: "Task ID"
+          required: true
+          type: "integer"
+      responses:
+        "200":
+          description: "Successful execution of the task - returns its result"
+        "202":
+          description: "Task still running"
+        "404":
+          description: "Task not found"
+        "500":
+          description: "An error occurred when executing the task"
+    delete:
+      tags:
+        - "task"
+      summary: "Stop the long running task"
+      parameters:
+        - name: "taskId"
+          in: "path"
+          description: "ID of the order that needs to be deleted"
+          required: true
+          type: "integer"
+      responses:
+        "204":
+          description: "Task cancelled"
+        "404":
+          description: "Task not found"
+
+components:
+  schemas:
+    ThothAdvise:
+      description: Thoth advise response.
+      required:
+        - requirements
+        - requirement_lock
+        - error
+        - error_msg
+      type: object
+      properties:
+        requirements:
+          type: string
+          description: Pipfile.
+        requirement_lock:
+          type: string
+          description: Pipfile.lock.
+        error:
+          type: boolean
+          description: Error present in thoth adviser answer.
+        error_msg:
+          type: string
+          description: Error message present only if error is true, otherwise empty string.
+
+    PipenvResult:
+      description: Pipenv response.
+      required:
+        - requirement_lock
+        - error
+      type: object
+      properties:
+        requirement_lock:
+          type: string
+          description: Pipfile.lock.
+        error:
+          type: boolean
+          description: Error present in pipenv resolution
+        error_msg:
+          type: string
+          description: Error message present only if error is true, otherwise empty string.
+
+    InstallHanlderResult:
+      description: Install handler result.
+      required:
+        - message
+        - kernel_name
+        - error
+      type: object
+      properties:
+        message:
+          type: string
+          description: Message related to installation.
+        kernel_name:
+          type: string
+          description: Name of the kernel where dependencies are installed.
+        error:
+          type: boolean
+          description: Error present in thoth adviser answer.

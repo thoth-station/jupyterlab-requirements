@@ -15,8 +15,7 @@ import { Dialog } from '@jupyterlab/apputils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
 
-import { MessageLoop } from '@lumino/messaging';
-import { Widget } from '@lumino/widgets';
+// import { ISignal, Signal } from '@lumino/signaling';
 import { IDisposable } from '@lumino/disposable';
 
 import { get_requirements, get_requirement_lock, get_thoth_configuration, get_resolution_engine } from "./notebook";
@@ -61,7 +60,7 @@ export class ManageDependenciesButtonExtension
                     loaded_resolution_engine: initial_resolution_engine
                 })
             );
-        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+
         const ui = {
             title: 'Manage Dependencies',
             body: widget,
