@@ -16,6 +16,8 @@
 
 """Dependency Management APIs for jupyter server."""
 
+from .api import YamlSpecHandler
+from .base import DependencyManagementBaseHandler
 from .dependencies_files_handler import DependenciesFilesHandler
 from .discover_handler import DependencyInstalledHandler
 from .discover_handler import PythonVersionHandler
@@ -27,6 +29,7 @@ from .thoth_config_handler import ThothConfigHandler
 from .thoth_invectio import ThothInvectioHandler
 
 __all__ = [
+    "DependencyManagementBaseHandler",
     "DependenciesFilesHandler",
     "DependencyInstallHandler",
     "DependencyInstalledHandler",
@@ -35,5 +38,6 @@ __all__ = [
     "PythonVersionHandler",
     "ThothAdviseHandler",
     "ThothConfigHandler",
-    "ThothInvectioHandler"
+    "ThothInvectioHandler",
+    "YamlSpecHandler"
 ]
