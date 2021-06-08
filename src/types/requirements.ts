@@ -16,12 +16,6 @@ export interface Requires {
     python_version: string
 }
 
-export interface SourcesEntity {
-    name: string
-    url: string
-    verify_ssl: boolean
-}
-
 export interface Requirements {
     packages: { [ name: string ]: string }
     requires: Requires
@@ -30,6 +24,13 @@ export interface Requirements {
 }
 
 // Requirements Lock
+
+export interface SourcesEntity {
+    name: string
+    url: string
+    verify_ssl: boolean
+}
+
 export interface Hash {
     sha256: string
 }
