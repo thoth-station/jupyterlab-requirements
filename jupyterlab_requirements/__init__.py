@@ -48,9 +48,7 @@ def _jupyter_server_extension_paths():
     Returns a list of dictionaries with metadata describing
     where to find the `_load_jupyter_server_extension` function.
     """
-    return [
-        {"module": "jupyterlab_requirements"}
-    ]
+    return [{"module": "jupyterlab_requirements"}]
 
 
 def _load_jupyter_server_extension(lab_app):
@@ -63,7 +61,7 @@ def _load_jupyter_server_extension(lab_app):
 
     """
     web_app = lab_app.web_app
-    host_pattern = '.*$'
+    host_pattern = ".*$"
 
     base_url = web_app.settings["base_url"]
 
@@ -72,12 +70,8 @@ def _load_jupyter_server_extension(lab_app):
     # Prepend the base_url so that it works in a jupyterhub setting
     custom_handlers = [
         (
-            url_path_join(
-                base_url,
-                r'/jupyterlab_requirements/{}'.format(
-                    YamlSpecHandler.get_resource_metadata()[0]
-                )
-            ), YamlSpecHandler
+            url_path_join(base_url, r"/jupyterlab_requirements/{}".format(YamlSpecHandler.get_resource_metadata()[0])),
+            YamlSpecHandler,
         ),
         (url_path_join(base_url, f"/{url_path}/thoth/config"), ThothConfigHandler),
         (url_path_join(base_url, f"/{url_path}/thoth/resolution"), ThothAdviseHandler),
@@ -90,11 +84,8 @@ def _load_jupyter_server_extension(lab_app):
         (url_path_join(base_url, f"/{url_path}/file/directory"), RootPathHandler),
         (url_path_join(base_url, f"/{url_path}/file/dependencies"), DependenciesFilesHandler),
         (
-            url_path_join(
-                base_url,
-                r"/jupyterlab_requirements/jupyterlab_requirements/tasks/%s" % r"(?P<index>\d+)"
-            ),
-            DependencyManagementBaseHandler
+            url_path_join(base_url, r"/jupyterlab_requirements/jupyterlab_requirements/tasks/%s" % r"(?P<index>\d+)"),
+            DependencyManagementBaseHandler,
         ),  # GET / DELETE
     ]
 

@@ -50,4 +50,4 @@ class YamlSpecHandler(BaseSpecHandler):
     @staticmethod
     def get_resource_metadata():
         """Return the (resource, mime-type) for the handlers spec."""
-        return 'jupyterlab_requirements.yaml', 'text/x-yaml'
+        return "jupyterlab_requirements.yaml", "text/x-yaml"

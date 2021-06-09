@@ -3,10 +3,7 @@ import os
 
 from pathlib import Path
 
-from jupyter_packaging import (
-    create_cmdclass, install_npm, ensure_targets,
-    combine_commands
-)
+from jupyter_packaging import create_cmdclass, install_npm, ensure_targets, combine_commands
 import setuptools
 
 HERE = Path(__file__).parent.resolve()
@@ -37,11 +34,7 @@ jstargets = [
     os.path.join(lab_path, "package.json"),
 ]
 
-package_data_spec = {
-    name: [
-        "*"
-    ]
-}
+package_data_spec = {name: ["*"]}
 
 # name of the labextension
 labext_name = "jupyterlab_requirements"
@@ -49,25 +42,17 @@ labext_name = "jupyterlab_requirements"
 data_files_spec = [
     ("share/jupyter/labextensions/%s" % labext_name, str(lab_path), "**"),
     ("share/jupyter/labextensions/%s" % labext_name, str(HERE), "install.json"),
-    (
-        "etc/jupyter/jupyter_server_config.d",
-        "jupyter-config/jupyter_server_config.d",
-        "jupyterlab_requirements.json"
-    ),
+    ("etc/jupyter/jupyter_server_config.d", "jupyter-config/jupyter_server_config.d", "jupyterlab_requirements.json"),
     (
         "etc/jupyter/jupyter_notebook_config.d",
-        'jupyter-config/jupyter_notebook_config.d',
-        'jupyterlab_requirements.json'
-    )
+        "jupyter-config/jupyter_notebook_config.d",
+        "jupyterlab_requirements.json",
+    ),
 ]
 
 # To deploy simultaneously the frontend and the backend,
 # the frontend NPM package needs to be built and inserted in the Python package.
-cmdclass = create_cmdclass(
-    "jsdeps",
-    package_data_spec=package_data_spec,
-    data_files_spec=data_files_spec
-)
+cmdclass = create_cmdclass("jsdeps", package_data_spec=package_data_spec, data_files_spec=data_files_spec)
 
 cmdclass["jsdeps"] = combine_commands(
     # it will build the frontend NPM package
@@ -82,9 +67,9 @@ README: str = Path(HERE, "README.md").read_text(encoding="utf-8")
 
 
 def _get_install_requires():
-    with open('requirements.txt', 'r') as requirements_file:
+    with open("requirements.txt", "r") as requirements_file:
         res = requirements_file.readlines()
-        return [req.split(' ', maxsplit=1)[0] for req in res if req]
+        return [req.split(" ", maxsplit=1)[0] for req in res if req]
 
 
 setup_args = dict(
@@ -94,7 +79,7 @@ setup_args = dict(
     author="Francesco Murdaca",
     author_email="fmurdaca@redhat.com",
     description="JupyterLab Extension for dependency management and optimization",
-    long_description= README,
+    long_description=README,
     long_description_content_type="text/markdown",
     cmdclass=cmdclass,
     packages=setuptools.find_packages(),
@@ -102,7 +87,7 @@ setup_args = dict(
     zip_safe=False,
     include_package_data=True,
     python_requires=">=3.8",
-    license='GPLv3+',
+    license="GPLv3+",
     platforms="Linux, Mac OS X, Windows",
     keywords=["Jupyter", "JupyterLab"],
     classifiers=[

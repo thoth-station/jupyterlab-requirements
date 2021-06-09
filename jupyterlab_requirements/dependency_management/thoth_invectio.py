@@ -52,9 +52,7 @@ class ThothInvectioHandler(APIHandler):
 
         report = visitor.get_module_report()
 
-        libs = filter(
-            lambda k: k not in std_lib | set(sys.builtin_module_names), report
-        )
+        libs = filter(lambda k: k not in std_lib | set(sys.builtin_module_names), report)
         library_gathered = list(libs)
         _LOGGER.info("Thoth invectio library gathered: %r", library_gathered)
         self.finish(json.dumps(library_gathered))

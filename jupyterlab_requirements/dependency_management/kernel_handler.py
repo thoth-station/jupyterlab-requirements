@@ -42,7 +42,7 @@ class JupyterKernelHandler(APIHandler):
         home = Path.home()
         complete_path = home.joinpath(".local/share/thoth/kernels")
 
-        _LOGGER.info(f"Setting new jupyter kernel {kernel_name} from {complete_path}/{kernel_name}." )
+        _LOGGER.info(f"Setting new jupyter kernel {kernel_name} from {complete_path}/{kernel_name}.")
 
         # TODO: Check if ipykernel is installed, otherwise install it
         # _ = subprocess.run(
@@ -54,7 +54,7 @@ class JupyterKernelHandler(APIHandler):
 
         _ = subprocess.run(f". {kernel_name}/bin/activate && pip install ipykernel", shell=True, cwd=complete_path)
 
-        _LOGGER.debug(f"Installing kernelspec called {kernel_name}." )
+        _LOGGER.debug(f"Installing kernelspec called {kernel_name}.")
 
         try:
             process_output = subprocess.run(
@@ -66,9 +66,7 @@ class JupyterKernelHandler(APIHandler):
             )
             _LOGGER.info(process_output.stdout.decode("utf-8"))
 
-        except Exception as e :
+        except Exception as e:
             _LOGGER.error(f"Could not enter environment {e}")
 
-        self.finish(json.dumps({
-            "data": f"installed kernel {kernel_name} at {complete_path}"
-        }))
+        self.finish(json.dumps({"data": f"installed kernel {kernel_name} at {complete_path}"}))

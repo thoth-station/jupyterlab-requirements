@@ -38,11 +38,7 @@ class DependenciesFilesHandler(APIHandler):
     @web.authenticated
     def get(self):
         """Retrieve requirements files from local disk."""
-        dependencies = {
-            "error": False,
-            "requirements": "",
-            "requirements_lock": ""
-        }
+        dependencies = {"error": False, "requirements": "", "requirements_lock": ""}
 
         requirements_format = "pipenv"
 
@@ -51,8 +47,8 @@ class DependenciesFilesHandler(APIHandler):
             requirements = project.pipfile.to_dict()
             requirements_lock = project.pipfile_lock.to_dict()
 
-            dependencies['requirements'] = requirements
-            dependencies['requirements_lock'] = requirements_lock
+            dependencies["requirements"] = requirements
+            dependencies["requirements_lock"] = requirements_lock
 
         except Exception as e:
             _LOGGER.warning(e)
@@ -80,8 +76,7 @@ class DependenciesFilesHandler(APIHandler):
 
         # Delete and recreate folder
         if env_path.exists():
-            _ = subprocess.call(
-                f"rm -rf ./{kernel_name} ", shell=True, cwd=Path(complete_path).joinpath(path_to_store))
+            _ = subprocess.call(f"rm -rf ./{kernel_name} ", shell=True, cwd=Path(complete_path).joinpath(path_to_store))
 
         env_path.mkdir(parents=True, exist_ok=True)
 
@@ -96,12 +91,7 @@ class DependenciesFilesHandler(APIHandler):
 
         if requirements_format == "pipenv":
             _LOGGER.debug("Writing to Pipfile/Pipfile.lock in %r", env_path)
-            project.to_files(
-                pipfile_path=pipfile_path,
-                pipfile_lock_path=pipfile_lock_path
-            )
+            project.to_files(pipfile_path=pipfile_path, pipfile_lock_path=pipfile_lock_path)
 
         os.chdir(initial_path)
-        self.finish(json.dumps({
-            "message": f"Successfully stored requirements at {env_path}!"
-        }))
+        self.finish(json.dumps({"message": f"Successfully stored requirements at {env_path}!"}))

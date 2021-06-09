@@ -22,7 +22,7 @@ hypothesis-auto = "*"
 hypothesis = "*"
 pytest-mypy = "*"
 mypy = "*"
-pre-commit = "==2.0.1"
+pre-commit = "*"
 
 [requires]
 python_version = "3.8"

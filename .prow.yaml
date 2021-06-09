@@ -11,3 +11,24 @@ presubmits:
             - "pre-commit"
             - "run"
             - "--all-files"
+
+
+  - name: thoth-mypy-py38
+    decorate: true
+    skip_report: false
+    always_run: true
+    context: aicoe-ci/prow/mypy
+    spec:
+      containers:
+        - image: quay.io/thoth-station/thoth-pytest-ubi8-py38:v0.12.5
+          command:
+            - "/usr/local/bin/mypy"
+            - "."
+            - "--ignore-missing-imports"
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1"

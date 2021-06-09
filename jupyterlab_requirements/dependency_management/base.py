@@ -59,7 +59,7 @@ class AsyncTasks:
                     "type": exc_type.__qualname__,  # type: ignore
                     "error": str(e),
                     "task_inputs": task_inputs,
-                    "traceback": traceback.format_tb(exc_traceback)
+                    "traceback": traceback.format_tb(exc_traceback),
                 }
                 _LOGGER.error(f"Error for task index {task_index}: {result}")
             else:
@@ -67,9 +67,7 @@ class AsyncTasks:
 
             return result
 
-        self.tasks[task_index] = asyncio.ensure_future(
-            _run_task(task_index, task, task_inputs)
-        )  # type: ignore
+        self.tasks[task_index] = asyncio.ensure_future(_run_task(task_index, task, task_inputs))  # type: ignore
 
         return task_index
 
