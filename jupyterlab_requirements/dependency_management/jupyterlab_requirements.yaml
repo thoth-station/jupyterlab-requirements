@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-swagger: "2.0"
+openapi: 3.0.1
 info:
   title: Jupyterlab Requirements API
   version: "0.7.0"
@@ -92,6 +92,39 @@ paths:
         "500":
           description: "An error occurred when executing the task"
 
+/thoth/config:
+    post:
+      tags: ["Thoth Resolution Engine"]
+      summary: Handle Thoth config.
+      parameters:
+        - name: "kernel_name"
+          description: "Jupyter Kernel name where advise will be requested."
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: Thoth Config.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThothConfig"
+
+  /thoth/invectio:
+    post:
+      tags: ["Thoth Resolution Engine"]
+      summary: Receive analysis from thoth invectio.
+      parameters:
+        - name: "notebook_content"
+          description: "Notebook content."
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: Invectio libraries gathered.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThothInvectio"
 
   /pipenv:
     post:
@@ -136,7 +169,7 @@ paths:
 
   /kernel/install:
     post:
-      tags: ["Install dependencies in the kernel"]
+      tags: ["Kernel actions"]
       summary: Install dependencies with micropipenv.
       parameters:
         - name: "kernel_name"
@@ -151,7 +184,7 @@ paths:
         "202":
           description: "Redirect long running task"
     get:
-      tags: ["Install dependencies in the kernel"]
+      tags: ["Kernel actions"]
       summary: "Get status of installation with micropipenv."
       produces:
         - "application/json"
@@ -174,6 +207,97 @@ paths:
           description: "Task not found"
         "500":
           description: "An error occurred when executing the task"
+
+  /kernel/packages:
+    post:
+      tags: ["Kernel actions"]
+      summary: Receive analysis from thoth invectio.
+      parameters:
+        - name: "kernel_name"
+          description: "Kernel name."
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: Packages installed in the kernel.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KernelPackages"
+
+  /kernel/python:
+    get:
+      tags: ["Kernel actions"]
+      summary: Discover python version in the kernel.
+      responses:
+        "200":
+          description: Python version in the kernel.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KernelPython"
+
+  /kernel/create:
+    post:
+      tags: ["Kernel actions"]
+      summary: Create kernel using virtualenv.
+      parameters:
+        - name: "kernel_name"
+          description: "Kernel name."
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: Created kernel.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KernelCreated"
+
+  /file/directory:
+    get:
+      tags: ["File handlers"]
+      summary: Discover root directory for the project.
+      responses:
+        "200":
+          description: Path of the root directory discovered.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileDirectory"
+
+  /file/dependencies:
+    post:
+      tags: ["File handler"]
+      summary: Store requirements files to disk.
+      parameters:
+        - name: "kernel_name"
+          description: "Jupyter Kernel name where dependency files will be stored."
+          required: true
+          type: "string"
+        - name: "requirements"
+          description: "Pipfile."
+          required: true
+          type: "string"
+        - name: "requirements_lock"
+          description: "Pipfile.lock."
+          required: true
+          type: "string"
+        - name: "complete_path"
+          description: "Complete path used for root directory."
+          required: true
+          type: "string"
+        - name: "path_to_store"
+          description: "Path added to the complete path where files are actually stored."
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: Created kernel.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileStored"
 
   /tasks/{taskId}:
     get:
@@ -236,6 +360,56 @@ components:
         error_msg:
           type: string
           description: Error message present only if error is true, otherwise empty string.
+
+    ThothConfig:
+      type: object
+      description: Response when request for thoth config is run.
+
+    ThothInvectio:
+      description: Gathered libraries from thoth invectio.
+      type: object
+      properties:
+        gathered_libraries:
+          type: array
+          description: List of gathered libraries using invectio.
+          items:
+            type: string
+            description: Package identified by invectio.
+
+    KernelPackages:
+      description: Packages installed in the kernel.
+      type: object
+      properties:
+        gathered_libraries:
+          type: array
+          description: List of installed packages in the kernel (pip list).
+          items:
+            type: string
+            description: Package identified in the kernel.
+  
+    KernelPython:
+      description: Python version discovered in the Kernel.
+      type: string
+
+    KernelCreated:
+      description: Created kernel in virtualenv.
+      type: object
+      properties:
+        data:
+          type: string
+          description: Message after kernel was created.
+
+    FileDirectory:
+      description: Path for the root directory.
+      type: string
+
+    FileStored:
+      description: Store dependencies files in the kernel.
+      type: object
+      properties:
+        message:
+          type: string
+          description: Message after files are stored.
 
     PipenvResult:
       description: Pipenv response.
