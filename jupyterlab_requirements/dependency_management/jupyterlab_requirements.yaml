@@ -252,7 +252,7 @@ paths:
 
   /file/directory:
     get:
-      tags: ["File handlers"]
+      tags: ["File handler"]
       summary: Discover root directory for the project.
       responses:
         "200":
