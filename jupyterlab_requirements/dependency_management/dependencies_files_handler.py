@@ -26,7 +26,6 @@ from pathlib import Path
 from jupyter_server.base.handlers import APIHandler
 from tornado import web
 
-from thamos.lib import load_files
 from thoth.python import Project
 
 _LOGGER = logging.getLogger("jupyterlab_requirements.dependencies_files_handler")
