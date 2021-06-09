@@ -14,10 +14,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
-openapi: 3.0.1
+swagger: "2.0"
 info:
   title: Jupyterlab Requirements API
-  version: "1"
+  version: "0.7.0"
   description: The API for the Jupyterlab Requirements extensions.
   contact:
     name: Thoth
@@ -27,7 +27,7 @@ paths:
   /jupyterlab_requirements.yaml:
     get:
       tags:
-      - api
+      - API
       summary: Get API information (yaml).
       responses:
         200:
@@ -178,7 +178,7 @@ paths:
   /tasks/{taskId}:
     get:
       tags:
-        - "task"
+        - "Task"
       summary: "Get long running task result"
       produces:
         - "application/json"
@@ -199,7 +199,7 @@ paths:
           description: "An error occurred when executing the task"
     delete:
       tags:
-        - "task"
+        - "Task"
       summary: "Stop the long running task"
       parameters:
         - name: "taskId"

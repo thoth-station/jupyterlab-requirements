@@ -27,7 +27,6 @@ from tornado import web
 
 from thamos.config import _Configuration
 
-from jupyterlab_requirements.dependency_management.common import select_complete_path
 
 _LOGGER = logging.getLogger("jupyterlab_requirements.thoth_config_handler")
 
@@ -74,8 +73,7 @@ class ThothConfigHandler(APIHandler):
         input_data = self.get_json_body()
         new_runtime_environment: str = input_data["runtime_environment"]
         force: bool = input_data["force"]
-
-        complete_path = select_complete_path()
+        complete_path: str = input_data["complete_path"]
 
         os.chdir(complete_path)
 

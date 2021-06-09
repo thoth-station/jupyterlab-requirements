@@ -38,13 +38,15 @@ export async function retrieve_config_file (
 export async function update_thoth_config_on_disk (
   runtime_environment: RuntimeEnvironment,
   force: boolean,
+  complete_path: string,
   init: RequestInit = {}
 ): Promise<string> {
 
   // PUT request
   const dataToSend = {
     runtime_environment: runtime_environment,
-    force: force
+    force: force,
+    complete_path: complete_path
   };
 
   const endpoint: string = 'thoth/config'

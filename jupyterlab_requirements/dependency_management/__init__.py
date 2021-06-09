@@ -21,6 +21,7 @@ from .base import DependencyManagementBaseHandler
 from .dependencies_files_handler import DependenciesFilesHandler
 from .discover_handler import DependencyInstalledHandler
 from .discover_handler import PythonVersionHandler
+from .discover_handler import RootPathHandler
 from .kernel_handler import JupyterKernelHandler
 from .install_handler import DependencyInstallHandler
 from .pipenv import PipenvHandler
@@ -36,6 +37,7 @@ __all__ = [
     "JupyterKernelHandler",
     "PipenvHandler",
     "PythonVersionHandler",
+    "RootPathHandler",
     "ThothAdviseHandler",
     "ThothConfigHandler",
     "ThothInvectioHandler",
