@@ -237,7 +237,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
      */
 
      setRootDirectoryPath(event: React.ChangeEvent<HTMLInputElement>) {
-      
+
       var root_directory = event.target.value
 
       // TODO: Check if Path exists!
@@ -250,7 +250,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
     }
 
-    
+
     /**
      * Function: Set recommendation type for thamos advise
      */
