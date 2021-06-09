@@ -494,7 +494,7 @@ export async function store_dependencies_on_disk (
     requirements: Requirements,
     requirements_lock: RequirementsLock,
     path_to_store: string,
-    using_home_path_base: boolean
+    complete_path: string
   ) {
     // TODO: Requested from the user (in this case it is to install them)
     const store_message: string = await store_dependencies(
@@ -502,7 +502,7 @@ export async function store_dependencies_on_disk (
         JSON.stringify(requirements),
         JSON.stringify(requirements_lock),
         path_to_store,
-        using_home_path_base
+        complete_path
     );
 
     console.debug("Store message", store_message);

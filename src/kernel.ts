@@ -135,7 +135,7 @@ export async function store_dependencies (
     requirements: string,
     requirement_lock: string,
     path_to_store: string = ".local/share/thoth/kernels",
-    using_home_path_base: boolean = true,
+    complete_path: string,
     init: RequestInit = {},
   ): Promise<string> {
 
@@ -145,7 +145,7 @@ export async function store_dependencies (
       requirements: requirements,
       requirement_lock: requirement_lock,
       path_to_store: path_to_store,
-      using_home_path_base: using_home_path_base
+      complete_path: complete_path
     };
 
     const endpoint: string = 'file/dependencies'
@@ -188,4 +188,23 @@ export async function gather_library_usage(
     console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
   }
 
+}
+
+/**
+ * Function: Attempt to discover root directory for the project.
+ */
+
+export async function discover_root_directory(
+  init: RequestInit = {},
+): Promise<string> {
+  const endpoint: string = 'file/directory'
+
+  try {
+    const root_directory = await requestAPI<any>(endpoint, {
+      method: 'GET'
+    });
+    return JSON.parse(JSON.stringify(root_directory));
+  } catch (reason) {
+    console.error('Error on GET /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
+  }
 }

@@ -27,7 +27,8 @@ import { ThothConfig } from '../types/thoth';
 
 import {
   install_packages,
-  create_new_kernel
+  create_new_kernel,
+  discover_root_directory
 } from '../kernel';
 
 import {
@@ -93,7 +94,8 @@ export interface IDependencyManagementUIState {
   error_msg: string,
   resolution_engine: string,
   thoth_timeout: number,
-  isEditing: boolean
+  isEditing: boolean,
+  root_directory: string
 }
 
 /**
@@ -141,6 +143,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         resolution_engine: "thoth",
         thoth_timeout: 180,
         isEditing: false,
+        root_directory: ""
       }
 
       this.onStart = this.onStart.bind(this),
@@ -160,6 +163,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       this.setKernelName = this.setKernelName.bind(this)
       this.setRecommendationType = this.setRecommendationType.bind(this)
       this.setTimeout = this.setTimeout.bind(this)
+      this.setRootDirectoryPath = this.setRootDirectoryPath.bind(this)
 
       this._model = new KernelModel ( this.props.panel.sessionContext )
     }
@@ -228,6 +232,25 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
     }
 
+    /**
+     * Function: Set root directory where to place overlays and where to find .thoth.yaml
+     */
+
+     setRootDirectoryPath(event: React.ChangeEvent<HTMLInputElement>) {
+      
+      var root_directory = event.target.value
+
+      // TODO: Check if Path exists!
+
+      this.setState(
+        {
+          root_directory: root_directory
+        }
+      );
+
+    }
+
+    
     /**
      * Function: Set recommendation type for thamos advise
      */
@@ -638,7 +661,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
           advise.requirements,
           advise.requirement_lock,
           'overlays',
-          false
+          this.state.root_directory
         )
       } catch ( error ) {
 
@@ -649,7 +672,8 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       try {
         await update_thoth_config_on_disk(
           this.state.thoth_config.runtime_environments[0],
-          true
+          true,
+          this.state.root_directory
           )
         } catch ( error ) {
         console.debug("Error updating thoth config on disk", error)
@@ -726,7 +750,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
           notebookMetadataRequirements,
           result.requirements_lock,
           'overlays',
-          false
+          this.state.root_directory
         )
 
       } catch ( error ) {
@@ -750,6 +774,8 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       // `
       // await this.execute_code_in_kernel(script)
 
+      const root_directory = await discover_root_directory()
+
       var ui_on_start_state = await parse_inputs_from_metadata(
         this.state,
         this.props.panel,
@@ -758,6 +784,8 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         this.props.loaded_requirements_lock,
         this.props.loaded_resolution_engine
       )
+
+      _.set(ui_on_start_state, "root_directory", root_directory)
 
       await this.setNewState(ui_on_start_state);
       return
@@ -822,6 +850,17 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                                 name="kernel_name"
                                 value={this.state.kernel_name}
                                 onChange={this.setKernelName}
+                              />
+                            </label>
+                            <br />
+                            <label>
+                              Path root project:
+                              <input
+                                title="Path root project"
+                                type="text"
+                                name="root_directory"
+                                value={this.state.root_directory}
+                                onChange={this.setRootDirectoryPath}
                               />
                             </label>
                             <br />
@@ -967,7 +1006,6 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
               {addPlusSaveContainers}
             </div>
           );
-
 
         case "saved":
           return (
