@@ -58,26 +58,24 @@ class DependencyInstallHandler(DependencyManagementBaseHandler):
 
         os.chdir(complete_path)
 
-        package_manager: str = 'micropipenv'
+        package_manager: str = "micropipenv"
 
-        _LOGGER.info(f"Installing requirements using {package_manager} in virtualenv at {env_path}." )
+        _LOGGER.info(f"Installing requirements using {package_manager} in virtualenv at {env_path}.")
 
-        #1. Creating new environment
+        # 1. Creating new environment
         if resolution_engine != "pipenv":
             cli_run([str(env_path)])
 
         # TODO: Check if micropipenv is installed
-        #2. Install using micropipenv
+        # 2. Install using micropipenv
         _ = subprocess.call(
-            f". {kernel_name}/bin/activate "
-            f"&& cd {kernel_name} && micropipenv install --dev", shell=True, cwd=complete_path)
+            f". {kernel_name}/bin/activate " f"&& cd {kernel_name} && micropipenv install --dev",
+            shell=True,
+            cwd=complete_path,
+        )
 
         os.chdir(initial_path)
 
-        result = {
-            "message": "installed with micropipenv",
-            "kernel_name": env_name,
-            "error": False
-        }
+        result = {"message": "installed with micropipenv", "kernel_name": env_name, "error": False}
 
         return 0, result

@@ -41,5 +41,5 @@ __all__ = [
     "ThothAdviseHandler",
     "ThothConfigHandler",
     "ThothInvectioHandler",
-    "YamlSpecHandler"
+    "YamlSpecHandler",
 ]

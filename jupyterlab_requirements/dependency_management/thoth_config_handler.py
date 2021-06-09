@@ -87,14 +87,11 @@ class ThothConfigHandler(APIHandler):
                 raise Exception("Thoth config file could not be created! %r", e)
 
         configuration.set_runtime_environment(
-            runtime_environment=new_runtime_environment,
-            force=force  # TODO: force should be user choice?
+            runtime_environment=new_runtime_environment, force=force  # TODO: force should be user choice?
         )
         configuration.save_config()
 
         _LOGGER.info("Updated Thoth config: %r", configuration.content)
 
         os.chdir(initial_path)
-        self.finish(json.dumps({
-            "message": f"Successfully updated thoth config at {initial_path}!"
-        }))
+        self.finish(json.dumps({"message": f"Successfully updated thoth config at {initial_path}!"}))

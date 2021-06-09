@@ -70,20 +70,16 @@ class ThothAdviseHandler(DependencyManagementBaseHandler):
         _LOGGER.info("Resolution engine used: thoth")
         pipfile_string = Pipfile.from_dict(requirements).to_string()
 
-        _LOGGER.info(f"Current path: %r ", env_path.as_posix())
+        _LOGGER.info("Current path: %r ", env_path.as_posix())
         _LOGGER.info(f"Input Pipfile: \n{pipfile_string}")
 
         advise = {"requirements": {}, "requirement_lock": {}, "error": False, "error_msg": ""}
         returncode = 0
 
-        temp = tempfile.NamedTemporaryFile(prefix="jl_thoth_", mode='w+t')
+        temp = tempfile.NamedTemporaryFile(prefix="jl_thoth_", mode="w+t")
 
         try:
-            adviser_inputs = {
-                "pipfile": pipfile_string,
-                "config": config,
-                "origin": origin
-            }
+            adviser_inputs = {"pipfile": pipfile_string, "config": config, "origin": origin}
             _LOGGER.info("Adviser inputs are: %r", adviser_inputs)
 
             temp.write(notebook_content)
@@ -99,7 +95,7 @@ class ThothAdviseHandler(DependencyManagementBaseHandler):
                 source_type=ThothAdviserIntegrationEnum.JUPYTER_NOTEBOOK,
                 no_static_analysis=False,
                 timeout=timeout,
-                src_path=temp.name
+                src_path=temp.name,
             )
 
             _LOGGER.info(f"Response: {response}")
@@ -110,7 +106,7 @@ class ThothAdviseHandler(DependencyManagementBaseHandler):
             result, error_result = response
 
             if error_result:
-                advise['error'] = True
+                advise["error"] = True
                 advise["error_msg"] = error_result
                 returncode = 1
 
@@ -124,15 +120,13 @@ class ThothAdviseHandler(DependencyManagementBaseHandler):
                     _LOGGER.debug(f"Stack info {stack_info}")
 
                     pipfile = result["report"]["products"][0]["project"]["requirements"]
-                    pipfile_lock = result["report"]["products"][0]["project"][
-                        "requirements_locked"
-                    ]
+                    pipfile_lock = result["report"]["products"][0]["project"]["requirements_locked"]
 
-                    advise = {"requirements": pipfile, "requirement_lock": pipfile_lock, "error": False }
+                    advise = {"requirements": pipfile, "requirement_lock": pipfile_lock, "error": False}
 
         except Exception as api_error:
             _LOGGER.warning(f"error locking dependencies using Thoth: {api_error}")
-            advise['error'] = True
+            advise["error"] = True
             advise["error_msg"] = "Error locking dependencies, check pod logs for more details about the error."
             returncode = 1
 
@@ -141,7 +135,7 @@ class ThothAdviseHandler(DependencyManagementBaseHandler):
 
         _LOGGER.info(f"advise received: {advise}")
 
-        if not advise['error']:
+        if not advise["error"]:
             try:
                 requirements_format = "pipenv"
 
@@ -152,10 +146,7 @@ class ThothAdviseHandler(DependencyManagementBaseHandler):
 
                 if requirements_format == "pipenv":
                     _LOGGER.info("Writing to Pipfile/Pipfile.lock in %r", env_path.as_posix())
-                    project.to_files(
-                        pipfile_path=pipfile_path,
-                        pipfile_lock_path=pipfile_lock_path
-                    )
+                    project.to_files(pipfile_path=pipfile_path, pipfile_lock_path=pipfile_lock_path)
             except Exception as e:
                 _LOGGER.warning("Requirements files have not been stored successfully %r", e)
 

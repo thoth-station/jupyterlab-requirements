@@ -45,18 +45,15 @@ class DependencyInstalledHandler(APIHandler):
         complete_path = home.joinpath(".local/share/thoth/kernels")
 
         process_output = subprocess.run(
-            f". {kernel_name}/bin/activate && pip list",
-            shell=True,
-            capture_output=True,
-            cwd=complete_path
+            f". {kernel_name}/bin/activate && pip list", shell=True, capture_output=True, cwd=complete_path
         )
 
-        processed_list = process_output.stdout.decode("utf-8").split('\n')[2:]
+        processed_list = process_output.stdout.decode("utf-8").split("\n")[2:]
         packages = {}
 
         for processed_package in processed_list:
             if processed_package:
-                package_version = [el for el in processed_package.split(' ') if el != '']
+                package_version = [el for el in processed_package.split(" ") if el != ""]
                 packages[package_version[0]] = package_version[1]
 
         self.finish(json.dumps(packages))
@@ -80,19 +77,14 @@ class RootPathHandler(APIHandler):
     def get(self):
         """Discover root directory of the project."""
         try:
-            process_output = subprocess.run(
-                'git rev-parse --show-toplevel',
-                capture_output=True,
-                shell=True
-            )
+            process_output = subprocess.run("git rev-parse --show-toplevel", capture_output=True, shell=True)
             git_root = process_output.stdout.decode("utf-8").strip()
             complete_path = Path(git_root)
             _LOGGER.info("complete path used is: %r", complete_path.as_posix())
 
         except Exception as not_git_exc:
             _LOGGER.error(
-                "Using home path because there was an error to identify root of git repository: %r",
-                not_git_exc
+                "Using home path because there was an error to identify root of git repository: %r", not_git_exc
             )
             complete_path = Path.home()
 

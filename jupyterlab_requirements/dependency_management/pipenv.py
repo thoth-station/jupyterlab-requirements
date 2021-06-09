@@ -58,8 +58,7 @@ class PipenvHandler(DependencyManagementBaseHandler):
 
         # Delete and recreate folder
         if not env_path.exists():
-            _ = subprocess.call(
-                f"rm -rf ./{kernel_name} ", shell=True, cwd=complete_path)
+            _ = subprocess.call(f"rm -rf ./{kernel_name} ", shell=True, cwd=complete_path)
 
         env_path.mkdir(parents=True, exist_ok=True)
 
@@ -83,13 +82,11 @@ class PipenvHandler(DependencyManagementBaseHandler):
         try:
             # TODO: check if pipenv is installed
             subprocess.run(
-                f". {kernel_name}/bin/activate && cd {kernel_name} && pip install pipenv",
-                cwd=complete_path,
-                shell=True
+                f". {kernel_name}/bin/activate && cd {kernel_name} && pip install pipenv", cwd=complete_path, shell=True
             )
         except Exception as pipenv_install_error:
             _LOGGER.warning("error installing pipenv: %r", pipenv_install_error)
-            result['error'] = True
+            result["error"] = True
             result["error_msg"] = pipenv_install_error
             returncode = 1
             os.chdir(initial_path)
@@ -99,26 +96,26 @@ class PipenvHandler(DependencyManagementBaseHandler):
         try:
             output = subprocess.run(
                 f". {kernel_name}/bin/activate && cd {kernel_name} && pipenv lock",
-                env=dict(os.environ, PIPENV_CACHE_DIR='/tmp'),
+                env=dict(os.environ, PIPENV_CACHE_DIR="/tmp"),
                 cwd=complete_path,
                 shell=True,
-                capture_output=True
+                capture_output=True,
             )
         except Exception as pipenv_error:
             _LOGGER.warning("error locking dependencies using Pipenv: %r", pipenv_error)
-            result['error'] = True
+            result["error"] = True
             result["error_msg"] = str(pipenv_error)
             returncode = 1
 
         if output.returncode != 0:
             _LOGGER.warning("error locking dependencies using Pipenv: %r", output.stderr)
-            result['error'] = True
+            result["error"] = True
             result["error_msg"] = str(output.stderr)
             returncode = 1
 
         os.chdir(env_path)
 
-        if not result['error']:
+        if not result["error"]:
 
             pipfile_lock_path = env_path.joinpath("Pipfile.lock")
 
@@ -136,7 +133,7 @@ class PipenvHandler(DependencyManagementBaseHandler):
 
             else:
                 _LOGGER.warning("Pipfile.lock cannot be found at: %r", str(pipfile_lock_path))
-                result['error'] = True
+                result["error"] = True
                 result["error_msg"] = "Error retrieving Pipfile.lock created from pipenv."
 
         os.chdir(initial_path)
