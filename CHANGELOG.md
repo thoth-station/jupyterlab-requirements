@@ -190,3 +190,42 @@ all the things that you see...
 * :arrow_up: Automatic update of dependencies by Kebechet (#262)
 ### Bug Fixes
 * fix requirements files missing from source build (#260)
+
+## Release 0.7.0 (2021-06-09T14:53:47)
+### Features
+* add missing base path
+* remove unusued endpoint
+* document API
+* Make new pre-commit happy
+* add check for package import
+* Allow user to select path for root directory
+* :arrow_up: Automatic update of dependencies by Kebechet
+* Set packages correctly and adjust kernel assignment
+* Adjust status code handler for pipenv on backend side
+* :arrow_up: Automatic update of dependencies by Kebechet
+* :arrow_up: Automatic update of dependencies by Kebechet
+* adjust tag API
+* add swagger validator
+* create handler for async tasks
+* Adjust undefined case
+* Add library for notification
+* :arrow_up: Automatic update of dependencies by Kebechet
+* :arrow_up: Automatic update of dependencies by Kebechet (#279)
+* :hatched_chick: update the prow resource limits (#278)
+* :arrow_up: Automatic update of dependencies by Kebechet (#277)
+* :arrow_up: Automatic update of dependencies by Kebechet (#274)
+* :arrow_up: Automatic update of dependencies by Kebechet (#271)
+* :arrow_up: Automatic update of dependencies by Kebechet (#268)
+* :arrow_up: Automatic update of dependencies by Kebechet (#266)
+* Create FUNDING.yml
+### Improvements
+* make pre-commit happy
+* use latest image of pre-commit
+* make pre-commit happy
+* Introduce Handler for root directory discovery
+* make pre-commit happy
+* Use async tasks for thoth, pipenv and install methods
+* Change base class to use Async class for long running tasks
+* Introduce AsyncTasks class and API yaml
+### Other
+* remove signal
