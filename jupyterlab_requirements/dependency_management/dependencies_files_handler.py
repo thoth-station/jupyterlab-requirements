@@ -26,7 +26,6 @@ from pathlib import Path
 from jupyter_server.base.handlers import APIHandler
 from tornado import web
 
-from thamos.lib import load_files
 from thoth.python import Project
 
 _LOGGER = logging.getLogger("jupyterlab_requirements.dependencies_files_handler")
@@ -34,27 +33,6 @@ _LOGGER = logging.getLogger("jupyterlab_requirements.dependencies_files_handler"
 
 class DependenciesFilesHandler(APIHandler):
     """Dependencies files handler to store, extract software stack."""
-
-    @web.authenticated
-    def get(self):
-        """Retrieve requirements files from local disk."""
-        dependencies = {"error": False, "requirements": "", "requirements_lock": ""}
-
-        requirements_format = "pipenv"
-
-        try:
-            project = load_files(requirements_format=requirements_format)
-            requirements = project.pipfile.to_dict()
-            requirements_lock = project.pipfile_lock.to_dict()
-
-            dependencies["requirements"] = requirements
-            dependencies["requirements_lock"] = requirements_lock
-
-        except Exception as e:
-            _LOGGER.warning(e)
-            dependencies["error"] = True
-
-        self.finish(json.dumps(dependencies))
 
     @web.authenticated
     def post(self):
