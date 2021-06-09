@@ -19,6 +19,7 @@
 import json
 import os
 import logging
+import subprocess
 
 from pathlib import Path
 
@@ -27,7 +28,6 @@ from tornado import web
 
 from thamos.lib import load_files
 from thoth.python import Project
-from jupyterlab_requirements.dependency_management.common import select_complete_path
 
 _LOGGER = logging.getLogger("jupyterlab_requirements.dependencies_files_handler")
 
@@ -68,21 +68,21 @@ class DependenciesFilesHandler(APIHandler):
 
         # Path of the repo where we need to store
         path_to_store: str = input_data["path_to_store"]
-        using_home_path_base: bool = input_data["using_home_path_base"]
 
         kernel_name: str = input_data["kernel_name"]
         requirements: str = input_data["requirements"]
         requirements_lock: str = input_data["requirement_lock"]
+        complete_path: str = input_data["complete_path"]
 
-        home = Path.home()
+        env_path = Path(complete_path).joinpath(path_to_store).joinpath(kernel_name)
 
-        if using_home_path_base:
-            env_path =  home.joinpath(path_to_store).joinpath(kernel_name)
-        else:
-            complete_path = select_complete_path()
-            env_path = complete_path.joinpath(path_to_store).joinpath(kernel_name)
+        _LOGGER.info("Path used to store dependencies is: %r", env_path.as_posix())
 
-        _LOGGER.info("path used to store dependencies is: %r", env_path.as_posix())
+        # Delete and recreate folder
+        if env_path.exists():
+            _ = subprocess.call(
+                f"rm -rf ./{kernel_name} ", shell=True, cwd=Path(complete_path).joinpath(path_to_store))
+
         env_path.mkdir(parents=True, exist_ok=True)
 
         os.chdir(env_path)

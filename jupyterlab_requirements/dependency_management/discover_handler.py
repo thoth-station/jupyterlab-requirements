@@ -35,7 +35,7 @@ class DependencyInstalledHandler(APIHandler):
 
     @web.authenticated
     def post(self):
-        """Discover python version available."""
+        """Discover list of packages installed."""
         input_data = self.get_json_body()
 
         kernel_name: str = input_data["kernel_name"]
@@ -67,7 +67,33 @@ class PythonVersionHandler(APIHandler):
 
     @web.authenticated
     def get(self):
-        """Discover list of packages installed."""
+        """Discover python version available."""
         python_version = discover_python_version()
 
         self.finish(json.dumps(python_version))
+
+
+class RootPathHandler(APIHandler):
+    """Discover root for the project."""
+
+    @web.authenticated
+    def get(self):
+        """Discover root directory of the project."""
+        try:
+            process_output = subprocess.run(
+                'git rev-parse --show-toplevel',
+                capture_output=True,
+                shell=True
+            )
+            git_root = process_output.stdout.decode("utf-8").strip()
+            complete_path = Path(git_root)
+            _LOGGER.info("complete path used is: %r", complete_path.as_posix())
+
+        except Exception as not_git_exc:
+            _LOGGER.error(
+                "Using home path because there was an error to identify root of git repository: %r",
+                not_git_exc
+            )
+            complete_path = Path.home()
+
+        self.finish(json.dumps(complete_path.as_posix()))
