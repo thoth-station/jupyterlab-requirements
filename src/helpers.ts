@@ -235,6 +235,10 @@ export async function _handle_requirements(
                 _.set(identified_packages, "scikit-learn", "*")
               }
 
+              else if ( library == "dotenv" ) {
+                _.set(identified_packages, "python-dotenv", "*")
+              }
+
               else {
                 _.set(identified_packages, library, "*")
               }
