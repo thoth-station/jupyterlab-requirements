@@ -229,3 +229,12 @@ all the things that you see...
 * Introduce AsyncTasks class and API yaml
 ### Other
 * remove signal
+
+## Release 0.7.1 (2021-06-10T13:16:40)
+### Features
+* add notification message when invectio fails
+* correct tag for file endpoints
+* :arrow_up: Automatic update of dependencies by Kebechet
+### Bug Fixes
+* Improve error message
+* fix parsing notebook content for invectio inputs
