@@ -313,7 +313,8 @@ export async function set_resolution_engine( notebook: NotebookPanel, dependency
  * Function: Take notebook content from cells.
  */
 
-export async function take_notebook_content( notebook: NotebookPanel): Promise<string> {
+export async function take_notebook_content( notebook: NotebookPanel ): Promise<string> {
+
     const default_python_indent = 4
     let number_of_cells = notebook.model.cells.length
 
@@ -328,7 +329,6 @@ export async function take_notebook_content( notebook: NotebookPanel): Promise<s
 
             const cell_text = cell.value.text
                 .trim()
-                .replace( "?", "" )  // remove Jupyter magic to display help
                 .replace( /^[%!]{1}[^%]{1}.*$/gm, "\n" )  // remove lines starting with single % or !
                 .replace( /^\s*\n/gm, "" )     // remove empty lines
 
