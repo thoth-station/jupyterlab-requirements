@@ -45,7 +45,7 @@ class ThothInvectioHandler(APIHandler):
         std_lib_path = Path(distutils.sysconfig.get_python_lib(standard_lib=True))
         std_lib = {p.name.rstrip(".py") for p in std_lib_path.iterdir()}
 
-        tree = ast.parse(textwrap.dedent(notebook_content))
+        tree = ast.parse(textwrap.dedent(f"""{notebook_content}""").replace(" \\", ""))
 
         visitor = invectio.lib.InvectioLibraryUsageVisitor()
         visitor.visit(tree)

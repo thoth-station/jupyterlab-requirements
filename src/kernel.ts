@@ -11,7 +11,7 @@
 
 import { requestAPI, THOTH_JUPYTER_INTEGRATION_API_BASE_NAME, AsyncTaskHandler } from './handler';
 import * as utils from "./utils";
-
+import { INotification } from "jupyterlab_toastify";
 /**
  * Function: Install dependencies in the new kernel.
  */
@@ -186,8 +186,15 @@ export async function gather_library_usage(
     return JSON.parse(JSON.stringify(gathered_packages));
   } catch (reason) {
     console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
+    INotification.error("Error detecting libraries in your notebook using Thoth invectio library. Please open issue with Thoth team.", {
+      buttons: [
+        {
+          label: "Open Issue",
+          callback: () => open("https://github.com/thoth-station/jupyterlab-requirements/issues/new?assignees=&labels=bug&template=bug_report.md")
+        },
+      ]
+    });
   }
-
 }
 
 /**
