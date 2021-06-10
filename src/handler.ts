@@ -21,7 +21,7 @@ import { PromiseDelegate } from '@lumino/coreutils';
 export const THOTH_JUPYTER_INTEGRATION_API_BASE_NAME = "jupyterlab_requirements";
 
 /**
- * Polling interval for accepted tasks
+ * Polling interval for accepted tasks [ms]
  */
 const POLLING_INTERVAL = 1000;
 
