@@ -76,7 +76,8 @@ export const AsyncTaskHandler = function (
               JSON.parse(JSON.stringify(reason))
             );
           });
-      } else if (response.status === 202) {
+      // Include also Gateway Error coming for JH
+      } else if (response.status === 202 || response.status === 504) {
         const redirectUrl = response.headers.get('Location') || requestUrl;
 
         setTimeout(
