@@ -21,7 +21,7 @@ import { PromiseDelegate } from '@lumino/coreutils';
 export const THOTH_JUPYTER_INTEGRATION_API_BASE_NAME = "jupyterlab_requirements";
 
 /**
- * Polling interval for accepted tasks
+ * Polling interval for accepted tasks [ms]
  */
 const POLLING_INTERVAL = 1000;
 
@@ -77,7 +77,7 @@ export const AsyncTaskHandler = function (
             );
           });
       // Include also Gateway Error coming for JH
-      } else if (response.status === 202 || response.status === 504) {
+      } else if ( response.status === 202 ) {
         const redirectUrl = response.headers.get('Location') || requestUrl;
 
         setTimeout(
@@ -96,6 +96,9 @@ export const AsyncTaskHandler = function (
           redirectUrl,
           { method: requestUrl }
         );
+      }
+      else if ( response.status === 504 ) {
+        console.log("Gateway Time-out! Keep going...")
       } else {
         promise.resolve(response.json());
       }

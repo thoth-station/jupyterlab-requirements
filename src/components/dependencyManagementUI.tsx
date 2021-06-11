@@ -37,7 +37,7 @@ import {
   lock_requirements_with_pipenv
 } from '../thoth';
 
-// import { INotification } from 'jupyterlab_toastify';
+import { INotification } from 'jupyterlab_toastify';
 
 import {
   get_kernel_name
@@ -1179,7 +1179,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
           // Check if kernel name is already assigned to notebook and if yes, do nothing
           const current_kernel = get_kernel_name( this.props.panel, true )
           if ( current_kernel == this.state.kernel_name ) {
-            console.log("kernel name to be assigned " + this.state.kernel_name + " already set for the notebook " + current_kernel + ", do not restart kernel...")
+            INotification.info("kernel name to be assigned " + this.state.kernel_name + " already set for the current notebook (" + current_kernel + "). Kernel won't be restarted.")
           }
           else {
             this.props.panel.sessionContext.session.changeKernel({"name": this.state.kernel_name})
