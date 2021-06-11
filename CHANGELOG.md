@@ -238,3 +238,10 @@ all the things that you see...
 ### Bug Fixes
 * Improve error message
 * fix parsing notebook content for invectio inputs
+
+## Release 0.7.2 (2021-06-11T08:06:12)
+### Features
+* :arrow_up: Automatic update of dependencies by Kebechet
+* Add notification
+### Other
+* Handle different status code
