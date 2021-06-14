@@ -61,7 +61,9 @@ export const AsyncTaskHandler = function (
   ServerConnection.makeRequest(requestUrl, requestInit, settings)
     .then(response => {
       console.log(response.status, endPoint)
-      if (!response.ok) {
+      if ( response.status === 504 ) {
+          console.log("Gateway Time-out! Keep going...")
+      } else if (!response.ok) {
         response
           .json()
           .then(body =>
@@ -96,9 +98,6 @@ export const AsyncTaskHandler = function (
           redirectUrl,
           { method: requestUrl }
         );
-      }
-      else if ( response.status === 504 ) {
-        console.log("Gateway Time-out! Keep going...")
       } else {
         promise.resolve(response.json());
       }
