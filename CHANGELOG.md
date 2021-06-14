@@ -245,3 +245,7 @@ all the things that you see...
 * Add notification
 ### Other
 * Handle different status code
+
+## Release 0.7.3 (2021-06-14T10:06:42)
+### Bug Fixes
+* Move check of error
