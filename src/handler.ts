@@ -82,9 +82,9 @@ export const AsyncTaskHandler = function (
             redirectUrl,
             { method: requestUrl }
           );
-        } else if ( response.status === 404 ) {
-          INotification.warning("Result not found! Cancelling task... please try again.")
- 
+      } else if ( response.status === 404 ) {
+        INotification.warning("Result not found! Cancelling task... please try again.")
+        promise.reject(Error("Result not found!"));
       } else if (!response.ok) {
         response
           .json()
@@ -101,6 +101,7 @@ export const AsyncTaskHandler = function (
             );
           });
       } else if ( response.status === 202 ) {
+        INotification.info("Async process started!.")
         const redirectUrl = response.headers.get('Location') || requestUrl;
 
         setTimeout(
