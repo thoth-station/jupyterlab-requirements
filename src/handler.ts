@@ -14,6 +14,7 @@
  */
 
 import { URLExt } from '@jupyterlab/coreutils';
+import { INotification } from "jupyterlab_toastify";
 
 import { ServerConnection } from '@jupyterlab/services';
 import { PromiseDelegate } from '@lumino/coreutils';
@@ -62,7 +63,28 @@ export const AsyncTaskHandler = function (
     .then(response => {
       console.log(response.status, endPoint)
       if ( response.status === 504 ) {
+          const redirectUrl = response.headers.get('Location') || requestUrl;
+          INotification.warning("Gateway Time-out! Trying to recover connection, be patient...")
           console.log("Gateway Time-out! Keep going...")
+          setTimeout(
+            (endPoint: string) => {
+              if (cancelled) {
+                // If cancelled, tell the backend to delete the task.
+                console.debug(`Request cancelled ${endPoint}.`);
+              }
+
+              answer = AsyncTaskHandler(endPoint, {});
+              answer.promise
+                .then(response => promise.resolve(response))
+                .catch(reason => promise.reject(reason));
+            },
+            POLLING_INTERVAL,
+            redirectUrl,
+            { method: requestUrl }
+          );
+        } else if ( response.status === 404 ) {
+          INotification.warning("Result not found! Cancelling task... please try again.")
+ 
       } else if (!response.ok) {
         response
           .json()
@@ -78,7 +100,6 @@ export const AsyncTaskHandler = function (
               JSON.parse(JSON.stringify(reason))
             );
           });
-      // Include also Gateway Error coming for JH
       } else if ( response.status === 202 ) {
         const redirectUrl = response.headers.get('Location') || requestUrl;
 

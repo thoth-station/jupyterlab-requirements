@@ -100,7 +100,12 @@ export async function lock_requirements_with_thoth(
       if ( message !== 'cancelled') {
         console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', message);
         message = `An error occurred while asking advise to Thoth.`;
-    }
+      }
+
+      else if ( message == 'cancelled' ) {
+        console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', message);
+        message = `Task was cancelled due to some issue.`;
+      }
   }
 }
 
@@ -137,6 +142,10 @@ export async function lock_requirements_with_pipenv(
       if ( message !== 'cancelled') {
         console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', message);
         message = `An error occurred while locking dependencies with pipenv.`;
+    }
+    else if ( message == 'cancelled' ) {
+      console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', message);
+      message = `Task was cancelled due to some issue.`;
     }
   }
 }
