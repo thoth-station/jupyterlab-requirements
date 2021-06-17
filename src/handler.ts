@@ -64,7 +64,7 @@ export const AsyncTaskHandler = function (
       console.log(response.status, endPoint)
       if ( response.status === 504 ) {
           const redirectUrl = response.headers.get('Location') || requestUrl;
-          INotification.warning("Gateway Time-out! Trying to recover connection, be patient...")
+          INotification.info("Gateway Time-out! Trying to recover connection...")
           console.log("Gateway Time-out! Keep going...")
           setTimeout(
             (endPoint: string) => {
@@ -83,8 +83,10 @@ export const AsyncTaskHandler = function (
             { method: requestUrl }
           );
       } else if ( response.status === 404 ) {
-        INotification.warning("Result not found! Cancelling task... please try again.")
-        promise.reject(Error("Result not found!"));
+          if ( endPoint == "pipenv" ) {
+            INotification.warning("Lost connection! Try installation again please.")
+            promise.reject(Error("missing_result"));
+          }
       } else if (!response.ok) {
         response
           .json()
@@ -101,7 +103,6 @@ export const AsyncTaskHandler = function (
             );
           });
       } else if ( response.status === 202 ) {
-        INotification.info("Async process started!.")
         const redirectUrl = response.headers.get('Location') || requestUrl;
 
         setTimeout(

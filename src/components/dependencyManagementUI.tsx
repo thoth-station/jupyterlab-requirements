@@ -707,10 +707,16 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
       } catch ( error ) {
 
-        console.debug("Error locking requirements with pipenv", error)
+        console.log("Error locking requirements with pipenv", error)
+        if (error.message == "missing_result") {
+          _.set(ui_state, "status", "failed")
+          _.set(ui_state, "error_msg", "Gateway error, please try again! Or directly contact Thoth team: ")
+          await this.setNewState(ui_state);
+          return
+        }
 
         _.set(ui_state, "status", "failed")
-        _.set(ui_state, "error_msg", "Error asking advise to Thoth, please contact Thoth team: ")
+        _.set(ui_state, "error_msg", "Error locking rquirements, please contact Thoth team: ")
         await this.setNewState(ui_state);
         return
       }
