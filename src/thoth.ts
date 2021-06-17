@@ -97,15 +97,21 @@ export async function lock_requirements_with_thoth(
   } catch (error) {
       let message: string = error.message || error.toString();
 
-      if ( message !== 'cancelled') {
+      if ( message == 'gateway_error') {
+        console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', message);
+        message = "Gateway error while locking dependencies with thoth.";
+      }
+      else if ( message !== 'cancelled') {
         console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', message);
         message = `An error occurred while asking advise to Thoth.`;
       }
 
-      else if ( message == 'cancelled' ) {
+      else {
         console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', message);
-        message = `Task was cancelled due to some issue.`;
+        message = "Task was cancelled due to some issue.";
       }
+
+      throw new Error(message)
   }
 }
 
@@ -139,13 +145,19 @@ export async function lock_requirements_with_pipenv(
   } catch (error) {
       let message: string = error.message || error.toString();
 
-      if ( message !== 'cancelled') {
+      if ( message == 'gateway_error') {
         console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', message);
-        message = `An error occurred while locking dependencies with pipenv.`;
-    }
-    else if ( message == 'cancelled' ) {
-      console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', message);
-      message = `Task was cancelled due to some issue.`;
-    }
+        message = "Gateway error while locking dependencies with pipenv.";
+      }
+      else if ( message !== 'cancelled') {
+        console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', message);
+        message = "An error occurred while locking dependencies with pipenv.";
+      }
+      else {
+        console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', message);
+        message = "Task was cancelled due to some issue.";
+      }
+
+      throw new Error(message)
   }
 }

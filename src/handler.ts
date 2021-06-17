@@ -63,30 +63,8 @@ export const AsyncTaskHandler = function (
     .then(response => {
       console.log(response.status, endPoint)
       if ( response.status === 504 ) {
-          const redirectUrl = response.headers.get('Location') || requestUrl;
-          INotification.info("Gateway Time-out! Trying to recover connection...")
-          console.log("Gateway Time-out! Keep going...")
-          setTimeout(
-            (endPoint: string) => {
-              if (cancelled) {
-                // If cancelled, tell the backend to delete the task.
-                console.debug(`Request cancelled ${endPoint}.`);
-              }
-
-              answer = AsyncTaskHandler(endPoint, {});
-              answer.promise
-                .then(response => promise.resolve(response))
-                .catch(reason => promise.reject(reason));
-            },
-            POLLING_INTERVAL,
-            redirectUrl,
-            { method: requestUrl }
-          );
-      } else if ( response.status === 404 ) {
-          if ( endPoint == "pipenv" ) {
-            INotification.warning("Lost connection! Try installation again please.")
-            promise.reject(Error("missing_result"));
-          }
+          INotification.info("Gateway Error! Try again please...")
+          promise.reject(new Error("gateway_error"));
       } else if (!response.ok) {
         response
           .json()
