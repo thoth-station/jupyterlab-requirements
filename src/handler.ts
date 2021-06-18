@@ -14,6 +14,7 @@
  */
 
 import { URLExt } from '@jupyterlab/coreutils';
+import { INotification } from "jupyterlab_toastify";
 
 import { ServerConnection } from '@jupyterlab/services';
 import { PromiseDelegate } from '@lumino/coreutils';
@@ -62,7 +63,8 @@ export const AsyncTaskHandler = function (
     .then(response => {
       console.log(response.status, endPoint)
       if ( response.status === 504 ) {
-          console.log("Gateway Time-out! Keep going...")
+          INotification.info("Gateway Error! Try again please...")
+          promise.reject(new Error("gateway_error"));
       } else if (!response.ok) {
         response
           .json()
@@ -78,7 +80,6 @@ export const AsyncTaskHandler = function (
               JSON.parse(JSON.stringify(reason))
             );
           });
-      // Include also Gateway Error coming for JH
       } else if ( response.status === 202 ) {
         const redirectUrl = response.headers.get('Location') || requestUrl;
 

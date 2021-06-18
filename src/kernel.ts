@@ -45,10 +45,20 @@ import { INotification } from "jupyterlab_toastify";
   } catch (error) {
       let message: string = error.message || error.toString();
 
-      if ( message !== 'cancelled') {
+      if ( message == 'gateway_error') {
+        console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', message);
+        message = "Gateway error while installing dependencies.";
+      }
+      else if ( message !== 'cancelled') {
         console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', message);
         message = `An error occurred while installing dependencies.`;
-    }
+      }
+      else {
+          console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', message);
+          message = "Task was cancelled due to some issue.";
+      }
+
+      throw new Error(message)
   }
 }
 

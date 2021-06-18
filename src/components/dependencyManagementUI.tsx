@@ -707,10 +707,18 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
       } catch ( error ) {
 
-        console.debug("Error locking requirements with pipenv", error)
+        console.log("Error locking requirements with pipenv", error)
+
+        if ( error.message == "Gateway error while locking dependencies with pipenv.") {
+            INotification.warning("Task was cancelled due to gateway error, try again please.")
+            _.set(ui_state, "status", "failed")
+            _.set(ui_state, "error_msg", "Gateway error, please try again!")
+            await this.setNewState(ui_state);
+            return
+        }
 
         _.set(ui_state, "status", "failed")
-        _.set(ui_state, "error_msg", "Error asking advise to Thoth, please contact Thoth team: ")
+        _.set(ui_state, "error_msg", "Error locking requirements, please contact Thoth team: ")
         await this.setNewState(ui_state);
         return
       }
@@ -1104,7 +1112,6 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
           return (
             <div>
-              {dependencyManagementform}
               <div>
                 <div className={CONTAINER_BUTTON}>
                   <div className={CONTAINER_BUTTON_CENTRE}>
