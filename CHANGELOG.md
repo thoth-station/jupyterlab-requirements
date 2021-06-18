@@ -249,3 +249,12 @@ all the things that you see...
 ## Release 0.7.3 (2021-06-14T10:06:42)
 ### Bug Fixes
 * Move check of error
+
+## Release 0.7.4 (2021-06-18T17:25:48)
+### Features
+* adjust version
+* adjust comments
+* Add new case for failure
+* give error
+### Bug Fixes
+* Add notification on error
