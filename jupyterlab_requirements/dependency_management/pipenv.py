@@ -79,11 +79,10 @@ class PipenvHandler(DependencyManagementBaseHandler):
         _LOGGER.info(f"kernel path: {env_path}")
         _LOGGER.info(f"Input Pipfile: \n{pipfile_string}")
 
-
         # 2. Install pipenv if not installed already
-        package = 'pipenv'
+        package = "pipenv"
         check_install = subprocess.run(
-            f'python3 -c "import sys, pkgutil; sys.exit(0 if pkgutil.find_loader(\'{package}\') else 1)"',
+            f"python3 -c \"import sys, pkgutil; sys.exit(0 if pkgutil.find_loader('{package}') else 1)\"",
             shell=True,
             cwd=complete_path,
             capture_output=True,
@@ -92,9 +91,7 @@ class PipenvHandler(DependencyManagementBaseHandler):
         if check_install.returncode != 0:
             _LOGGER.debug(f"pipenv is not installed in the host!: {check_install.stderr}")
             try:
-                subprocess.run(
-                    f"pip install pipenv", cwd=complete_path, shell=True
-                )
+                subprocess.run("pip install pipenv", cwd=complete_path, shell=True)
             except Exception as pipenv_install_error:
                 _LOGGER.warning("error installing pipenv: %r", pipenv_install_error)
                 result["error"] = True

@@ -44,9 +44,10 @@ class JupyterKernelHandler(APIHandler):
 
         _LOGGER.info(f"Setting new jupyter kernel {kernel_name} from {complete_path}/{kernel_name}.")
 
-        package = 'ipykernel'
+        package = "ipykernel"
         check_install = subprocess.run(
-            f'. {kernel_name}/bin/activate && python3 -c "import sys, pkgutil; sys.exit(0 if pkgutil.find_loader(\'{package}\') else 1)"',
+            f". {kernel_name}/bin/activate &&"
+            f"python3 -c \"import sys, pkgutil; sys.exit(0 if pkgutil.find_loader('{package}') else 1)\"",
             shell=True,
             cwd=complete_path,
             capture_output=True,
