@@ -408,12 +408,12 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
       const deleted_packages = {}
 
+      const version_deleted = _.get(packages, package_name)
       _.unset(packages, package_name)
 
       console.debug("After deleting", packages)
 
-      // TODO: Set correctly the version deleted
-      _.set(deleted_packages, package_name, "*")
+      _.set(deleted_packages, package_name, version_deleted)
 
       console.debug("Deleted", deleted_packages)
 
@@ -438,14 +438,14 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
       const saved_packages = this.state.loaded_packages
 
+      const version_deleted = _.get(saved_packages, package_name)
       _.unset(saved_packages, package_name)
 
       console.debug("After deleting saved", saved_packages)
 
       const deleted_packages = {}
 
-      // TODO: Set correctly the version deleted
-      _.set(deleted_packages, package_name, "*")
+      _.set(deleted_packages, package_name, version_deleted)
 
       console.debug("Deleted", deleted_packages)
 
