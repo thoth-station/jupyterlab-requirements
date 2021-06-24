@@ -24,7 +24,7 @@ export const THOTH_JUPYTER_INTEGRATION_API_BASE_NAME = "jupyterlab_requirements"
 /**
  * Polling interval for accepted tasks [ms]
  */
-const POLLING_INTERVAL = 1000;
+const POLLING_INTERVAL = 2000;
 
 export interface ICancellablePromise<T> {
   promise: Promise<T>;

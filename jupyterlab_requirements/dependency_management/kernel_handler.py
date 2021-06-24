@@ -44,15 +44,20 @@ class JupyterKernelHandler(APIHandler):
 
         _LOGGER.info(f"Setting new jupyter kernel {kernel_name} from {complete_path}/{kernel_name}.")
 
-        # TODO: Check if ipykernel is installed, otherwise install it
-        # _ = subprocess.run(
-        #     f". {kernel_name}/bin/activate && pip show ipykernel",
-        #     shell=True,
-        #     capture_output=True,
-        #     cwd=complete_path
-        # )
+        package = "ipykernel"
+        check_install = subprocess.run(
+            f". {kernel_name}/bin/activate &&"
+            f"python3 -c \"import sys, pkgutil; sys.exit(0 if pkgutil.find_loader('{package}') else 1)\"",
+            shell=True,
+            cwd=complete_path,
+            capture_output=True,
+        )
 
-        _ = subprocess.run(f". {kernel_name}/bin/activate && pip install ipykernel", shell=True, cwd=complete_path)
+        if check_install.returncode != 0:
+            _LOGGER.debug(f"ipykernel is not installed in the host!: {check_install.stderr}")
+            _ = subprocess.run(f". {kernel_name}/bin/activate && pip install ipykernel", shell=True, cwd=complete_path)
+        else:
+            _LOGGER.debug("ipykernel is already present on the host!")
 
         _LOGGER.debug(f"Installing kernelspec called {kernel_name}.")
 

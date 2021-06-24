@@ -79,19 +79,29 @@ class PipenvHandler(DependencyManagementBaseHandler):
         _LOGGER.info(f"kernel path: {env_path}")
         _LOGGER.info(f"Input Pipfile: \n{pipfile_string}")
 
-        try:
-            # TODO: check if pipenv is installed
-            subprocess.run(
-                f". {kernel_name}/bin/activate && cd {kernel_name} && pip install pipenv", cwd=complete_path, shell=True
-            )
-        except Exception as pipenv_install_error:
-            _LOGGER.warning("error installing pipenv: %r", pipenv_install_error)
-            result["error"] = True
-            result["error_msg"] = pipenv_install_error
-            returncode = 1
-            os.chdir(initial_path)
+        # 2. Install pipenv if not installed already
+        package = "pipenv"
+        check_install = subprocess.run(
+            f"python3 -c \"import sys, pkgutil; sys.exit(0 if pkgutil.find_loader('{package}') else 1)\"",
+            shell=True,
+            cwd=complete_path,
+            capture_output=True,
+        )
 
-            return returncode, result
+        if check_install.returncode != 0:
+            _LOGGER.debug(f"pipenv is not installed in the host!: {check_install.stderr}")
+            try:
+                subprocess.run("pip install pipenv", cwd=complete_path, shell=True)
+            except Exception as pipenv_install_error:
+                _LOGGER.warning("error installing pipenv: %r", pipenv_install_error)
+                result["error"] = True
+                result["error_msg"] = pipenv_install_error
+                returncode = 1
+                os.chdir(initial_path)
+
+                return returncode, result
+        else:
+            _LOGGER.debug("pipenv is already present on the host!")
 
         try:
             output = subprocess.run(

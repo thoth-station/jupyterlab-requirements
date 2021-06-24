@@ -64,7 +64,6 @@ async function _handle_runtime_environment(
     const runtime_environments: RuntimeEnvironment[] = processed_thoth_config.runtime_environments
     const runtime_environment: RuntimeEnvironment = processed_thoth_config.runtime_environments[0]
 
-    // TODO: Assign user recommendation type to all runtime environments in thoth config?
     _.set(runtime_environment, "name", kernel_name)
     _.set(runtime_environment, "recommendation_type", recommendation_type)
     _.set(runtime_environments, 0, runtime_environment)

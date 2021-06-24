@@ -66,9 +66,27 @@ class DependencyInstallHandler(DependencyManagementBaseHandler):
         if resolution_engine != "pipenv":
             cli_run([str(env_path)])
 
-        # TODO: Check if micropipenv is installed
-        # 2. Install using micropipenv
-        _ = subprocess.call(
+        # 2. Install micropipenv if not installed already
+        package = "micropipenv"
+        check_install = subprocess.run(
+            f"python3 -c \"import sys, pkgutil; sys.exit(0 if pkgutil.find_loader('{package}') else 1)\"",
+            shell=True,
+            cwd=complete_path,
+            capture_output=True,
+        )
+
+        if check_install.returncode != 0:
+            _LOGGER.debug(f"micropipenv is not installed in the host!: {check_install.stderr}")
+            _ = subprocess.run(
+                "pip install micropipenv",
+                shell=True,
+                cwd=complete_path,
+            )
+        else:
+            _LOGGER.debug("micropipenv is already present on the host!")
+
+        # 3. Install packages using micropipenv
+        _ = subprocess.run(
             f". {kernel_name}/bin/activate " f"&& cd {kernel_name} && micropipenv install --dev",
             shell=True,
             cwd=complete_path,
