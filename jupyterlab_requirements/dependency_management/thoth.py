@@ -107,7 +107,7 @@ class ThothAdviseHandler(DependencyManagementBaseHandler):
 
             if error_result:
                 advise["error"] = True
-                advise["error_msg"] = error_result
+                advise["error_msg"] = result.get("error_msg")
                 returncode = 1
 
             else:

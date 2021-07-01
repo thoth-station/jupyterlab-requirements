@@ -118,7 +118,7 @@ class PipenvHandler(DependencyManagementBaseHandler):
             returncode = 1
 
         if output.returncode != 0:
-            _LOGGER.warning("error locking dependencies using Pipenv: %r", output.stderr)
+            _LOGGER.warning("error in process trying to lock dependencies with pipenv: %r", output.stderr)
             result["error"] = True
             result["error_msg"] = str(output.stderr)
             returncode = 1

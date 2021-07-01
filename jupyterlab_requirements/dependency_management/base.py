@@ -127,11 +127,8 @@ class DependencyManagementBaseHandler(APIHandler):
                 self.set_status(202)
                 self.finish("{}")
             else:
-                if r[1]["error"]:
-                    self.set_status(500)
-                    _LOGGER.debug("%r", r)
-                else:
-                    self.set_status(200)
+                # We port errors to the frontend to show them to the user.
+                self.set_status(200)
                 self.finish(json.dumps(r[1]))
 
     def redirect_to_task(self, task_index: int):
