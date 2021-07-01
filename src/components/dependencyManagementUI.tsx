@@ -223,7 +223,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       _.set(new_state, "thoth_resolution_error_msg", thoth_resolution_error_msg)
 
       _.set(new_state, "pipenv_resolution_error_msg", pipenv_resolution_error_msg)
-      
+
       console.debug("new", new_state)
       this.setState(new_state);
     }
@@ -1125,12 +1125,12 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
         case "failed_re":
 
-          let paragrah_failure = <p> 
+          let paragrah_failure = <p>
             Thoth resolution engine failed because of: {this.state.thoth_resolution_error_msg} <br></br> <br></br>
               Pipenv resolution engine failed because of: {this.state.pipenv_resolution_error_msg}<br></br> <br></br>
               {this.state.error_msg} <br></br>
           </p>
-  
+
           return (
             <div>
               <div>

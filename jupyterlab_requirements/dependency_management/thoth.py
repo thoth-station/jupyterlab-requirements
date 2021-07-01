@@ -127,7 +127,7 @@ class ThothAdviseHandler(DependencyManagementBaseHandler):
         except Exception as api_error:
             _LOGGER.warning(f"error locking dependencies using Thoth: {api_error}")
             advise["error"] = True
-            advise["error_msg"] = f"Error locking dependencies, check pod logs for more details about the error."
+            advise["error_msg"] = "Error locking dependencies, check pod logs for more details about the error."
             returncode = 1
 
         finally:
