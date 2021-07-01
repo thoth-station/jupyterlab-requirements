@@ -95,7 +95,9 @@ export interface IDependencyManagementUIState {
   resolution_engine: string,
   thoth_timeout: number,
   isEditing: boolean,
-  root_directory: string
+  root_directory: string,
+  thoth_resolution_error_msg: string,
+  pipenv_resolution_error_msg: string
 }
 
 /**
@@ -143,7 +145,9 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         resolution_engine: "thoth",
         thoth_timeout: 180,
         isEditing: false,
-        root_directory: ""
+        root_directory: "",
+        thoth_resolution_error_msg: undefined,
+        pipenv_resolution_error_msg: undefined
       }
 
       this.onStart = this.onStart.bind(this),
@@ -191,6 +195,8 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       kernel_name: string,
       thoth_config: ThothConfig,
       error_msg?: string,
+      thoth_resolution_error_msg?: string,
+      pipenv_resolution_error_msg?: string,
     ) {
 
       var new_state: IDependencyManagementUIState = this.state
@@ -214,6 +220,10 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
       _.set(new_state, "error_msg", error_msg)
 
+      _.set(new_state, "thoth_resolution_error_msg", thoth_resolution_error_msg)
+
+      _.set(new_state, "pipenv_resolution_error_msg", pipenv_resolution_error_msg)
+      
       console.debug("new", new_state)
       this.setState(new_state);
     }
@@ -635,6 +645,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         if ( advise != undefined ) {
           console.log("Thoth resolution engine error:", advise.error_msg)
         }
+        _.set(ui_state, "thoth_resolution_error_msg", advise.error_msg )
         _.set(ui_state, "resolution_engine", "pipenv" )
         _.set(ui_state, "status", "locking_requirements_using_pipenv")
         await this.setNewState(ui_state);
@@ -717,22 +728,26 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
             return
         }
 
-        _.set(ui_state, "status", "failed")
-        _.set(ui_state, "error_msg", "Error locking requirements, please contact Thoth team: ")
+        _.set(ui_state, "status", "failed_re")
+        _.set(ui_state, "error_msg", "Error locking requirements, check logs and please contact Thoth team: ")
         await this.setNewState(ui_state);
         return
       }
 
       if ( result == undefined || result.error == true ) {
 
+        var error_msg = "No resolution engine was able to install dependencies, please contact Thoth team: "
         if ( result != undefined ) {
-          console.log("Pipenv resolution engine error:", result.error_msg)
+          console.debug("Pipenv resolution engine error:", result.error_msg)
+          _.set(ui_state, "pipenv_resolution_error_msg", result.error_msg.toString())
+          var error_msg = `No resolution engine was able to install dependencies! Please contact Thoth team: `
         }
-        _.set(ui_state, "status", "failed")
+
+        _.set(ui_state, "status", "failed_re")
         _.set(
           ui_state,
           "error_msg",
-          "No resolution engine was able to install dependendices, please contact Thoth team: "
+          error_msg
         )
         await this.setNewState(ui_state);
         return
@@ -1108,6 +1123,46 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
             </div>
         );
 
+        case "failed_re":
+
+          let paragrah_failure = <p> 
+            Thoth resolution engine failed because of: {this.state.thoth_resolution_error_msg} <br></br> <br></br>
+              Pipenv resolution engine failed because of: {this.state.pipenv_resolution_error_msg}<br></br> <br></br>
+              {this.state.error_msg} <br></br>
+          </p>
+  
+          return (
+            <div>
+              <div>
+                <div className={CONTAINER_BUTTON}>
+                  <div className={CONTAINER_BUTTON_CENTRE}>
+                    <button
+                      title='Finish.'
+                      className={OK_BUTTON_CLASS}
+                      onClick={() => this.changeUIstate(
+                        "loading",
+                        this.state.packages,
+                        this.state.loaded_packages,
+                        this.state.installed_packages,
+                        this.state.deleted_packages,
+                        this.state.requirements,
+                        this.state.kernel_name,
+                        this.state.thoth_config,
+                      )
+                      }
+                      >
+                      Ok
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div>
+                    {paragrah_failure}
+              </div>
+              <a href={"https://github.com/thoth-station/jupyterlab-requirements/issues/new?assignees=&labels=bug&template=bug_report.md"} target="_blank"> Open Issue </a>
+            </div>
+        );
+
         case "failed":
 
           return (
@@ -1136,7 +1191,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                 </div>
               </div>
               <div>
-                <p>{this.state.error_msg}</p>
+                {this.state.error_msg}
               </div>
               <a href={"https://github.com/thoth-station/jupyterlab-requirements/issues/new?assignees=&labels=bug&template=bug_report.md"} target="_blank"> Open Issue </a>
             </div>
