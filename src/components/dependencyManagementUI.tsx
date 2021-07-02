@@ -94,7 +94,7 @@ export interface IDependencyManagementUIState {
   error_msg: string,
   resolution_engine: string,
   thoth_timeout: number,
-  isEditing: boolean,
+  thoth_force: boolean,
   root_directory: string,
   thoth_resolution_error_msg: string,
   pipenv_resolution_error_msg: string
@@ -144,7 +144,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         error_msg: undefined,
         resolution_engine: "thoth",
         thoth_timeout: 180,
-        isEditing: false,
+        thoth_force: false,
         root_directory: "",
         thoth_resolution_error_msg: undefined,
         pipenv_resolution_error_msg: undefined
@@ -228,6 +228,12 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       this.setState(new_state);
     }
 
+    async setNewState(ui_state: IDependencyManagementUIState) {
+
+      console.log("new state", ui_state)
+      this.setState(ui_state);
+    }
+
     /**
      * Function: Set recommendation type for thamos advise
      */
@@ -239,8 +245,36 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
           recommendation_type: recommendation_type
         }
       );
-
     }
+
+    /**
+     * Function: Change recommendation type for thamos advise
+     */
+
+    changeRecommendationType(event: React .ChangeEvent<HTMLInputElement>) {
+
+      const recommendation_type = event.target.value;
+      this.setRecommendationType( recommendation_type )
+  }
+
+    /**
+     * Function: Set force for thamos advise
+     */
+
+     setForceParameter(thoth_force: string) {
+        if (thoth_force == "true") {
+          var force = true
+        }
+        else {
+          var force = false
+        }
+
+        this.setState(
+          {
+            thoth_force: force
+          }
+        );
+     }
 
     /**
      * Function: Set root directory where to place overlays and where to find .thoth.yaml
@@ -259,23 +293,6 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       );
 
     }
-
-
-    /**
-     * Function: Set recommendation type for thamos advise
-     */
-
-    async setNewState(ui_state: IDependencyManagementUIState) {
-
-      console.log("new state", ui_state)
-      this.setState(ui_state);
-    }
-
-    changeRecommendationType(event: React .ChangeEvent<HTMLInputElement>) {
-
-        const recommendation_type = event.target.value;
-        this.setRecommendationType( recommendation_type )
-  }
 
     /**
      * Function: Set Kernel name to be created and assigned to notebook
@@ -312,7 +329,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       var thoth_timeout = Number(event.target.value)
 
       if ( Number(event.target.value) > 300 ) {
-        console.warn('kernel_name python3 cannot be used assigning default one')
+        console.warn('timeout for thoth resolution engine cannot be set more than 300 seconds due to constraint on server side.')
         var thoth_timeout: number = 300
       }
 
@@ -627,6 +644,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         var advise: Advise | undefined = await lock_requirements_with_thoth(
           this.state.kernel_name,
           this.state.thoth_timeout,
+          this.state.thoth_force,
           notebook_content,
           JSON.stringify(thoth_config),
           JSON.stringify(this.state.requirements)
@@ -909,6 +927,17 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                                 value={this.state.thoth_timeout}
                                 onChange={this.setTimeout}
                               />
+                            </label>
+                            <br />
+                            <label>
+                              Thoth --force:
+                              <select onChange={() => this.setForceParameter}>
+                                title="Thoth force parameter"
+                                name="thoth_force"
+                                value={this.state.thoth_force}
+                                <option value="false">False</option>
+                                <option value="true">True</option>
+                              </select>
                             </label>
                           </form>
                         </div>

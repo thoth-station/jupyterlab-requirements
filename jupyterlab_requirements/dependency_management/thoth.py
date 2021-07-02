@@ -53,6 +53,7 @@ class ThothAdviseHandler(DependencyManagementBaseHandler):
         config: str = input_data["thoth_config"]
         kernel_name: str = input_data["kernel_name"]
         timeout: str = input_data["thoth_timeout"]
+        force: bool = input_data["thoth_force"]
         notebook_content: str = input_data["notebook_content"]
         requirements: dict = json.loads(input_data["requirements"])
 
@@ -88,7 +89,7 @@ class ThothAdviseHandler(DependencyManagementBaseHandler):
             response = advise_using_config(
                 pipfile=pipfile_string,
                 pipfile_lock="",  # TODO: Provide Pipfile.lock retrieved?
-                force=False,  # TODO: Provide force input from user?
+                force=force,
                 config=config,
                 origin=origin,
                 nowait=False,
