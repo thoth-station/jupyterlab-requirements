@@ -340,15 +340,12 @@ export async function parse_inputs_from_metadata(
  * Function: Retrieve installed packages from kernel.
  */
 
-async function retrieveInstalledPackages(kernel_name: string, packages: {}): Promise<{}> {
+async function retrieveInstalledPackages(kernel_packages: {}, packages: {}): Promise<{}> {
 
-    // Retrieve installed packages
-    const retrieved_packages = await discover_installed_packages( kernel_name )
-
-    console.debug("packages installed (pip list)", retrieved_packages);
+    console.debug("packages installed (pip list)", kernel_packages);
     const installed_packages = {}
 
-    _.forIn(retrieved_packages, function(version, name) {
+    _.forIn(kernel_packages, function(version, name) {
       if (_.has(packages, name.toLowerCase())) {
         if ( _.get(packages, name.toLowerCase()) == version) {
           _.set(installed_packages, name, version)
@@ -365,16 +362,33 @@ async function retrieveInstalledPackages(kernel_name: string, packages: {}): Pro
  * Function: Check installed packages and verify pipfile.lock are all in installed list
  */
 
-async function checkInstalledPackages(installed_packages: {}, packages: {}): Promise<boolean> {
-    _.forIn(packages, function(version, name) {
-        if (_.has(installed_packages, name.toLowerCase()) && _.get(installed_packages, name.toLowerCase()) == version ) {
+export function checkInstalledPackages(kernel_packages: {}, packages: {}): boolean {
+
+    // Check if pipfile.lock has any packages
+    if ( _.size(packages) == 0) {
+        return false
+    }
+
+    var counter = 0
+    _.forIn(packages, function(version: string, name: string) {
+        console.debug(version, name)
+
+        if (_.has(kernel_packages, name.toLowerCase()) && _.get(kernel_packages, name.toLowerCase()) == version ) {
             console.debug( `Package '${ name }' in version '${ version }' is already installed` )
+            counter += 1
         }
         else {
+            console.debug( `Package '${ name }' in version '${ version }' not installed` )
             return false
         }
     })
-    return true
+
+    if ( _.size(packages) == counter) {
+        return true
+    }
+    else {
+        return false
+    }
 }
 
 export async function  _handle_requirements_lock(
@@ -424,8 +438,10 @@ export async function  _handle_requirements_lock(
     console.debug("loaded packages from pipfile", ui_state.loaded_packages)
     console.debug("loaded packages from pipfile lock", initial_locked_packages)
     console.debug("packages in pipfile and pipfile lock", check_packages)
+    const kernel_packages = await discover_installed_packages( kernel_name )
+    console.debug("kernel packages", kernel_packages)
 
-    const installed_packages = await retrieveInstalledPackages(kernel_name, initial_locked_packages)
+    const installed_packages = await retrieveInstalledPackages(kernel_packages, initial_locked_packages)
 
     console.debug("packages from kernel and pipfile lock", installed_packages)
 
@@ -443,8 +459,8 @@ export async function  _handle_requirements_lock(
     if ( _.isEqual(_.size(ui_state.loaded_packages), _.size(check_packages) )) {
 
         // check if all requirements locked are also installed in the current kernel
-        const are_installed: boolean = await checkInstalledPackages(installed_packages, initial_locked_packages)
-
+        const are_installed: boolean = await checkInstalledPackages(kernel_packages, initial_locked_packages)
+        console.debug("are packages installed?", are_installed)
         // if locked requirements are present in the kernel (match packages installed)
         if ( are_installed == true ) {
 
