@@ -9,7 +9,7 @@
  * @since  0.0.1
  */
 
-var thoth = require('../src/common');
+var common = require('../src/common');
 
 describe('checkInstalledPackages', function() {
   it('test same packages', function() {
@@ -21,7 +21,7 @@ describe('checkInstalledPackages', function() {
       "test1" : "33"
     }
 
-    var check = thoth.checkInstalledPackages(
+    var check = common.checkInstalledPackages(
         installed_packages,
         packages,
       );
@@ -40,7 +40,7 @@ describe('checkInstalledPackages', function() {
       "test1" : "33"
     }
 
-    var check = thoth.checkInstalledPackages(
+    var check = common.checkInstalledPackages(
         installed_packages,
         packages,
       );
@@ -57,7 +57,7 @@ describe('checkInstalledPackages', function() {
 
     var packages = {}
 
-    var check = thoth.checkInstalledPackages(
+    var check = common.checkInstalledPackages(
         installed_packages,
         packages,
       );
