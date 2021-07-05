@@ -9,41 +9,7 @@
  * @since  0.0.1
  */
 
-const _ = require("lodash")
-// import {
-//     checkInstalledPackages,
-// } from '../src/helpers';
-
-// var thoth = require('../src/helpers');
-
-function checkInstalledPackages(kernel_packages, packages) {
-
-    // Check if pipfile.lock has any packages
-    if ( _.size(packages) == 0) {
-        return false
-    }
-
-    var counter = 0
-    _.forIn(packages, function(version, name) {
-        console.debug(version, name)
-
-        if (_.has(kernel_packages, name.toLowerCase()) && _.get(kernel_packages, name.toLowerCase()) == version ) {
-            console.debug( `Package '${ name }' in version '${ version }' is already installed` )
-            counter += 1
-        }
-        else {
-            console.debug( `Package '${ name }' in version '${ version }' not installed` )
-            return false
-        }
-    })
-
-    if ( _.size(packages) == counter) {
-        return true
-    }
-    else {
-        return false
-    }
-}
+var thoth = require('../src/common');
 
 describe('checkInstalledPackages', function() {
   it('test same packages', function() {
@@ -55,7 +21,7 @@ describe('checkInstalledPackages', function() {
       "test1" : "33"
     }
 
-    var check = checkInstalledPackages(
+    var check = thoth.checkInstalledPackages(
         installed_packages,
         packages,
       );
@@ -74,7 +40,7 @@ describe('checkInstalledPackages', function() {
       "test1" : "33"
     }
 
-    var check = checkInstalledPackages(
+    var check = thoth.checkInstalledPackages(
         installed_packages,
         packages,
       );
@@ -89,11 +55,9 @@ describe('checkInstalledPackages', function() {
       "test1" : "23"
     }
 
-    var packages = {
-      "test1" : "33"
-    }
+    var packages = {}
 
-    var check = checkInstalledPackages(
+    var check = thoth.checkInstalledPackages(
         installed_packages,
         packages,
       );

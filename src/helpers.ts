@@ -34,6 +34,7 @@ import { retrieve_config_file } from "./thoth"
 import { Requirements, RequirementsLock } from "./types/requirements";
 import { RuntimeEnvironment, ThothConfig } from "./types/thoth"
 import { IDependencyManagementUIState } from "./components/dependencyManagementUI"
+import { checkInstalledPackages } from "./common";
 
 /**
  * Function: Create Thoth configuration file using thamos library on the backend
@@ -358,40 +359,7 @@ async function retrieveInstalledPackages(kernel_packages: {}, packages: {}): Pro
   }
 
 
-/**
- * Function: Check installed packages and verify pipfile.lock are all in installed list
- */
-
-export function checkInstalledPackages(kernel_packages: {}, packages: {}): boolean {
-
-    // Check if pipfile.lock has any packages
-    if ( _.size(packages) == 0) {
-        return false
-    }
-
-    var counter = 0
-    _.forIn(packages, function(version: string, name: string) {
-        console.debug(version, name)
-
-        if (_.has(kernel_packages, name.toLowerCase()) && _.get(kernel_packages, name.toLowerCase()) == version ) {
-            console.debug( `Package '${ name }' in version '${ version }' is already installed` )
-            counter += 1
-        }
-        else {
-            console.debug( `Package '${ name }' in version '${ version }' not installed` )
-            return false
-        }
-    })
-
-    if ( _.size(packages) == counter) {
-        return true
-    }
-    else {
-        return false
-    }
-}
-
-export async function  _handle_requirements_lock(
+export async function _handle_requirements_lock(
     initial_loaded_requirements_lock: RequirementsLock,
     panel: NotebookPanel,
     ui_state: IDependencyManagementUIState,
