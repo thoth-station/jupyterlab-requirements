@@ -856,7 +856,6 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                                         <div className={CONTAINER_BUTTON}>
                                           <div className={CONTAINER_BUTTON_CENTRE}>
                                             <DependencyManagementInstallButton
-                                            changeUIstate={this.changeUIstate}
                                             install={this.lock_using_thoth} />
                                           </div>
                                         </div>
@@ -871,8 +870,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                                       <div className={CONTAINER_BUTTON}>
                                         <div className={CONTAINER_BUTTON_CENTRE}>
                                           <DependencyManagementSaveButton
-                                            onSave={this.onSave}
-                                            changeUIstate={this.changeUIstate} />
+                                            onSave={this.onSave}/>
                                         </div>
                                       </div>
                                     </div>

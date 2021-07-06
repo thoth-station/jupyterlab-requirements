@@ -1,5 +1,5 @@
 # jupyterlab-requirements
-# Copyright(C) 2020 Francesco Murdaca
+# Copyright(C) 2020, 2021 Francesco Murdaca
 #
 # This program is free software: you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
@@ -103,6 +103,8 @@ class PipenvHandler(DependencyManagementBaseHandler):
         else:
             _LOGGER.debug("pipenv is already present on the host!")
 
+        pipfile_lock_path = env_path.joinpath("Pipfile.lock")
+
         try:
             output = subprocess.run(
                 f". {kernel_name}/bin/activate && cd {kernel_name} && pipenv lock",
@@ -126,8 +128,6 @@ class PipenvHandler(DependencyManagementBaseHandler):
         os.chdir(env_path)
 
         if not result["error"]:
-
-            pipfile_lock_path = env_path.joinpath("Pipfile.lock")
 
             if pipfile_lock_path.exists():
 

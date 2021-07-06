@@ -136,6 +136,58 @@ export async function create_new_kernel (
   }
 }
 
+
+/**
+ * Function: Create new kernel.
+ */
+
+ export async function get_kernel_list (
+  init: RequestInit = {}
+): Promise<Array<string>> {
+
+  // GET request
+  const endpoint: string = 'kernel/create'
+
+  try {
+    const message = await requestAPI<any>(endpoint, {
+      method: 'GET'
+    });
+    return message;
+  } catch (reason) {
+    console.error('Error on GET /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
+  }
+}
+
+/**
+ * Function: Create new kernel.
+ */
+
+export async function delete_kernel (
+  kernel_name: string,
+  init: RequestInit = {}
+): Promise<Array<string>> {
+
+  // DELETE request
+  const dataToSend = {
+    kernel_name: kernel_name
+  };
+
+  const endpoint: string = 'kernel/create'
+
+  try {
+    const message = await requestAPI<any>(endpoint, {
+      body: JSON.stringify(dataToSend),
+      method: 'DELETE'
+    });
+    console.log(message)
+    return message;
+  } catch (reason) {
+    console.error('Error on DELETE /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
+  }
+}
+
+
+
 /**
  * Function: Store dependencies locally.
  */

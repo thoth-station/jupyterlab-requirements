@@ -165,6 +165,12 @@ Thoth resolution engine is able to provide an optimized software stack based on 
 
 In general different runtime environment will provide different effect on you application (e.g. more performance), therefore we include these information in the notebook metadata so that other can find out what runtime environment has been used to run a certain notebook.
 
+## Delete kernels
+
+If you have too many kernels, you can handle them directly from the menu.
+
+![kernel delete handler menu](preview.gif)
+
 # Contributing
 
 ## Development install
