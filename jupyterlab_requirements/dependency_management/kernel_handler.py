@@ -1,5 +1,5 @@
 # jupyterlab-requirements
-# Copyright(C) 2020 Francesco Murdaca
+# Copyright(C) 2020, 2021 Francesco Murdaca
 #
 # This program is free software: you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 import json
 import logging
 import subprocess
+import shutil
 
 from pathlib import Path
 
@@ -75,3 +76,63 @@ class JupyterKernelHandler(APIHandler):
             _LOGGER.error(f"Could not enter environment {e}")
 
         self.finish(json.dumps({"data": f"installed kernel {kernel_name} at {complete_path}"}))
+
+
+    @web.authenticated
+    def get(self):
+        try:
+            kernels_output = subprocess.run(
+                f"jupyter kernelspec list --json",
+                shell=True,
+                capture_output=True,
+            )
+            kernelspecs_str = kernels_output.stdout.decode("utf-8")
+            _LOGGER.debug(kernelspecs_str)
+
+        except Exception as e:
+            _LOGGER.error(f"Could not get kernels available: {e}")
+        
+        kernelspecs_json = json.loads(kernelspecs_str)
+        kernels = []
+        for kernelspec in kernelspecs_json["kernelspecs"]:
+            # Default kernel is filtered.
+            if kernelspec != "python3":
+                kernels.append(kernelspec)
+
+        self.finish(json.dumps(kernels))
+
+    @web.authenticated
+    def delete(self):
+        input_data = self.get_json_body()
+
+        kernel_name: str = input_data["kernel_name"]
+
+        {"message": f"", "error": False}
+
+        # Delete jupyter kernel
+        try:
+            command_output = subprocess.run(
+                f"jupyter kernelspec remove -f {kernel_name}",
+                shell=True,
+                capture_output=True,
+            )
+            _LOGGER.debug(command_output.returncode)
+
+        except Exception as e:
+            _LOGGER.error(f"Could not delete selected kernel: {e}")
+
+        # Delete folder from host
+        home = Path.home()
+        complete_path = home.joinpath(".local/share/thoth/kernels")
+        env_path = complete_path.joinpath(kernel_name)
+
+        if env_path.exists():
+            try:
+                shutil.rmtree(env_path)
+            except Exception as e:
+                _LOGGER.warning(f"Repo at {env_path.as_posix()} was not removed because of: {e}")
+
+        if command_output.returncode == 0:
+            self.finish(json.dumps({"message": f"{kernel_name} successfully delete", "error": False}))
+        else:
+            self.finish(json.dumps({"message": f"{kernel_name} could not be delete, please check pod logs", "error": True}))
