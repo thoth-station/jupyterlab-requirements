@@ -89,7 +89,7 @@ export class KernelHandlerWidget extends React.Component<IKernelHandlerProps, IK
       var current_kernels = kernels
 
       var new_kernels: Array<string> = []
-      
+
       _.forEach(current_kernels, function(kernel) {
           if ( kernel == kernel_to_delete ) {
             new_kernels.push(kernel)

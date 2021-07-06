@@ -23,7 +23,7 @@ export class KernelHandler extends Widget {
     super();
     this.id = 'kernel-handler-extension';
     this.title.closable = true;
-  
+
     this._kernel_handler = ReactWidget.create(
         React.createElement(KernelHandlerWidget, {})
     );
@@ -33,7 +33,7 @@ export class KernelHandler extends Widget {
         body: this._kernel_handler,
         buttons: [Dialog.cancelButton()]
     };
-    
+
     const dialog = new Dialog(ui);
     dialog.launch();
 

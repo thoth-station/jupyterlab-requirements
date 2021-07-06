@@ -77,12 +77,12 @@ class JupyterKernelHandler(APIHandler):
 
         self.finish(json.dumps({"data": f"installed kernel {kernel_name} at {complete_path}"}))
 
-
     @web.authenticated
     def get(self):
+        """Get kernel list."""
         try:
             kernels_output = subprocess.run(
-                f"jupyter kernelspec list --json",
+                "jupyter kernelspec list --json",
                 shell=True,
                 capture_output=True,
             )
@@ -91,7 +91,7 @@ class JupyterKernelHandler(APIHandler):
 
         except Exception as e:
             _LOGGER.error(f"Could not get kernels available: {e}")
-        
+
         kernelspecs_json = json.loads(kernelspecs_str)
         kernels = []
         for kernelspec in kernelspecs_json["kernelspecs"]:
@@ -103,11 +103,12 @@ class JupyterKernelHandler(APIHandler):
 
     @web.authenticated
     def delete(self):
+        """Delete selected kernel."""
         input_data = self.get_json_body()
 
         kernel_name: str = input_data["kernel_name"]
 
-        {"message": f"", "error": False}
+        {"message": "", "error": False}
 
         # Delete jupyter kernel
         try:
@@ -135,4 +136,6 @@ class JupyterKernelHandler(APIHandler):
         if command_output.returncode == 0:
             self.finish(json.dumps({"message": f"{kernel_name} successfully delete", "error": False}))
         else:
-            self.finish(json.dumps({"message": f"{kernel_name} could not be delete, please check pod logs", "error": True}))
+            self.finish(
+                json.dumps({"message": f"{kernel_name} could not be delete, please check pod logs", "error": True})
+            )
