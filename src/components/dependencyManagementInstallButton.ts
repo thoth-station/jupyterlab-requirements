@@ -13,7 +13,6 @@ import * as React from 'react';
  * Class: Holds properties for DependencyManagementInstallButton.
  */
 interface IProps {
-    changeUIstate: Function;
     install: Function;
 }
 /**

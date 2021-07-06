@@ -15,7 +15,6 @@ import { Dialog } from '@jupyterlab/apputils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
 
-// import { ISignal, Signal } from '@lumino/signaling';
 import { IDisposable } from '@lumino/disposable';
 
 import { get_requirements, get_requirement_lock, get_thoth_configuration, get_resolution_engine } from "./notebook";
@@ -59,7 +58,7 @@ export class ManageDependenciesButtonExtension
                     loaded_config_file: initial_config_file,
                     loaded_resolution_engine: initial_resolution_engine
                 })
-            );
+        );
 
         const ui = {
             title: 'Manage Dependencies',

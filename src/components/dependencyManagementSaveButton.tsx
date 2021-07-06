@@ -26,7 +26,6 @@ export const saveIcon = new LabIcon({
  * Class: Holds properties for DependencyManagementSaveButton.
  */
 interface IProps {
-    changeUIstate: Function;
     onSave: Function;
 }
 

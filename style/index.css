@@ -34,6 +34,23 @@
   color: white;
 }
 
+.thoth-kernel-delete-button {
+  background-color: rgb(255, 17, 0);
+  border-radius: 12px;
+  border: none;
+  color: white;
+  padding: 10px 16px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}
+
+.thoth-kernel-delete-button:hover {
+  background-color: #b4212d;
+  color: white;
+}
+
 .thoth-install-button {
   background-color: rgb(174, 0, 255);
   border-radius: 12px;
