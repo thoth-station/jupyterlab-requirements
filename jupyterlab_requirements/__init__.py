@@ -28,7 +28,7 @@ from .dependency_management import JupyterKernelHandler, DependencyInstalledHand
 
 HERE = Path(__file__).parent.resolve()
 
-__version__ = "0.7.4"
+__version__ = "0.8.0"
 
 with (HERE / "labextension" / "package.json").open() as fid:
     data = json.load(fid)
