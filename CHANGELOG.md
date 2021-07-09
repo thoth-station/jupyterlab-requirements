@@ -258,3 +258,29 @@ all the things that you see...
 * give error
 ### Bug Fixes
 * Add notification on error
+
+## Release 0.8.0 (2021-07-09T07:18:18)
+### Features
+* Add description into README
+* Introduce new Dialog for kernel handler frontend
+* Introduce new endpoints for kernel handler
+* Fix/check initial packages
+* :arrow_up: Automatic update of dependencies by Kebechet
+* :arrow_up: Automatic update of dependencies by Kebechet
+* :arrow_up: Automatic update of dependencies by Kebechet
+* Make pre-commit happy
+* Provide more info on errors to user
+* :arrow_up: Automatic update of dependencies by Kebechet
+* Set correctly the version deleted
+* Make pre-commit happy
+* Add checks for packages installed
+* :arrow_up: Automatic update of dependencies by Kebechet
+* Add link to video
+* :arrow_up: Automatic update of dependencies by Kebechet
+### Improvements
+* make pre-commit happy
+* adjust test
+* make pre-commit happy
+* make pre-commit happy
+* Add tests for method
+* Allow user to use force
