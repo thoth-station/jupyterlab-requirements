@@ -20,13 +20,20 @@
 import logging
 import os
 import json
+import ast
+import sys
+import subprocess
 
 import click
 from typing import Optional
 from pathlib import Path
 
-from thoth.python import Pipfile, PipfileLock
+import invectio
+import distutils
+
+from thoth.python import Pipfile, PipfileLock, PipfileMeta, Source, PackageVersion
 from thamos.config import _Configuration
+from thamos.discover import discover_python_version
 
 _LOGGER = logging.getLogger("thoth.jupyterlab_requirements.cli")
 
@@ -40,6 +47,7 @@ def _get_version(name):
         if line.startswith("__version__ ="):
             # dirty, remove trailing and leading chars
             return line.split(" = ")[1][1:-2]
+
     raise ValueError("No version identifier found")
 
 
@@ -82,8 +90,8 @@ def cli(
     _LOGGER.info("Version: %s", _get_version(name="jupyterlab_requirements"))
 
 
-def get_notebook_metadata(notebook_path: str):
-    """Get JSON of the notebook metadata."""
+def get_notebook_content(notebook_path: str):
+    """Get JSON of the notebook content."""
     actual_path = Path(notebook_path)
 
     if not actual_path.exists():
@@ -95,21 +103,12 @@ def get_notebook_metadata(notebook_path: str):
     with open(notebook_path) as notebook_content:
         notebook = json.load(notebook_content)
 
-    notebook_metadata = notebook.get("metadata")
-    if not notebook_metadata:
-        raise Exception("There is no metadata key in notebook.")
-
-    return notebook_metadata
+    return notebook
 
 
 @cli.command("extract")
 @click.pass_context
-@click.option(
-    "--path",
-    is_flag=False,
-    required=True,
-    help="Path to notebook.",
-)
+@click.argument("path")
 @click.option(
     "--store-files-path",
     is_flag=False,
@@ -151,7 +150,7 @@ def get_notebook_metadata(notebook_path: str):
     is_flag=True,
     help="Force actions for extraction.",
 )
-def notebook(
+def extract(
     ctx: click.Context,
     path: str,
     store_files_path: str,
@@ -164,7 +163,12 @@ def notebook(
     extract_all: bool = False,
 ):
     """Extract actions from notebook metadata."""
-    notebook_metadata = get_notebook_metadata(notebook_path=path)
+    notebook = get_notebook_content(notebook_path=path)
+
+    notebook_metadata = notebook.get("metadata")
+
+    if not notebook_metadata:
+        raise KeyError("There is no metadata key in notebook.")
 
     language_info = notebook_metadata.get("language_info")
     language = language_info.get("name")
@@ -177,15 +181,18 @@ def notebook(
     kernel_name = kernelspec.get("name")
     click.echo(f"Kernel name is: {kernel_name!s}")
 
-    if use_overlay:
-        if not kernel_name:
-            raise Exception("No kernel name identified in notebook metadata kernelspec.")
+    if not show_only:
+        store_path: Path = Path(store_files_path)
 
-        store_files_path = Path(store_files_path).joinpath("overlays").joinpath(kernel_name)
-        store_files_path.mkdir(parents=True, exist_ok=True)
+    if use_overlay and not show_only:
+        if not kernel_name:
+            raise KeyError("No kernel name identified in notebook metadata kernelspec.")
+
+        store_path = store_path.joinpath("overlays").joinpath(kernel_name)
+        store_path.mkdir(parents=True, exist_ok=True)
 
     if not dependency_resolution_engine:
-        raise Exception("No Resolution engine identified in notebook metadata.")
+        raise KeyError("No Resolution engine identified in notebook metadata.")
 
     click.echo(f"Resolution engine identified: {dependency_resolution_engine!s}")
 
@@ -193,7 +200,7 @@ def notebook(
         pipfile_string = notebook_metadata.get("requirements")
 
         if not pipfile_string:
-            raise Exception("No Pipfile identified in notebook metadata.")
+            raise KeyError("No Pipfile identified in notebook metadata.")
 
         pipfile_ = Pipfile.from_string(pipfile_string)
 
@@ -203,10 +210,12 @@ def notebook(
             if not extract_all:
                 ctx.exit(0)
         else:
-            pipfile_path = Path(store_files_path).joinpath("Pipfile")
+            pipfile_path = store_path.joinpath("Pipfile")
 
             if pipfile_path.exists() and not force:
-                raise Exception(f"Cannot store Pipfile because it already exists at path: {pipfile_path.as_posix()!r}")
+                raise FileExistsError(
+                    f"Cannot store Pipfile because it already exists at path: {pipfile_path.as_posix()!r}"
+                )
             else:
                 pipfile_.to_file(path=pipfile_path)
 
@@ -214,7 +223,7 @@ def notebook(
         pipfile_lock_string = notebook_metadata.get("requirements_lock")
 
         if not pipfile_lock_string:
-            raise Exception("No Pipfile.lock identified in notebook metadata.")
+            raise KeyError("No Pipfile.lock identified in notebook metadata.")
 
         pipfile_lock_ = PipfileLock.from_string(pipfile_content=pipfile_lock_string, pipfile=Pipfile.from_string(""))
 
@@ -224,10 +233,10 @@ def notebook(
             if not extract_all:
                 ctx.exit(0)
         else:
-            pipfile_lock_path = Path(store_files_path).joinpath("Pipfile.lock")
+            pipfile_lock_path = store_path.joinpath("Pipfile.lock")
 
             if pipfile_lock_path.exists() and not force:
-                raise Exception(
+                raise FileExistsError(
                     f"Cannot store Pipfile.lock because it already exists at path: {pipfile_lock_path.as_posix()!r}"
                 )
             else:
@@ -237,7 +246,7 @@ def notebook(
         thoth_config_string = notebook_metadata.get("thoth_config")
 
         if not thoth_config_string:
-            raise Exception("No .thoth.yaml identified in notebook metadata.")
+            raise KeyError("No .thoth.yaml identified in notebook metadata.")
 
         config = _Configuration()
         config.load_config_from_string(thoth_config_string)
@@ -249,9 +258,114 @@ def notebook(
         else:
             yaml_path = Path(".thoth.yaml")
             if yaml_path.exists() and not force:
-                raise Exception(f"Cannot store .thoth.yaml because it already exists at path: {yaml_path.as_posix()!r}")
+                raise FileExistsError(
+                    f"Cannot store .thoth.yaml because it already exists at path: {yaml_path.as_posix()!r}"
+                )
             else:
                 config.save_config()
+
+    ctx.exit(0)
+
+
+def _gather_libraries(notebook_path: str):
+    """Gather libraries with invectio."""
+    actual_path = Path(notebook_path)
+
+    if not actual_path.exists():
+        raise FileNotFoundError(f"There is no file at this path: {actual_path.as_posix()!r}")
+
+    if actual_path.suffix != ".ipynb":
+        raise Exception("File submitted is not .ipynb")
+
+    check_convert = subprocess.run(
+        f"jupyter nbconvert --to script {actual_path} --stdout", shell=True, capture_output=True
+    )
+
+    if check_convert.returncode != 0:
+        raise Exception("jupyter nbconvert failed converting notebook to .py")
+
+    notebook_content = check_convert.stdout.decode("utf-8")
+
+    try:
+        tree = ast.parse(notebook_content)
+    except Exception:
+        raise
+
+    visitor = invectio.lib.InvectioLibraryUsageVisitor()
+    visitor.visit(tree)
+
+    report = visitor.get_module_report()
+
+    std_lib_path = Path(distutils.sysconfig.get_python_lib(standard_lib=True))
+    std_lib = {p.name.rstrip(".py") for p in std_lib_path.iterdir()}
+
+    libs = filter(lambda k: k not in std_lib | set(sys.builtin_module_names), report)
+    library_gathered = list(libs)
+
+    return library_gathered
+
+
+def create_pipfile_from_packages(packages: list):
+    """Create Pipfile from list of packages."""
+    source = Source(url="https://pypi.org/simple", name="pypi", verify_ssl=True)
+
+    pipfile_meta = PipfileMeta(sources={"pypi": source}, requires={"python_version": discover_python_version()})
+
+    packages_versions = []
+
+    for package_name in packages:
+        package_version = PackageVersion(name=package_name, version="*", develop=False)
+        packages_versions.append(package_version)
+
+    pipfile_ = Pipfile.from_package_versions(packages=packages_versions, meta=pipfile_meta)
+
+    return pipfile_
+
+
+@cli.command("discover")
+@click.pass_context
+@click.argument("path")
+@click.option(
+    "--store-files-path",
+    is_flag=False,
+    default=".",
+    help="Custom path used to store all files.",
+)
+@click.option(
+    "--show-only",
+    is_flag=True,
+    help="If active only the content will be shown but no Pipfile created.",
+)
+@click.option(
+    "--force",
+    is_flag=True,
+    help="Force actions for extraction.",
+)
+def discover(ctx: click.Context, path: str, store_files_path: str, show_only: bool = False, force: bool = False):
+    """Discover actions from notebook."""
+    packages = _gather_libraries(notebook_path=path)
+
+    if packages:
+        click.echo(f"Thoth invectio library gathered: {json.dumps(packages)}")
+    else:
+        click.echo(f"No libraries discovered from notebook at path: {path}")
+
+    pipfile = create_pipfile_from_packages(packages=packages)
+
+    if show_only:
+        click.echo(f"\nPipfile:\n\n{pipfile.to_string()}")
+        ctx.exit(0)
+    else:
+        store_path: Path = Path(store_files_path)
+
+        pipfile_path = store_path.joinpath("Pipfile")
+
+        if pipfile_path.exists() and not force:
+            raise FileExistsError(
+                f"Cannot store Pipfile because it already exists at path: {pipfile_path.as_posix()!r}"
+            )
+        else:
+            pipfile.to_file(path=pipfile_path)
 
     ctx.exit(0)
 
