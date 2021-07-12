@@ -23,10 +23,14 @@ import json
 import ast
 import sys
 import subprocess
+import yaml
 
 import click
 from typing import Optional
 from pathlib import Path
+from rich.console import Console
+from rich.table import Table
+from rich.text import Text
 
 import invectio
 import distutils
@@ -37,6 +41,12 @@ from thamos.discover import discover_python_version
 
 _LOGGER = logging.getLogger("thoth.jupyterlab_requirements.cli")
 
+
+_EMOJI = {
+    "WARNING": Text("\u26a0\ufe0f WARNING", style="yellow"),
+    "ERROR": Text("\u274c ERROR", style="bold red"),
+    "INFO": Text("\u2714\ufe0f INFO", "green"),
+}
 
 def _get_version(name):
     """Print jupyterlab-requirements version and exit."""
@@ -342,11 +352,17 @@ def create_pipfile_from_packages(packages: list):
     help="Force actions for extraction.",
 )
 def discover(ctx: click.Context, path: str, store_files_path: str, show_only: bool = False, force: bool = False):
-    """Discover actions from notebook."""
+    """Discover actions from notebook.
+    
+    Examples:
+        jupyterlab-requirements-cli discover [YOUR_NOTEBOOK].ipynb
+
+        jupyterlab-requirements-cli discover [YOUR_NOTEBOOK].ipynb --only-show
+    """
     packages = _gather_libraries(notebook_path=path)
 
     if packages:
-        click.echo(f"Thoth invectio library gathered: {json.dumps(packages)}")
+        click.echo(f"Thoth invectio libraries gathered: {json.dumps(packages)}")
     else:
         click.echo(f"No libraries discovered from notebook at path: {path}")
 
@@ -368,6 +384,140 @@ def discover(ctx: click.Context, path: str, store_files_path: str, show_only: bo
             pipfile.to_file(path=pipfile_path)
 
     ctx.exit(0)
+
+
+def check_metadata_content(
+    notebook_metadata: dict
+) -> list:
+    """Check the metadata of notebook for dependencies."""
+    result = []
+
+    language_info = notebook_metadata.get("language_info")
+    language = language_info.get("name")
+
+    if language != "python":
+        result.append(
+                {
+                    "message": f"Only python programming language is supported.",
+                    "type": "ERROR",
+                }
+            )
+
+        return result
+
+    for mandatory_key in ["dependency_resolution_engine",  "requirements", "requirements_lock"]:
+        if mandatory_key not in notebook_metadata.keys():
+            result.append(
+                {
+                    "message": f"{mandatory_key} key is not present in notebook metadata",
+                    "type": "ERROR",
+                }
+            )
+        else:
+            result.append(
+                {
+                    "message": f"{mandatory_key} key is present in notebook metadata",
+                    "type": "INFO",
+                }
+            )
+
+    resolution_engine = notebook_metadata.get("dependency_resolution_engine")
+
+    if not resolution_engine:
+        return result
+
+    result.append(
+        {
+            "message": f"Notebook dependencies are created with {resolution_engine} resolution engine",
+            "type": "INFO",
+        }
+    )
+
+    if resolution_engine == "thoth":
+        for thoth_specific_key in ["thoth_config"]:
+            if thoth_specific_key not in notebook_metadata.keys():
+                result.append(
+                    {
+                        "message": f"{thoth_specific_key} key is not present in notebook metadata",
+                        "type": "ERROR",
+                    }
+                )
+            else:
+                result.append(
+                    {
+                        "message": f"{thoth_specific_key} key is present in notebook metadata",
+                        "type": "INFO",
+                    }
+                )
+
+    return result
+
+
+@cli.command("check")
+@click.pass_context
+@click.argument("path")
+@click.option(
+    "--output-format",
+    "-o",
+    type=click.Choice(["json", "yaml", "table"]),
+    default="table",
+    help="Specify output format for the status report.",
+)
+def check(ctx: click.Context, path: str, output_format: str) -> None:
+    """Check the metadata in the notebook.
+
+    Check the metadata for reproducibility of the notebook.
+
+    Examples:
+        jupyterlab-requirements-cli check [YOUR_NOTEBOOK].ipynb
+
+        jupyterlab-requirements-cli check [YOUR_NOTEBOOK].ipynb --output-format yaml
+    """
+    notebook = get_notebook_content(notebook_path=path)
+    notebook_metadata = notebook.get("metadata")
+
+    result = check_metadata_content(notebook_metadata=notebook_metadata)
+
+    if output_format == "yaml":
+        yaml.safe_dump(result, sys.stdout)
+
+    elif output_format == "json":
+        json.dump(result, sys.stdout, indent=2)
+        sys.stdout.write("\n")
+
+    elif output_format == "table":
+        table = Table()
+
+        header = set()
+        for item in result:
+            for key in item.keys():
+                header.add(key)
+
+        header_sorted = sorted(header)
+        for element in header_sorted:
+            table.add_column(
+                element.replace("_", " ").capitalize(),
+                style="cyan",
+                overflow="fold",
+            )
+
+        for item in result:
+            row = []
+            for key in header_sorted:
+                entry = item.get(key)
+                if not bool(int(os.getenv("JUPYTERLAB_REQUIREMENTS_NO_EMOJI", 0))) and isinstance(
+                    entry, str
+                ):
+                    entry = _EMOJI.get(entry, entry)
+
+                row.append(entry if entry is not None else "-")
+
+            table.add_row(*row)
+
+        console = Console()
+        console.print(table, justify="center")
+
+    sys.exit(1 if any(item.get("type") == "ERROR" for item in result) else 0)
 
 
 __name__ == "__main__" and cli()
