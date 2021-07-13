@@ -16,14 +16,10 @@
 
 """Install API for jupyterlab requirements."""
 
-import os
-import subprocess
 import logging
-from virtualenv import cli_run
 
-from pathlib import Path
-
-from jupyterlab_requirements.dependency_management.base import DependencyManagementBaseHandler
+from .base import DependencyManagementBaseHandler
+from .lib import install_packages
 from tornado import web
 
 _LOGGER = logging.getLogger("jupyterlab_requirements.install_handler")
@@ -43,56 +39,11 @@ class DependencyInstallHandler(DependencyManagementBaseHandler):
 
     async def install_dependencies(self, input_data):
         """Install packages using selected package manager."""
-        initial_path = Path.cwd()
         kernel_name: str = input_data["kernel_name"]
         resolution_engine: str = input_data["resolution_engine"]
-        _LOGGER.info(f"kernel_name selected: {kernel_name}")
 
-        home = Path.home()
-        complete_path = home.joinpath(".local/share/thoth/kernels")
+        install_packages(kernel_name=kernel_name, resolution_engine=resolution_engine)
 
-        env_name = kernel_name
-        env_path = complete_path.joinpath(env_name)
-
-        env_path.mkdir(parents=True, exist_ok=True)
-
-        os.chdir(complete_path)
-
-        package_manager: str = "micropipenv"
-
-        _LOGGER.info(f"Installing requirements using {package_manager} in virtualenv at {env_path}.")
-
-        # 1. Creating new environment
-        if resolution_engine != "pipenv":
-            cli_run([str(env_path)])
-
-        # 2. Install micropipenv if not installed already
-        check_install = subprocess.run(
-            f"python3 -c \"import sys, pkgutil; sys.exit(0 if pkgutil.find_loader('{package_manager}') else 1)\"",
-            shell=True,
-            cwd=complete_path,
-            capture_output=True,
-        )
-
-        if check_install.returncode != 0:
-            _LOGGER.debug(f"micropipenv is not installed in the host!: {check_install.stderr}")
-            _ = subprocess.run(
-                "pip install micropipenv",
-                shell=True,
-                cwd=complete_path,
-            )
-        else:
-            _LOGGER.debug("micropipenv is already present on the host!")
-
-        # 3. Install packages using micropipenv
-        _ = subprocess.run(
-            f". {kernel_name}/bin/activate " f"&& cd {kernel_name} && micropipenv install --dev",
-            shell=True,
-            cwd=complete_path,
-        )
-
-        os.chdir(initial_path)
-
-        result = {"message": "installed with micropipenv", "kernel_name": env_name, "error": False}
+        result = {"message": "installed with micropipenv", "kernel_name": kernel_name, "error": False}
 
         return 0, result

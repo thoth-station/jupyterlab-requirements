@@ -23,7 +23,7 @@ import tempfile
 
 from pathlib import Path
 
-from jupyterlab_requirements.dependency_management.base import DependencyManagementBaseHandler
+from .base import DependencyManagementBaseHandler
 from tornado import web
 
 from thamos.lib import advise_using_config, _get_origin

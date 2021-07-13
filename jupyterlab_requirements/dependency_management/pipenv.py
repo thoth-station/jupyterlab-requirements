@@ -23,7 +23,7 @@ import subprocess
 
 from pathlib import Path
 
-from jupyterlab_requirements.dependency_management.base import DependencyManagementBaseHandler
+from .base import DependencyManagementBaseHandler
 from tornado import web
 
 from thoth.python import Pipfile, PipfileLock

@@ -29,6 +29,10 @@ from .thoth import ThothAdviseHandler
 from .thoth_config_handler import ThothConfigHandler
 from .thoth_invectio import ThothInvectioHandler
 
+from .lib import create_kernel
+from .lib import delete_kernel
+from .lib import install_packages
+
 __all__ = [
     "DependencyManagementBaseHandler",
     "DependenciesFilesHandler",
@@ -42,4 +46,7 @@ __all__ = [
     "ThothConfigHandler",
     "ThothInvectioHandler",
     "YamlSpecHandler",
+    "create_kernel",
+    "delete_kernel",
+    "install_packages",
 ]
