@@ -24,16 +24,17 @@ import ast
 import sys
 import subprocess
 import yaml
-
+import shutil
 import click
+import invectio
+import distutils
+
+from virtualenv import cli_run
 from typing import Optional
 from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
-
-import invectio
-import distutils
 
 from thoth.python import Pipfile, PipfileLock, PipfileMeta, Source, PackageVersion
 from thamos.config import _Configuration
@@ -47,6 +48,7 @@ _EMOJI = {
     "ERROR": Text("\u274c ERROR", style="bold red"),
     "INFO": Text("\u2714\ufe0f INFO", "green"),
 }
+
 
 def _get_version(name):
     """Print jupyterlab-requirements version and exit."""
@@ -186,7 +188,6 @@ def extract(
     if language != "python":
         raise Exception("Only Python kernels are currently supported.")
 
-    dependency_resolution_engine = notebook_metadata.get("dependency_resolution_engine")
     kernelspec = notebook_metadata.get("kernelspec")
     kernel_name = kernelspec.get("name")
     click.echo(f"Kernel name is: {kernel_name!s}")
@@ -200,6 +201,8 @@ def extract(
 
         store_path = store_path.joinpath("overlays").joinpath(kernel_name)
         store_path.mkdir(parents=True, exist_ok=True)
+
+    dependency_resolution_engine = notebook_metadata.get("dependency_resolution_engine")
 
     if not dependency_resolution_engine:
         raise KeyError("No Resolution engine identified in notebook metadata.")
@@ -349,11 +352,11 @@ def create_pipfile_from_packages(packages: list):
 @click.option(
     "--force",
     is_flag=True,
-    help="Force actions for extraction.",
+    help="Force actions for creation of Pipfile.",
 )
 def discover(ctx: click.Context, path: str, store_files_path: str, show_only: bool = False, force: bool = False):
     """Discover actions from notebook.
-    
+
     Examples:
         jupyterlab-requirements-cli discover [YOUR_NOTEBOOK].ipynb
 
@@ -386,9 +389,7 @@ def discover(ctx: click.Context, path: str, store_files_path: str, show_only: bo
     ctx.exit(0)
 
 
-def check_metadata_content(
-    notebook_metadata: dict
-) -> list:
+def check_metadata_content(notebook_metadata: dict) -> list:
     """Check the metadata of notebook for dependencies."""
     result = []
 
@@ -397,15 +398,15 @@ def check_metadata_content(
 
     if language != "python":
         result.append(
-                {
-                    "message": f"Only python programming language is supported.",
-                    "type": "ERROR",
-                }
-            )
+            {
+                "message": "Only python programming language is supported.",
+                "type": "ERROR",
+            }
+        )
 
         return result
 
-    for mandatory_key in ["dependency_resolution_engine",  "requirements", "requirements_lock"]:
+    for mandatory_key in ["dependency_resolution_engine", "requirements", "requirements_lock"]:
         if mandatory_key not in notebook_metadata.keys():
             result.append(
                 {
@@ -505,9 +506,7 @@ def check(ctx: click.Context, path: str, output_format: str) -> None:
             row = []
             for key in header_sorted:
                 entry = item.get(key)
-                if not bool(int(os.getenv("JUPYTERLAB_REQUIREMENTS_NO_EMOJI", 0))) and isinstance(
-                    entry, str
-                ):
+                if not bool(int(os.getenv("JUPYTERLAB_REQUIREMENTS_NO_EMOJI", 0))) and isinstance(entry, str):
                     entry = _EMOJI.get(entry, entry)
 
                 row.append(entry if entry is not None else "-")
@@ -518,6 +517,158 @@ def check(ctx: click.Context, path: str, output_format: str) -> None:
         console.print(table, justify="center")
 
     sys.exit(1 if any(item.get("type") == "ERROR" for item in result) else 0)
+
+
+@cli.command("kernel-create")
+@click.pass_context
+@click.argument("path")
+@click.option(
+    "--force",
+    is_flag=True,
+    help="Force actions for creation of kernel.",
+)
+@click.option(
+    "--kernel-name",
+    is_flag=False,
+    type=str,
+    default="jupyterlab-requirements",
+    show_default=True,
+    help="Name of kernel.",
+)
+def kernel_install(ctx: click.Context, path: str, force: bool, kernel_name: str) -> None:
+    """Create kernel to run your notebook.
+
+    Create kernel for your notebook.
+
+    Examples:
+        jupyterlab-requirements-cli kernel-create [YOUR_NOTEBOOK].ipynb
+    """
+    if force:
+        click.echo("--force is enabled")
+    # 1. Get Pipfile, Pipfile.lock and .thoth.yaml and store them in ./.local/share/kernel/{kernel_name}
+    notebook = get_notebook_content(notebook_path=path)
+
+    notebook_metadata = notebook.get("metadata")
+    if not notebook_metadata:
+        raise KeyError("There is no metadata key in notebook.")
+
+    language_info = notebook_metadata.get("language_info")
+    language = language_info.get("name")
+    if language != "python":
+        raise Exception("Only Python kernels are currently supported.")
+
+    kernelspec = notebook_metadata.get("kernelspec")
+    kernel = kernelspec.get("name")
+    click.echo(f"Kernel name is: {kernel!s}")
+
+    home = Path.home()
+    store_path: Path = home.joinpath(".local/share/thoth/kernels")
+
+    if not kernel:
+        raise KeyError("No kernel name identified in notebook metadata kernelspec.")
+
+    if kernel == "python3":
+        click.echo("python3 kernel name, cannot be overwritten, assigning default jupyterlab-requirements")
+        kernel = kernel_name
+
+    dependency_resolution_engine = notebook_metadata.get("dependency_resolution_engine")
+
+    if not dependency_resolution_engine:
+        raise KeyError("No Resolution engine identified in notebook metadata.")
+
+    click.echo(f"Resolution engine identified: {dependency_resolution_engine!s}")
+
+    complete_path = store_path.joinpath(kernel)
+
+    if complete_path.exists():
+        if not force:
+            raise FileExistsError(
+                f"kernel repo already exists at path: {complete_path.as_posix()!r}. Use --force to overwrite it."
+            )
+
+        else:
+            # Delete jupyter kernel
+            try:
+                _ = subprocess.run(
+                    f"jupyter kernelspec remove -f {kernel}",
+                    shell=True,
+                    capture_output=True,
+                )
+                click.echo(f"{kernel} kernel successfully deleted")
+
+            except Exception as e:
+                _LOGGER.warning(f"Could not delete selected kernel: {e}")
+
+            # Delete folder from host
+            try:
+                shutil.rmtree(complete_path)
+                click.echo(f"{complete_path.as_posix()} successfully delete")
+
+            except Exception as e:
+                _LOGGER.warning(f"Repo at {complete_path.as_posix()} was not removed because of: {e}")
+
+    complete_path.mkdir(parents=True, exist_ok=True)
+
+    pipfile_string = notebook_metadata.get("requirements")
+
+    if not pipfile_string:
+        raise KeyError("No Pipfile identified in notebook metadata.")
+
+    pipfile_ = Pipfile.from_string(pipfile_string)
+    pipfile_path = complete_path.joinpath("Pipfile")
+    pipfile_.to_file(path=pipfile_path)
+
+    pipfile_lock_string = notebook_metadata.get("requirements_lock")
+
+    if not pipfile_lock_string:
+        raise KeyError("No Pipfile.lock identified in notebook metadata.")
+
+    pipfile_lock_ = PipfileLock.from_string(pipfile_content=pipfile_lock_string, pipfile=Pipfile.from_string(""))
+    pipfile_lock_path = complete_path.joinpath("Pipfile.lock")
+    pipfile_lock_.to_file(path=pipfile_lock_path)
+
+    if dependency_resolution_engine == "thoth":
+        thoth_config_string = notebook_metadata.get("thoth_config")
+
+        if not thoth_config_string:
+            raise KeyError("No .thoth.yaml identified in notebook metadata.")
+
+        config = _Configuration()
+        config.load_config_from_string(thoth_config_string)
+        config_path = complete_path.joinpath(".thoth.yaml")
+        config.save_config(path=config_path)
+
+    # 2. Create virtualenv and install dependencies
+    package_manager: str = "micropipenv"
+
+    click.echo(f"Installing requirements using {package_manager} in virtualenv at {complete_path}.")
+
+    if dependency_resolution_engine != "pipenv":
+        cli_run([str(complete_path)])
+
+    # 3. Install packages using micropipenv
+    _ = subprocess.run(
+        f". {kernel}/bin/activate " f"&& cd {kernel} && micropipenv install --dev",
+        shell=True,
+        cwd=store_path,
+    )
+
+    # 3. Create jupyter kernel
+
+    try:
+        _ = subprocess.run(
+            f". {kernel}/bin/activate && ipython kernel install --user"
+            f" --name={kernel} --display-name 'Python ({kernel})'",
+            shell=True,
+            cwd=store_path,
+            capture_output=True,
+        )
+        click.echo(f"Installed kernelspec called {kernel}.")
+
+    except Exception as e:
+        _LOGGER.error(f"Could not enter environment {e}")
+
+    ctx.exit(0)
 
 
 __name__ == "__main__" and cli()

@@ -120,7 +120,7 @@ class JupyterKernelHandler(APIHandler):
             _LOGGER.debug(command_output.returncode)
 
         except Exception as e:
-            _LOGGER.error(f"Could not delete selected kernel: {e}")
+            _LOGGER.error(f"Selected kernel could not be deleted: {e}")
 
         # Delete folder from host
         home = Path.home()
@@ -134,8 +134,10 @@ class JupyterKernelHandler(APIHandler):
                 _LOGGER.warning(f"Repo at {env_path.as_posix()} was not removed because of: {e}")
 
         if command_output.returncode == 0:
-            self.finish(json.dumps({"message": f"{kernel_name} successfully delete", "error": False}))
+            self.finish(json.dumps({"message": f"{kernel_name} kernel successfully deleted", "error": False}))
         else:
             self.finish(
-                json.dumps({"message": f"{kernel_name} could not be delete, please check pod logs", "error": True})
+                json.dumps(
+                    {"message": f"{kernel_name} kernel could not be deleted, please check pod logs", "error": True}
+                )
             )

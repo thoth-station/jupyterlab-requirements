@@ -67,9 +67,8 @@ class DependencyInstallHandler(DependencyManagementBaseHandler):
             cli_run([str(env_path)])
 
         # 2. Install micropipenv if not installed already
-        package = "micropipenv"
         check_install = subprocess.run(
-            f"python3 -c \"import sys, pkgutil; sys.exit(0 if pkgutil.find_loader('{package}') else 1)\"",
+            f"python3 -c \"import sys, pkgutil; sys.exit(0 if pkgutil.find_loader('{package_manager}') else 1)\"",
             shell=True,
             cwd=complete_path,
             capture_output=True,
