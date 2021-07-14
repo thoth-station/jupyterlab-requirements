@@ -154,11 +154,6 @@ def get_notebook_content(notebook_path: str):
     help="Extract Pipfile and Pipfile.lock in overlay with kernel name.",
 )
 @click.option(
-    "--extract-all",
-    is_flag=True,
-    help="Extract and store all content from metadata.",
-)
-@click.option(
     "--show-only",
     is_flag=True,
     help="If active only the content will be shown but not extracted.",
@@ -178,15 +173,19 @@ def extract(
     use_overlay: bool = False,
     show_only: bool = False,
     force: bool = False,
-    extract_all: bool = False,
 ):
     """Extract dependencies from notebook metadata.
 
     Examples:
+        jupyterlab-requirements-cli extract [YOUR_NOTEBOOK].ipynb
         jupyterlab-requirements-cli extract [YOUR_NOTEBOOK].ipynb  --pipfile
         jupyterlab-requirements-cli extract [YOUR_NOTEBOOK].ipynb  --pipfile-lock
         jupyterlab-requirements-cli extract [YOUR_NOTEBOOK].ipynb  --thoth-config
     """
+    if not pipfile and not pipfile_lock and not thoth_config:
+        # If no parameter to be extracted is set, extract all
+        extract_all = True
+
     notebook = get_notebook_content(notebook_path=path)
     notebook_metadata = notebook.get("metadata")
 
@@ -329,14 +328,6 @@ def save_notebook_content(notebook_path: str, notebook: dict):
     help="Save .thoth.yaml in notebook metadata.",
 )
 @click.option(
-    "--save-all",
-    is_flag=False,
-    type=str,
-    default=".",
-    show_default=True,
-    help="Save all content from metadata.",
-)
-@click.option(
     "--force",
     is_flag=True,
     help="Force save if content for dependencies already exists.",
@@ -354,7 +345,6 @@ def save(
     path: str,
     resolution_engine: str,
     save_files_path: str,
-    save_all: str,
     kernel_name: str,
     pipfile: bool = False,
     pipfile_lock: bool = False,
@@ -364,6 +354,7 @@ def save(
     """Save dependencies in notebook metadata.
 
     Examples:
+        jupyterlab-requirements-cli save [YOUR_NOTEBOOK].ipynb
         jupyterlab-requirements-cli save [YOUR_NOTEBOOK].ipynb  --pipfile
         jupyterlab-requirements-cli save [YOUR_NOTEBOOK].ipynb  --pipfile-lock
         jupyterlab-requirements-cli save [YOUR_NOTEBOOK].ipynb  --thoth-config
@@ -371,15 +362,19 @@ def save(
     notebook = get_notebook_content(notebook_path=path)
     notebook_metadata = dict(notebook.get("metadata"))
 
-    language_info = notebook_metadata.get("language_info")
-    language = language_info.get("name")
+    language = notebook_metadata["language_info"]["name"]
 
     if language != "python":
         raise Exception("Only Python kernels are currently supported.")
 
     click.echo(f"Resolution engine set to {resolution_engine}.")
 
-    pipfile_string, pipfile_lock_string = load_files(base_path=save_files_path)
+    if not pipfile and not pipfile_lock and not thoth_config:
+        # If no parameter to be saved is set, save all
+        save_all = True
+
+    if pipfile or pipfile_lock or save_all:
+        pipfile_string, pipfile_lock_string = load_files(base_path=save_files_path)
 
     if pipfile or save_all:
         if "requirements" in notebook_metadata and not force:
@@ -392,7 +387,7 @@ def save(
 
             notebook_metadata["requirements"] = pipfile_string
 
-    if pipfile_lock_string or save_all:
+    if pipfile_lock or save_all:
         if "requirements_lock" in notebook_metadata and not force:
             raise FileExistsError("Cannot store Pipfile.lock in notebook metadata because it already exists.")
         else:
@@ -404,10 +399,11 @@ def save(
             notebook_metadata["requirements_lock"] = pipfile_lock_string
 
     if resolution_engine == "thoth":
-        config = _Configuration()
-        config.load_config_from_file(config_path=Path(save_files_path).joinpath(".thoth.yaml"))
 
         if thoth_config or save_all:
+            config = _Configuration()
+            config.load_config_from_file(config_path=Path(save_files_path).joinpath(".thoth.yaml"))
+
             if "thoth_config" in notebook_metadata and not force:
                 raise FileExistsError("Cannot store .thoth.yaml in notebook metadata because it already exists.")
             else:
@@ -544,8 +540,7 @@ def check_metadata_content(notebook_metadata: dict) -> list:
     """Check the metadata of notebook for dependencies."""
     result = []
 
-    language_info = notebook_metadata.get("language_info")
-    language = language_info.get("name")
+    language = notebook_metadata["language_info"]["name"]
 
     if language != "python":
         result.append(
@@ -557,8 +552,7 @@ def check_metadata_content(notebook_metadata: dict) -> list:
 
         return result
 
-    kernelspec = notebook_metadata.get("kernelspec")
-    kernel_name = kernelspec.get("name")
+    kernel_name = notebook_metadata["kernelspec"]["name"]
 
     result.append(
         {
