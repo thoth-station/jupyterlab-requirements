@@ -467,11 +467,11 @@ def _gather_libraries(notebook_path: str):
     return library_gathered
 
 
-def create_pipfile_from_packages(packages: list):
+def create_pipfile_from_packages(packages: list, python_version: str):
     """Create Pipfile from list of packages."""
     source = Source(url="https://pypi.org/simple", name="pypi", verify_ssl=True)
 
-    pipfile_meta = PipfileMeta(sources={"pypi": source}, requires={"python_version": discover_python_version()})
+    pipfile_meta = PipfileMeta(sources={"pypi": source}, requires={"python_version": python_version})
 
     packages_versions = []
 
@@ -518,7 +518,9 @@ def discover(ctx: click.Context, path: str, store_files_path: str, show_only: bo
     else:
         click.echo(f"No libraries discovered from notebook at path: {path}")
 
-    pipfile = create_pipfile_from_packages(packages=packages)
+    python_version = discover_python_version()
+    click.echo(f"Python version discovered from host: {python_version}")
+    pipfile = create_pipfile_from_packages(packages=packages, python_version=python_version)
 
     if show_only:
         click.echo(f"\nPipfile:\n\n{pipfile.to_string()}")
