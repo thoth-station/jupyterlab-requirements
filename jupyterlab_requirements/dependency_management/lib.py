@@ -58,7 +58,7 @@ def install_packages(
     )
 
     if check_install.returncode != 0:
-        _LOGGER.debug(f"micropipenv is not installed in the host!: {check_install.stderr}")
+        _LOGGER.debug("micropipenv is not installed in the host!: %r", check_install.stderr)
         _ = subprocess.run(
             "pip install micropipenv",
             shell=True,
@@ -88,7 +88,7 @@ def create_kernel(kernel_name: str, kernels_path: Path = Path.home().joinpath(".
     )
 
     if check_install.returncode != 0:
-        _LOGGER.debug(f"ipykernel is not installed in the host!: {check_install.stderr}")
+        _LOGGER.debug("ipykernel is not installed in the host!: %r", check_install.stderr)
         _ = subprocess.run(f". {kernel_name}/bin/activate && pip install ipykernel", shell=True, cwd=kernels_path)
     else:
         _LOGGER.debug("ipykernel is already present on the host!")

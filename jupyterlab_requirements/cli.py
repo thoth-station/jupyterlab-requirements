@@ -26,7 +26,7 @@ import subprocess
 import yaml
 import click
 import invectio
-import distutils
+import distutils.sysconfig as sysconfig
 
 from typing import Optional
 from pathlib import Path
@@ -454,7 +454,7 @@ def _gather_libraries(notebook_path: str):
 
     report = visitor.get_module_report()
 
-    std_lib_path = Path(distutils.sysconfig.get_python_lib(standard_lib=True))
+    std_lib_path = Path(sysconfig.get_python_lib(standard_lib=True))
     std_lib = {p.name.rstrip(".py") for p in std_lib_path.iterdir()}
 
     libs = filter(lambda k: k not in std_lib | set(sys.builtin_module_names), report)
