@@ -32,6 +32,7 @@ from .thoth_invectio import ThothInvectioHandler
 from .lib import create_kernel
 from .lib import delete_kernel
 from .lib import install_packages
+from .lib import load_files
 
 __all__ = [
     "DependencyManagementBaseHandler",
@@ -49,4 +50,5 @@ __all__ = [
     "create_kernel",
     "delete_kernel",
     "install_packages",
+    "load_files",
 ]

@@ -19,9 +19,12 @@
 import subprocess
 import logging
 import shutil
+import typing
 
 from virtualenv import cli_run
 from pathlib import Path
+
+from thoth.python import Project
 
 
 _LOGGER = logging.getLogger("jupyterlab_requirements.lib")
@@ -132,3 +135,29 @@ def delete_kernel(kernel_name: str, kernels_path: Path = Path.home().joinpath(".
             _LOGGER.warning(f"Repo at {env_path.as_posix()} was not removed because of: {e}")
 
     return command_output
+
+
+def load_files(base_path: str) -> typing.Tuple[str, typing.Optional[str]]:
+    """Load Pipfile/Pipfile.lock from path."""
+    _LOGGER.info("Looking for Pipenv files located in %r directory", base_path)
+    pipfile_path = Path(base_path).joinpath("Pipfile")
+    pipfile_lock_path = Path(base_path).joinpath("Pipfile.lock")
+
+    project = Project.from_files(
+        pipfile_path=pipfile_path,
+        pipfile_lock_path=pipfile_lock_path,
+        without_pipfile_lock=not pipfile_lock_path.exists(),
+    )
+
+    if pipfile_lock_path.exists() and project.pipfile_lock.meta.hash["sha256"] != project.pipfile.hash()["sha256"]:
+        _LOGGER.error(
+            "Pipfile hash stated in Pipfile.lock %r does not correspond to Pipfile hash %r - was Pipfile "
+            "adjusted? This error is not critical.",
+            project.pipfile_lock.meta.hash["sha256"][:6],
+            project.pipfile.hash()["sha256"][:6],
+        )
+
+    return (
+        project.pipfile.to_string(),
+        project.pipfile_lock.to_string() if project.pipfile_lock else None,
+    )

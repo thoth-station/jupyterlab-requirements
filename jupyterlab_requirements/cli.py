@@ -34,13 +34,17 @@ from rich.console import Console
 from rich.table import Table
 from rich.text import Text
 
-from thoth.python import Pipfile, PipfileLock, PipfileMeta, Source, PackageVersion
+from thoth.python import Pipfile, PipfileLock, PipfileMeta
+from thoth.python import Source, PackageVersion
+from thoth.python import Project
 from thamos.config import _Configuration
 from thamos.discover import discover_python_version
 
 from dependency_management import install_packages
 from dependency_management import create_kernel
 from dependency_management import delete_kernel
+from dependency_management import load_files
+
 
 _LOGGER = logging.getLogger("thoth.jupyterlab_requirements.cli")
 
@@ -176,7 +180,7 @@ def extract(
     force: bool = False,
     extract_all: bool = False,
 ):
-    """Extract command for jupyter notebooks.
+    """Extract dependencies from notebook metadata.
 
     Examples:
         jupyterlab-requirements-cli extract [YOUR_NOTEBOOK].ipynb  --pipfile
@@ -184,11 +188,7 @@ def extract(
         jupyterlab-requirements-cli extract [YOUR_NOTEBOOK].ipynb  --thoth-config
     """
     notebook = get_notebook_content(notebook_path=path)
-
     notebook_metadata = notebook.get("metadata")
-
-    if not notebook_metadata:
-        raise KeyError("There is no metadata key in notebook.")
 
     language_info = notebook_metadata.get("language_info")
     language = language_info.get("name")
@@ -288,6 +288,147 @@ def extract(
     ctx.exit(0)
 
 
+def save_notebook_content(notebook_path: str, notebook: dict):
+    """Save notebook content."""
+    with open(notebook_path, "w") as notebook_content:
+        json.dump(notebook, notebook_content)
+
+    return notebook
+
+
+@cli.command("save")
+@click.pass_context
+@click.argument("path")
+@click.option(
+    "--resolution-engine",
+    is_flag=False,
+    type=click.Choice(["thoth", "pipenv"], case_sensitive=False),
+    required=True,
+    help="Resolution engine used to lock dependencies.",
+)
+@click.option(
+    "--save-files-path",
+    is_flag=False,
+    default=".",
+    type=str,
+    help="Custom path used to identify dependencies files.",
+)
+@click.option(
+    "--pipfile",
+    is_flag=True,
+    help="Save Pipfile in notebook metadata.",
+)
+@click.option(
+    "--pipfile-lock",
+    is_flag=True,
+    help="Save Pipfile.lock. in notebook metadata.",
+)
+@click.option(
+    "--thoth-config",
+    is_flag=True,
+    help="Save .thoth.yaml in notebook metadata.",
+)
+@click.option(
+    "--save-all",
+    is_flag=False,
+    type=str,
+    default=".",
+    show_default=True,
+    help="Save all content from metadata.",
+)
+@click.option(
+    "--force",
+    is_flag=True,
+    help="Force save if content for dependencies already exists.",
+)
+@click.option(
+    "--kernel-name",
+    is_flag=False,
+    type=str,
+    default="jupyterlab-requirements",
+    show_default=True,
+    help="Name of kernel.",
+)
+def save(
+    ctx: click.Context,
+    path: str,
+    resolution_engine: str,
+    save_files_path: str,
+    save_all: str,
+    kernel_name: str,
+    pipfile: bool = False,
+    pipfile_lock: bool = False,
+    thoth_config: bool = False,
+    force: bool = False,
+):
+    """Save dependencies in notebook metadata.
+
+    Examples:
+        jupyterlab-requirements-cli save [YOUR_NOTEBOOK].ipynb  --pipfile
+        jupyterlab-requirements-cli save [YOUR_NOTEBOOK].ipynb  --pipfile-lock
+        jupyterlab-requirements-cli save [YOUR_NOTEBOOK].ipynb  --thoth-config
+    """
+    notebook = get_notebook_content(notebook_path=path)
+    notebook_metadata = dict(notebook.get("metadata"))
+
+    language_info = notebook_metadata.get("language_info")
+    language = language_info.get("name")
+
+    if language != "python":
+        raise Exception("Only Python kernels are currently supported.")
+
+    click.echo(f"Resolution engine set to {resolution_engine}.")
+
+    pipfile_string, pipfile_lock_string = load_files(base_path=save_files_path)
+
+    if pipfile or save_all:
+        if "requirements" in notebook_metadata and not force:
+            raise FileExistsError("Cannot store Pipfile in notebook metadata because it already exists.")
+        else:
+            if not force:
+                click.echo("No requirements found in notebook metadata.")
+            else:
+                click.echo("Updating existing requirements in notebook metadata.")
+
+            notebook_metadata["requirements"] = pipfile_string
+
+    if pipfile_lock_string or save_all:
+        if "requirements_lock" in notebook_metadata and not force:
+            raise FileExistsError("Cannot store Pipfile.lock in notebook metadata because it already exists.")
+        else:
+            if not force:
+                click.echo("No requirements_lock found in notebook metadata.")
+            else:
+                click.echo("Updating existing requirements_lock in notebook metadata.")
+
+            notebook_metadata["requirements_lock"] = pipfile_lock_string
+
+    if resolution_engine == "thoth":
+        config = _Configuration()
+        config.load_config_from_file(config_path=Path(save_files_path).joinpath(".thoth.yaml"))
+
+        if thoth_config or save_all:
+            if "thoth_config" in notebook_metadata and not force:
+                raise FileExistsError("Cannot store .thoth.yaml in notebook metadata because it already exists.")
+            else:
+                if not force:
+                    click.echo("No .thoth.yaml found in notebook metadata.")
+                else:
+                    click.echo("Updating existing .thoth.yaml in notebook metadata.")
+
+                notebook_metadata["thoth_config"] = json.dumps(config.content)
+
+    if kernel_name:
+        notebook_metadata["kernelspec"]["name"] = kernel_name
+
+    notebook_metadata["dependency_resolution_engine"] = resolution_engine
+
+    notebook["metadata"] = notebook_metadata
+
+    save_notebook_content(notebook_path=path, notebook=notebook)
+    ctx.exit(0)
+
+
 def _gather_libraries(notebook_path: str):
     """Gather libraries with invectio."""
     actual_path = Path(notebook_path)
@@ -363,7 +504,7 @@ def create_pipfile_from_packages(packages: list):
     help="Force actions for creation of Pipfile.",
 )
 def discover(ctx: click.Context, path: str, store_files_path: str, show_only: bool = False, force: bool = False):
-    """Discover actions from notebook.
+    """Discover dependencies from notebook content.
 
     Examples:
         jupyterlab-requirements-cli discover [YOUR_NOTEBOOK].ipynb
@@ -414,6 +555,16 @@ def check_metadata_content(notebook_metadata: dict) -> list:
 
         return result
 
+    kernelspec = notebook_metadata.get("kernelspec")
+    kernel_name = kernelspec.get("name")
+
+    result.append(
+        {
+            "message": f"kernel name: {kernel_name}",
+            "type": "INFO",
+        }
+    )
+
     for mandatory_key in ["dependency_resolution_engine", "requirements", "requirements_lock"]:
         if mandatory_key not in notebook_metadata.keys():
             result.append(
@@ -426,6 +577,29 @@ def check_metadata_content(notebook_metadata: dict) -> list:
             result.append(
                 {
                     "message": f"{mandatory_key} key is present in notebook metadata",
+                    "type": "INFO",
+                }
+            )
+
+    if "requirements" in notebook_metadata and "requirements_lock" in notebook_metadata:
+        project = Project.from_strings(
+            pipfile_str=notebook_metadata["requirements"], pipfile_lock_str=notebook_metadata["requirements_lock"]
+        )
+
+        if project.pipfile_lock.meta.hash["sha256"] != project.pipfile.hash()["sha256"]:
+            result.append(
+                {
+                    "message": f"Pipfile hash stated in Pipfile.lock {project.pipfile_lock.meta.hash['sha256'][:6]} "
+                    f"does not correspond to Pipfile hash {project.pipfile.hash()['sha256'][:6]} - was Pipfile "
+                    "adjusted? This error is not critical.",
+                    "type": "ERROR",
+                }
+            )
+        else:
+            result.append(
+                {
+                    "message": f"Pipfile hash stated in Pipfile.lock {project.pipfile_lock.meta.hash['sha256'][:6]} "
+                    f"correspond to Pipfile hash {project.pipfile.hash()['sha256'][:6]}.",
                     "type": "INFO",
                 }
             )
@@ -473,7 +647,7 @@ def check_metadata_content(notebook_metadata: dict) -> list:
     help="Specify output format for the status report.",
 )
 def check(ctx: click.Context, path: str, output_format: str) -> None:
-    """Check the metadata in the notebook.
+    """Check dependencies in notebook metadata.
 
     Check the metadata for reproducibility of the notebook.
 
@@ -484,8 +658,6 @@ def check(ctx: click.Context, path: str, output_format: str) -> None:
     """
     notebook = get_notebook_content(notebook_path=path)
     notebook_metadata = notebook.get("metadata")
-    if not notebook_metadata:
-        raise KeyError("There is no metadata key in notebook.")
 
     result = check_metadata_content(notebook_metadata=notebook_metadata)
 
@@ -546,7 +718,7 @@ def check(ctx: click.Context, path: str, output_format: str) -> None:
     help="Name of kernel.",
 )
 def kernel_install(ctx: click.Context, path: str, force: bool, kernel_name: str) -> None:
-    """Create kernel to run your notebook.
+    """Create kernel using dependencies in notebook metadata.
 
     Create kernel for your notebook.
 
