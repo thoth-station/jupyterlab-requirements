@@ -41,6 +41,8 @@ from thoth.python import Project
 from thamos.config import _Configuration
 from thamos.discover import discover_python_version
 
+from jupyterlab_requirements import __version__
+
 from dependency_management import create_kernel
 from dependency_management import delete_kernel
 from dependency_management import get_packages
@@ -58,25 +60,12 @@ _EMOJI = {
 }
 
 
-def _get_version(name):
-    """Print jupyterlab-requirements version and exit."""
-    with open(os.path.join(name, "__init__.py")) as f:
-        content = f.readlines()
-
-    for line in content:
-        if line.startswith("__version__ ="):
-            # dirty, remove trailing and leading chars
-            return line.split(" = ")[1][1:-2]
-
-    raise ValueError("No version identifier found")
-
-
 def _print_version(ctx: click.Context, _, value: str):
     """Print version and exit."""
     if not value or ctx.resilient_parsing:
         return
 
-    click.echo(_get_version(name="jupyterlab_requirements"))
+    click.echo(__version__)
     ctx.exit()
 
 
@@ -89,25 +78,17 @@ def _print_version(ctx: click.Context, _, value: str):
     envvar="THOTH_JUPYTERLAB_REQUIREMENTS_DEBUG",
     help="Be verbose about what's going on.",
 )
-@click.option(
-    "--version",
-    is_flag=True,
-    is_eager=True,
-    callback=_print_version,
-    expose_value=False,
-    help="Print version and exit.",
-)
 def cli(
     ctx=None,
     verbose: bool = False,
     output: Optional[str] = None,
 ):
-    """CLI tool for jupyterlab-requirements."""
+    """Horus: CLI for jupyterlab-requirements."""
     if verbose:
         _LOGGER.setLevel(logging.DEBUG)
 
     _LOGGER.debug("Debug mode is on")
-    # _LOGGER.info("Version: %s", _get_version(name="jupyterlab_requirements"))
+    _LOGGER.info("Version: %s", __version__)
 
 
 def get_notebook_content(notebook_path: str):
@@ -125,6 +106,22 @@ def get_notebook_content(notebook_path: str):
 
     return notebook
 
+
+@cli.command("version")
+@click.pass_context
+@click.option(
+    "--json", "-j", "json_output", is_flag=True, help="Print output in JSON format."
+)
+def _print_version(ctx, json_output: bool = False):
+    """Print Horus, Thamos and Thoth version and exit."""
+    click.echo(f"Horus (jupyterlab-requirements CLI) version: {__version__}")
+
+    process_output = subprocess.run(
+        f"thamos version", shell=True, capture_output=True
+    )
+    click.echo(process_output.stdout.decode("utf-8"))
+
+    ctx.exit(0)
 
 @cli.command("extract")
 @click.pass_context
