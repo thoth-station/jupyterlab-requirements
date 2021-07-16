@@ -31,6 +31,7 @@ from .thoth_invectio import ThothInvectioHandler
 
 from .lib import create_kernel
 from .lib import delete_kernel
+from .lib import get_packages
 from .lib import install_packages
 from .lib import load_files
 
@@ -49,6 +50,7 @@ __all__ = [
     "YamlSpecHandler",
     "create_kernel",
     "delete_kernel",
+    "get_packages",
     "install_packages",
     "load_files",
 ]

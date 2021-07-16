@@ -75,6 +75,25 @@ def install_packages(
     )
 
 
+def get_packages(kernel_name: str, kernels_path: Path = Path.home().joinpath(".local/share/thoth/kernels")):
+    """Get packages in the virtualenv (pip list)."""
+    _LOGGER.info(f"kernel_name selected: {kernel_name}")
+
+    process_output = subprocess.run(
+        f". {kernel_name}/bin/activate && pip list", shell=True, capture_output=True, cwd=kernels_path
+    )
+
+    processed_list = process_output.stdout.decode("utf-8").split("\n")[2:]
+    packages = {}
+
+    for processed_package in processed_list:
+        if processed_package:
+            package_version = [el for el in processed_package.split(" ") if el != ""]
+            packages[package_version[0]] = package_version[1]
+
+    return packages
+
+
 def create_kernel(kernel_name: str, kernels_path: Path = Path.home().joinpath(".local/share/thoth/kernels")):
     """Create kernel using new virtualenv."""
     _LOGGER.info(f"Setting new jupyter kernel {kernel_name} from {kernels_path}/{kernel_name}.")

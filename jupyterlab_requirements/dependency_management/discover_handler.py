@@ -27,6 +27,8 @@ from thamos.discover import discover_python_version
 from jupyter_server.base.handlers import APIHandler
 from tornado import web
 
+from .lib import get_packages
+
 _LOGGER = logging.getLogger("jupyterlab_requirements.discover_handler")
 
 
@@ -40,21 +42,7 @@ class DependencyInstalledHandler(APIHandler):
 
         kernel_name: str = input_data["kernel_name"]
 
-        home = Path.home()
-
-        complete_path = home.joinpath(".local/share/thoth/kernels")
-
-        process_output = subprocess.run(
-            f". {kernel_name}/bin/activate && pip list", shell=True, capture_output=True, cwd=complete_path
-        )
-
-        processed_list = process_output.stdout.decode("utf-8").split("\n")[2:]
-        packages = {}
-
-        for processed_package in processed_list:
-            if processed_package:
-                package_version = [el for el in processed_package.split(" ") if el != ""]
-                packages[package_version[0]] = package_version[1]
+        packages = get_packages(kernel_name=kernel_name)
 
         self.finish(json.dumps(packages))
 

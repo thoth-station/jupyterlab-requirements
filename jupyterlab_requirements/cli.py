@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""A CLI for jupyterlab-requirements."""
+"""A CLI for jupyterlab-requirements: Horus."""
 
 import logging
 import os
@@ -25,6 +25,7 @@ import sys
 import subprocess
 import yaml
 import click
+import typing
 import invectio
 import distutils.sysconfig as sysconfig
 
@@ -40,9 +41,10 @@ from thoth.python import Project
 from thamos.config import _Configuration
 from thamos.discover import discover_python_version
 
-from dependency_management import install_packages
 from dependency_management import create_kernel
 from dependency_management import delete_kernel
+from dependency_management import get_packages
+from dependency_management import install_packages
 from dependency_management import load_files
 
 
@@ -105,7 +107,7 @@ def cli(
         _LOGGER.setLevel(logging.DEBUG)
 
     _LOGGER.debug("Debug mode is on")
-    _LOGGER.info("Version: %s", _get_version(name="jupyterlab_requirements"))
+    # _LOGGER.info("Version: %s", _get_version(name="jupyterlab_requirements"))
 
 
 def get_notebook_content(notebook_path: str):
@@ -177,11 +179,13 @@ def extract(
     """Extract dependencies from notebook metadata.
 
     Examples:
-        jupyterlab-requirements-cli extract [YOUR_NOTEBOOK].ipynb
-        jupyterlab-requirements-cli extract [YOUR_NOTEBOOK].ipynb  --pipfile
-        jupyterlab-requirements-cli extract [YOUR_NOTEBOOK].ipynb  --pipfile-lock
-        jupyterlab-requirements-cli extract [YOUR_NOTEBOOK].ipynb  --thoth-config
+        horus extract [YOUR_NOTEBOOK].ipynb
+        horus extract [YOUR_NOTEBOOK].ipynb  --pipfile
+        horus extract [YOUR_NOTEBOOK].ipynb  --pipfile-lock
+        horus extract [YOUR_NOTEBOOK].ipynb  --thoth-config
     """
+    extract_all = False
+
     if not pipfile and not pipfile_lock and not thoth_config:
         # If no parameter to be extracted is set, extract all
         extract_all = True
@@ -234,7 +238,8 @@ def extract(
 
             if pipfile_path.exists() and not force:
                 raise FileExistsError(
-                    f"Cannot store Pipfile because it already exists at path: {pipfile_path.as_posix()!r}"
+                    f"Cannot store Pipfile because it already exists at path: {pipfile_path.as_posix()!r}. "
+                    "Use --force to overwrite existing content or --show-only to visualize it."
                 )
             else:
                 pipfile_.to_file(path=pipfile_path)
@@ -257,7 +262,8 @@ def extract(
 
             if pipfile_lock_path.exists() and not force:
                 raise FileExistsError(
-                    f"Cannot store Pipfile.lock because it already exists at path: {pipfile_lock_path.as_posix()!r}"
+                    f"Cannot store Pipfile.lock because it already exists at path: {pipfile_lock_path.as_posix()!r}. "
+                    "Use --force to overwrite existing content or --show-only to visualize it."
                 )
             else:
                 pipfile_lock_.to_file(path=pipfile_lock_path)
@@ -279,7 +285,8 @@ def extract(
             yaml_path = Path(".thoth.yaml")
             if yaml_path.exists() and not force:
                 raise FileExistsError(
-                    f"Cannot store .thoth.yaml because it already exists at path: {yaml_path.as_posix()!r}"
+                    f"Cannot store .thoth.yaml because it already exists at path: {yaml_path.as_posix()!r}. "
+                    "Use --force to overwrite existing content or --show-only to visualize it."
                 )
             else:
                 config.save_config()
@@ -354,10 +361,10 @@ def save(
     """Save dependencies in notebook metadata.
 
     Examples:
-        jupyterlab-requirements-cli save [YOUR_NOTEBOOK].ipynb
-        jupyterlab-requirements-cli save [YOUR_NOTEBOOK].ipynb  --pipfile
-        jupyterlab-requirements-cli save [YOUR_NOTEBOOK].ipynb  --pipfile-lock
-        jupyterlab-requirements-cli save [YOUR_NOTEBOOK].ipynb  --thoth-config
+        horus save [YOUR_NOTEBOOK].ipynb
+        horus save [YOUR_NOTEBOOK].ipynb  --pipfile
+        horus save [YOUR_NOTEBOOK].ipynb  --pipfile-lock
+        horus save [YOUR_NOTEBOOK].ipynb  --thoth-config
     """
     notebook = get_notebook_content(notebook_path=path)
     notebook_metadata = dict(notebook.get("metadata"))
@@ -369,6 +376,8 @@ def save(
 
     click.echo(f"Resolution engine set to {resolution_engine}.")
 
+    save_all = False
+
     if not pipfile and not pipfile_lock and not thoth_config:
         # If no parameter to be saved is set, save all
         save_all = True
@@ -378,7 +387,10 @@ def save(
 
     if pipfile or save_all:
         if "requirements" in notebook_metadata and not force:
-            raise FileExistsError("Cannot store Pipfile in notebook metadata because it already exists.")
+            raise FileExistsError(
+                "Cannot store Pipfile in notebook metadata because it already exists. "
+                "Use --force to overwrite existing content or --show-only to visualize it."
+            )
         else:
             if not force:
                 click.echo("No requirements found in notebook metadata.")
@@ -389,7 +401,10 @@ def save(
 
     if pipfile_lock or save_all:
         if "requirements_lock" in notebook_metadata and not force:
-            raise FileExistsError("Cannot store Pipfile.lock in notebook metadata because it already exists.")
+            raise FileExistsError(
+                "Cannot store Pipfile.lock in notebook metadata because it already exists. "
+                "Use --force to overwrite existing content or --show-only to visualize it."
+            )
         else:
             if not force:
                 click.echo("No requirements_lock found in notebook metadata.")
@@ -405,7 +420,10 @@ def save(
             config.load_config_from_file(config_path=Path(save_files_path).joinpath(".thoth.yaml"))
 
             if "thoth_config" in notebook_metadata and not force:
-                raise FileExistsError("Cannot store .thoth.yaml in notebook metadata because it already exists.")
+                raise FileExistsError(
+                    "Cannot store .thoth.yaml in notebook metadata because it already exists. "
+                    "Use --force to overwrite existing content or --show-only to visualize it."
+                )
             else:
                 if not force:
                     click.echo("No .thoth.yaml found in notebook metadata.")
@@ -503,9 +521,11 @@ def discover(ctx: click.Context, path: str, store_files_path: str, show_only: bo
     """Discover dependencies from notebook content.
 
     Examples:
-        jupyterlab-requirements-cli discover [YOUR_NOTEBOOK].ipynb
+        horus discover [YOUR_NOTEBOOK].ipynb
 
-        jupyterlab-requirements-cli discover [YOUR_NOTEBOOK].ipynb --only-show
+        horus discover [YOUR_NOTEBOOK].ipynb --only-show
+
+        horus discover [YOUR_NOTEBOOK].ipynb --force
     """
     packages = _gather_libraries(notebook_path=path)
 
@@ -528,7 +548,8 @@ def discover(ctx: click.Context, path: str, store_files_path: str, show_only: bo
 
         if pipfile_path.exists() and not force:
             raise FileExistsError(
-                f"Cannot store Pipfile because it already exists at path: {pipfile_path.as_posix()!r}"
+                f"Cannot store Pipfile because it already exists at path: {pipfile_path.as_posix()!r}. "
+                "Use --force to overwrite existing content or --show-only to visualize the Pipfile."
             )
         else:
             pipfile.to_file(path=pipfile_path)
@@ -561,7 +582,41 @@ def check_metadata_content(notebook_metadata: dict) -> list:
         }
     )
 
-    for mandatory_key in ["dependency_resolution_engine", "requirements", "requirements_lock"]:
+    if "dependency_resolution_engine" not in notebook_metadata.keys():
+        result.append(
+            {
+                "message": "dependency_resolution_engine key is not present in notebook metadata",
+                "type": "ERROR",
+            }
+        )
+    else:
+        result.append(
+            {
+                "message": f"dependency resolution engine: {notebook_metadata['dependency_resolution_engine']}",
+                "type": "INFO",
+            }
+        )
+
+    resolution_engine = notebook_metadata.get("dependency_resolution_engine")
+
+    if resolution_engine == "thoth":
+        for thoth_specific_key in ["thoth_config"]:
+            if thoth_specific_key not in notebook_metadata.keys():
+                result.append(
+                    {
+                        "message": f"{thoth_specific_key} key is not present in notebook metadata",
+                        "type": "ERROR",
+                    }
+                )
+            else:
+                result.append(
+                    {
+                        "message": f"{thoth_specific_key} key is present in notebook metadata",
+                        "type": "INFO",
+                    }
+                )
+
+    for mandatory_key in ["requirements", "requirements_lock"]:
         if mandatory_key not in notebook_metadata.keys():
             result.append(
                 {
@@ -587,7 +642,7 @@ def check_metadata_content(notebook_metadata: dict) -> list:
                 {
                     "message": f"Pipfile hash stated in Pipfile.lock {project.pipfile_lock.meta.hash['sha256'][:6]} "
                     f"does not correspond to Pipfile hash {project.pipfile.hash()['sha256'][:6]} - was Pipfile "
-                    "adjusted? This error is not critical.",
+                    "adjusted? Then you should run horus lock PATH to notebook.",
                     "type": "ERROR",
                 }
             )
@@ -600,34 +655,32 @@ def check_metadata_content(notebook_metadata: dict) -> list:
                 }
             )
 
-    resolution_engine = notebook_metadata.get("dependency_resolution_engine")
+        kernel_packages = get_packages(kernel_name=kernel_name)
+        notebook_packages = project.pipfile_lock.packages
 
-    if not resolution_engine:
-        return result
-
-    result.append(
-        {
-            "message": f"Notebook dependencies are created with {resolution_engine} resolution engine",
-            "type": "INFO",
-        }
-    )
-
-    if resolution_engine == "thoth":
-        for thoth_specific_key in ["thoth_config"]:
-            if thoth_specific_key not in notebook_metadata.keys():
-                result.append(
-                    {
-                        "message": f"{thoth_specific_key} key is not present in notebook metadata",
-                        "type": "ERROR",
-                    }
-                )
+        check = 0
+        for package in notebook_packages:
+            if str(package.name) in kernel_packages:
+                if str(package.version) in kernel_packages[str(package.name)]:
+                    check += 1
             else:
-                result.append(
-                    {
-                        "message": f"{thoth_specific_key} key is present in notebook metadata",
-                        "type": "INFO",
-                    }
-                )
+                break
+
+        if check == len([p for p in notebook_packages]):
+            result.append(
+                {
+                    "message": f"kernel {kernel_name} you are using has all dependencies installed.",
+                    "type": "INFO",
+                }
+            )
+        else:
+            result.append(
+                {
+                    "message": f"kernel {kernel_name} you are using does not match your dependencies. "
+                    "Please run horus lock --[RESOLUTION_ENGINE] (thoth or pipenv)",
+                    "type": "WARNING",
+                }
+            )
 
     return result
 
@@ -648,9 +701,9 @@ def check(ctx: click.Context, path: str, output_format: str) -> None:
     Check the metadata for reproducibility of the notebook.
 
     Examples:
-        jupyterlab-requirements-cli check [YOUR_NOTEBOOK].ipynb
+        horus check [YOUR_NOTEBOOK].ipynb
 
-        jupyterlab-requirements-cli check [YOUR_NOTEBOOK].ipynb --output-format yaml
+        horus check [YOUR_NOTEBOOK].ipynb --output-format yaml
     """
     notebook = get_notebook_content(notebook_path=path)
     notebook_metadata = notebook.get("metadata")
@@ -697,7 +750,7 @@ def check(ctx: click.Context, path: str, output_format: str) -> None:
     sys.exit(1 if any(item.get("type") == "ERROR" for item in result) else 0)
 
 
-@cli.command("kernel-create")
+@cli.command("set-kernel")
 @click.pass_context
 @click.argument("path")
 @click.option(
@@ -719,7 +772,7 @@ def kernel_install(ctx: click.Context, path: str, force: bool, kernel_name: str)
     Create kernel for your notebook.
 
     Examples:
-        jupyterlab-requirements-cli kernel-create [YOUR_NOTEBOOK].ipynb
+        horus kernel-create [YOUR_NOTEBOOK].ipynb
     """
     if force:
         click.echo("--force is enabled")
@@ -732,7 +785,7 @@ def kernel_install(ctx: click.Context, path: str, force: bool, kernel_name: str)
     if any(item.get("type") == "ERROR" for item in result):
         click.echo(
             "Kernel with dependencies cannot be created.\n"
-            f"Please run `jupyterlab-requirements-cli check {path}` for more information."
+            f"Please run `horus check {path}` for more information."
         )
         sys.exit(1)
 
@@ -801,6 +854,125 @@ def kernel_install(ctx: click.Context, path: str, force: bool, kernel_name: str)
     create_kernel(kernel_name=kernel)
     click.echo(f"Installed kernelspec called {kernel}.")
     ctx.exit(0)
+
+
+@cli.command("requirements")
+@click.pass_context
+@click.argument("path")
+@click.option(
+    "-a",
+    "--add",
+    is_flag=False,
+    multiple=True,
+    type=str,
+    help="Add package to requirements (if does not exists).",
+)
+@click.option(
+    "-r",
+    "--remove",
+    is_flag=False,
+    multiple=True,
+    type=str,
+    help="Remove package to requirements (if exists).",
+)
+@click.option(
+    "--index-url",
+    "-i",
+    default="https://pypi.org/simple",
+    type=str,
+    metavar="INDEX_URL",
+    show_default=True,
+    help="Specify Python package index to be used as a source for the given requirement/s.",
+)
+@click.option(
+    "--dev",
+    is_flag=True,
+    show_default=True,
+    help="Add/Remove the given package to the development packages.",
+)
+def requirements(
+    ctx: click.Context,
+    path: str,
+    index_url: str,
+    dev: bool,
+    add: Optional[typing.List[str]] = None,
+    remove: Optional[typing.List[str]] = None,
+) -> None:
+    """Add/Remove one or multiple requirements from the notebook.
+
+    -add: add one or multiple requirements to the direct dependency listing without actually installing them.
+    The supplied requirement is specified using PEP-508 standard.
+
+    Examples:
+      horus requirements [YOUR_NOTEBOOK].ipynb --add flask
+
+      horus requirements [YOUR_NOTEBOOK].ipynb --add tensorflow --runtime-environment "training"
+
+      horus requirements [YOUR_NOTEBOOK].ipynb --add --dev 'pytest~=6.2.0'
+
+      horus requirements [YOUR_NOTEBOOK].ipynb --add 'importlib-metadata; python_version < "3.8"'
+
+      horus requirements [YOUR_NOTEBOOK].ipynb --remove flask
+    """
+    if not add and not remove:
+        click.echo("No action selected. You can check horus requirements --help")
+
+    notebook = get_notebook_content(notebook_path=path)
+    notebook_metadata = dict(notebook.get("metadata"))
+
+    result = check_metadata_content(notebook_metadata=notebook_metadata)
+
+    if any(item.get("type") == "ERROR" for item in result):
+        click.echo(
+            "Kernel with dependencies cannot be created.\n"
+            f"Please run `horus check {path}` for more information."
+        )
+        sys.exit(1)
+
+    pipfile_string = notebook_metadata.get("requirements")
+    pipfile_ = Pipfile.from_string(pipfile_string)
+
+    if add:
+        for req in add:
+            _LOGGER.info(
+                "Adding %r to %s requirements",
+                req,
+                "development" if dev else "default",
+            )
+            pipfile_.add_requirement(req, is_dev=dev, index_url=index_url, force=True)
+
+    if remove:
+        for req in remove:
+            any_change = False
+
+            if req in pipfile_.packages.packages:
+                pipfile_.packages.packages.pop(req)
+                _LOGGER.info(
+                    "Removed %r from default requirements",
+                    req,
+                )
+                any_change = True
+
+            if req in pipfile_.dev_packages.packages:
+                pipfile_.dev_packages.packages.pop(req)
+                _LOGGER.info(
+                    "Removed %r from development requirements",
+                    req,
+                )
+                any_change = True
+
+            if not any_change:
+                _LOGGER.error(
+                    "Requirement %r not found in requirements, " "aborting making any changes.",
+                    req,
+                )
+                sys.exit(1)
+
+    click.echo(f"\nPipfile:\n\n{pipfile_.to_string()}")
+    notebook_metadata["requirements"] = pipfile_.to_string()
+
+    notebook["metadata"] = notebook_metadata
+    save_notebook_content(notebook_path=path, notebook=notebook)
 
 
 __name__ == "__main__" and cli()
