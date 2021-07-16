@@ -373,6 +373,8 @@ def save(
     if language != "python":
         raise Exception("Only Python kernels are currently supported.")
 
+    click.echo(f"Resolution engine set to {resolution_engine!r}.")
+
     save_all = False
 
     if not pipfile and not pipfile_lock and not thoth_config:

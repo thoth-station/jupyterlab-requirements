@@ -370,7 +370,7 @@ def lock_dependencies_with_pipenv(
     )
 
     if check_install.returncode != 0:
-        _LOGGER.debug(f"pipenv is not installed in the host!: {check_install.stderr}")
+        _LOGGER.debug(f"pipenv is not installed in the host!: {check_install.stderr!r}")
 
         try:
             subprocess.run("pip install pipenv", cwd=kernels_path, shell=True)
