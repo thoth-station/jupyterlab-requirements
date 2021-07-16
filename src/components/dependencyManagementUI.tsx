@@ -1260,6 +1260,8 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                     </p>
                 </fieldset>
               </div>
+              {addPlusInstallContainers}
+              {optionsForm}
             </div>
             );
 

@@ -371,6 +371,7 @@ def lock_dependencies_with_pipenv(
 
     if check_install.returncode != 0:
         _LOGGER.debug(f"pipenv is not installed in the host!: {check_install.stderr}")
+
         try:
             subprocess.run("pip install pipenv", cwd=kernels_path, shell=True)
         except Exception as pipenv_install_error:
@@ -416,9 +417,9 @@ def lock_dependencies_with_pipenv(
                 pipfile_lock_str = pipfile_lock_file.read()
 
             pipfile = Pipfile.from_string(pipfile_string)
-            pipfile_lock_str: PipfileLock = PipfileLock.from_string(pipfile_lock_str, pipfile=pipfile)
+            pipfile_lock_: PipfileLock = PipfileLock.from_string(pipfile_lock_str, pipfile=pipfile)
 
-            result["requirements_lock"] = pipfile_lock_str.to_dict()
+            result["requirements_lock"] = pipfile_lock_.to_dict()
 
             _LOGGER.debug(f"result from pipenv received: {result}")
 

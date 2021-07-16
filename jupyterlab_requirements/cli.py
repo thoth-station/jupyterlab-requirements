@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# thoth-jupyterlab-requirements
+# horus
 # Copyright(C) 2021 Francesco Murdaca
 #
 # This program is free software: you can redistribute it and / or modify
@@ -217,13 +217,15 @@ def extract(
 
     click.echo(f"Resolution engine identified: {dependency_resolution_engine!s}")
 
-    if pipfile or extract_all:
+    if pipfile or pipfile_lock or extract_all:
         pipfile_string = notebook_metadata.get("requirements")
 
         if not pipfile_string:
             raise KeyError("No Pipfile identified in notebook metadata.")
 
         pipfile_ = Pipfile.from_string(pipfile_string)
+
+    if pipfile or extract_all:
 
         if show_only:
             click.echo(f"\nPipfile:\n\n{pipfile_.to_string()}")
@@ -247,7 +249,7 @@ def extract(
         if not pipfile_lock_string:
             raise KeyError("No Pipfile.lock identified in notebook metadata.")
 
-        pipfile_lock_ = PipfileLock.from_string(pipfile_content=pipfile_lock_string, pipfile=Pipfile.from_string(""))
+        pipfile_lock_ = PipfileLock.from_string(pipfile_content=pipfile_lock_string, pipfile=pipfile_)
 
         if show_only:
             click.echo(f"\nPipfile.lock:\n\n{pipfile_lock_.to_string()}")
@@ -366,12 +368,10 @@ def save(
     notebook = get_notebook_content(notebook_path=path)
     notebook_metadata = dict(notebook.get("metadata"))
 
-    language = notebook_metadata["language_info"]["name"]
+    language: str = notebook_metadata["language_info"]["name"]
 
     if language != "python":
         raise Exception("Only Python kernels are currently supported.")
-
-    click.echo(f"Resolution engine set to {resolution_engine}.")
 
     save_all = False
 
@@ -381,6 +381,9 @@ def save(
 
     if pipfile or pipfile_lock or save_all:
         pipfile_string, pipfile_lock_string = load_files(base_path=save_files_path)
+
+        pipfile_ = Pipfile.from_string(pipfile_string)
+        pipfile_lock_ = PipfileLock.from_string(pipfile_content=pipfile_lock_string, pipfile=pipfile_)
 
     if pipfile or save_all:
         if "requirements" in notebook_metadata and not force:
@@ -394,7 +397,7 @@ def save(
             else:
                 click.echo("Updating existing requirements in notebook metadata.")
 
-            notebook_metadata["requirements"] = json.dumps(pipfile_string.to_dict())
+            notebook_metadata["requirements"] = json.dumps(pipfile_.to_dict())
 
     if pipfile_lock or save_all:
         if "requirements_lock" in notebook_metadata and not force:
@@ -408,7 +411,7 @@ def save(
             else:
                 click.echo("Updating existing requirements_lock in notebook metadata.")
 
-            notebook_metadata["requirements_lock"] = json.dumps(pipfile_lock_string.to_dict())
+            notebook_metadata["requirements_lock"] = json.dumps(pipfile_lock_.to_dict())
 
     if resolution_engine == "thoth":
 
@@ -787,15 +790,19 @@ def kernel_install(ctx: click.Context, path: str, kernel_name: Optional[str]) ->
     if language != "python":
         raise Exception("Only Python kernels are currently supported.")
 
+    kernelspec = notebook_metadata.get("kernelspec")
+    notebook_kernel = kernelspec.get("name")
+
     if not kernel_name:
-        kernelspec = notebook_metadata.get("kernelspec")
-        kernel_name = kernelspec.get("name")
+        kernel = notebook_kernel
+    else:
+        kernel = kernel_name
 
-    if kernel_name == "python3":
+    if kernel == "python3":
         click.echo("python3 kernel name, cannot be overwritten, assigning default jupyterlab-requirements")
-        kernel_name = "jupyterlab-requirements"
+        kernel = "jupyterlab-requirements"
 
-    click.echo(f"Kernel name is: {kernel_name!s}")
+    click.echo(f"Kernel name is: {kernel!s}")
 
     home = Path.home()
     store_path: Path = home.joinpath(".local/share/thoth/kernels")
@@ -807,10 +814,10 @@ def kernel_install(ctx: click.Context, path: str, kernel_name: Optional[str]) ->
 
     click.echo(f"Resolution engine identified: {dependency_resolution_engine!s}")
 
-    complete_path = store_path.joinpath(kernel_name)
+    complete_path: Path = store_path.joinpath(kernel)
 
     if complete_path.exists():
-        delete_kernel(kernel_name=kernel_name)
+        delete_kernel(kernel_name=kernel)
 
     complete_path.mkdir(parents=True, exist_ok=True)
 
@@ -824,7 +831,7 @@ def kernel_install(ctx: click.Context, path: str, kernel_name: Optional[str]) ->
 
     # requirements lock
     pipfile_lock_string = notebook_metadata.get("requirements_lock")
-    pipfile_lock_ = PipfileLock.from_string(pipfile_content=pipfile_lock_string, pipfile=Pipfile.from_string(""))
+    pipfile_lock_ = PipfileLock.from_string(pipfile_content=pipfile_lock_string, pipfile=pipfile_)
     pipfile_lock_path = complete_path.joinpath("Pipfile.lock")
     pipfile_lock_.to_file(path=pipfile_lock_path)
 
@@ -838,13 +845,13 @@ def kernel_install(ctx: click.Context, path: str, kernel_name: Optional[str]) ->
 
     # 2. Create virtualenv and install dependencies
     click.echo("Installing requirements with micropipenv...")
-    install_packages(kernel_name=kernel_name, resolution_engine=dependency_resolution_engine, is_cli=True)
+    install_packages(kernel_name=kernel, resolution_engine=dependency_resolution_engine, is_cli=True)
     click.echo(f"Requirements installed using micropipenv in virtualenv at {complete_path}.")
 
     # 3. Install packages using micropipenv
     click.echo("Installing kernel for Jupyter notebooks...")
-    create_kernel(kernel_name=kernel_name)
-    click.echo(f"Installed kernelspec called {kernel_name}.")
+    create_kernel(kernel_name=kernel)
+    click.echo(f"Installed kernelspec called {kernel}.")
     ctx.exit(0)
 
 
@@ -1014,13 +1021,19 @@ def lock(
     notebook = get_notebook_content(notebook_path=path)
     notebook_metadata = notebook.get("metadata")
 
-    if not kernel_name:
-        kernelspec = notebook_metadata.get("kernelspec")
-        kernel_name = kernelspec.get("name")
+    kernelspec = notebook_metadata.get("kernelspec")
+    notebook_kernel = kernelspec.get("name")
 
-    if kernel_name == "python3":
+    if not kernel_name:
+        kernel = notebook_kernel
+    else:
+        kernel = kernel_name
+
+    if kernel == "python3":
         click.echo("python3 kernel name, cannot be overwritten, assigning default jupyterlab-requirements")
-        kernel_name = "jupyterlab-requirements"
+        kernel = "jupyterlab-requirements"
+
+    click.echo(f"Kernel name is: {kernel!s}")
 
     pipfile_string = notebook_metadata.get("requirements")
 
@@ -1038,12 +1051,12 @@ def lock(
         thoth_config = notebook_metadata.get("thoth_config")
 
         if not thoth_config:
-            thoth_config = get_thoth_config(kernel_name=kernel_name)
+            thoth_config = get_thoth_config(kernel_name=kernel)
 
         notebook_content_py = get_notebook_content_py(notebook_path=path)
 
         returncode, advise = lock_dependencies_with_thoth(
-            kernel_name=kernel_name,
+            kernel_name=kernel,
             pipfile_string=pipfile_string,
             config=json.dumps(thoth_config),
             timeout=timeout,
@@ -1064,7 +1077,7 @@ def lock(
             notebook_metadata["thoth_config"] = json.dumps(thoth_config)
 
     if resolution_engine == "pipenv":
-        returncode, result = lock_dependencies_with_pipenv(kernel_name=kernel_name, pipfile_string=pipfile_.to_string())
+        returncode, result = lock_dependencies_with_pipenv(kernel_name=kernel, pipfile_string=pipfile_.to_string())
 
         if returncode != 0 or result["error"]:
             click.echo({"error_msg": result["error_msg"]})
