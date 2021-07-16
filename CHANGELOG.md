@@ -284,3 +284,25 @@ all the things that you see...
 * make pre-commit happy
 * Add tests for method
 * Allow user to use force
+
+## Release 0.9.0 (2021-07-16T20:57:30)
+### Features
+* Add horus show command
+* Adjust MANIFEST for CLI
+* provide relock button if resolution is not done with thoth
+* update README
+* Add horus lock command
+* Add thamos and user-api to horus version command
+* Add horus requirements command to handle requirements from CLI
+* Adjust mypy
+* adjust discover python version
+* Add save command
+* Add create-kernel command
+* Add jupyterlab-requirement check command
+* Add discover command
+* Introduce jupyterlab requirements CLI
+* :arrow_up: Automatic update of dependencies by Kebechet
+* Add youtube link to v0.8.0
+### Improvements
+* Add defaults for save and extract
+* Add library with core methods for jupyter extension and CLI
