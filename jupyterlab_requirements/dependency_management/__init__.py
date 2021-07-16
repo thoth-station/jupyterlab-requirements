@@ -32,8 +32,11 @@ from .thoth_invectio import ThothInvectioHandler
 from .lib import create_kernel
 from .lib import delete_kernel
 from .lib import get_packages
+from .lib import get_thoth_config
 from .lib import install_packages
 from .lib import load_files
+from .lib import lock_dependencies_with_pipenv
+from .lib import lock_dependencies_with_thoth
 
 __all__ = [
     "DependencyManagementBaseHandler",
@@ -51,6 +54,9 @@ __all__ = [
     "create_kernel",
     "delete_kernel",
     "get_packages",
+    "get_thoth_config",
     "install_packages",
     "load_files",
+    "lock_dependencies_with_pipenv",
+    "lock_dependencies_with_thoth",
 ]

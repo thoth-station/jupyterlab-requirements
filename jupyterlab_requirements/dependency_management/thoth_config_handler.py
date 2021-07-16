@@ -23,6 +23,7 @@ import logging
 
 from pathlib import Path
 from jupyter_server.base.handlers import APIHandler
+from .lib import get_thoth_config
 from tornado import web
 
 from thamos.config import _Configuration
@@ -37,33 +38,10 @@ class ThothConfigHandler(APIHandler):
     @web.authenticated
     def post(self):
         """Retrieve or create Thoth config file."""
-        initial_path = Path.cwd()
         input_data = self.get_json_body()
         kernel_name: str = input_data["kernel_name"]
 
-        home = Path.home()
-        complete_path = home.joinpath(".local/share/thoth/kernels")
-        env_path = complete_path.joinpath(kernel_name)
-        env_path.mkdir(parents=True, exist_ok=True)
-
-        os.chdir(env_path)
-
-        _LOGGER.info(f"kernel_name selected: {kernel_name} and path: {env_path}")
-
-        config = _Configuration()
-
-        if not config.config_file_exists():
-            _LOGGER.info("Thoth config does not exist, creating it...")
-            try:
-                config.create_default_config()
-            except Exception as e:
-                raise Exception("Thoth config file could not be created! %r", e)
-
-        config.load_config()
-
-        thoth_config = config.content
-        _LOGGER.info("Thoth config: %r", thoth_config)
-        os.chdir(initial_path)
+        thoth_config = get_thoth_config(kernel_name=kernel_name)
         self.finish(json.dumps(thoth_config))
 
     @web.authenticated
