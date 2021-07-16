@@ -306,3 +306,7 @@ all the things that you see...
 ### Improvements
 * Add defaults for save and extract
 * Add library with core methods for jupyter extension and CLI
+
+## Release 0.9.1 (2021-07-16T21:34:07)
+### Features
+* Fix CLI during setup
