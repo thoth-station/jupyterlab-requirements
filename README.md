@@ -174,11 +174,11 @@ If you have too many kernels, you can handle them directly from the menu.
 ![kernel delete handler menu](preview.gif)
 
 
-## Horus: jupyterlab-requirements CLI
+# Horus: jupyterlab-requirements CLI
 
 As of `v0.9.0` jupyterlab-requirements support a CLI that can be used for automation processes, called `Horus`, another Egyptian God, part of Thoth family.
 
-### Check notebook metadata content about dependencies
+## Check notebook metadata content about dependencies
 
 This command is used to verify if a certain notebook is reproducible, therefore if it contains all dependencies required for installation and run.
 This command can be used in CI to verify notebooks have dependencies.
@@ -187,17 +187,23 @@ This command can be used in CI to verify notebooks have dependencies.
 horus check [YOUR_NOTEBOOK].ipynb
 ```
 
-### Extract notebook metadata content about dependencies and install them
+## Show notebook metadata content about dependencies
 
-This command is used to extract content in notebook metadata from CLI and store it locally.
+This command is used to show dependencies content from notebook metadata.
+
+```
+horus show [YOUR_NOTEBOOK].ipynb
+```
+
+## Extract notebook metadata content about dependencies
+
+This command is used to extract dependencies content from notebook metadata and store it locally.
 
 ```
 horus extract [YOUR_NOTEBOOK].ipynb
 ```
 
 It can be combined with the commands below:
-
-Adding `--show-only` won't store file locally, but only show it to stdout.
 
 Adding `--store-files-path` will store file at the desired path.
 
@@ -213,13 +219,7 @@ horus extract [YOUR_NOTEBOOK].ipynb  --pipfile-lock
 horus extract [YOUR_NOTEBOOK].ipynb  --thoth-config
 ```
 
-Once dependencies are extracted, you can install them with the following command:
-
-```bash
-micropipenv install
-```
-
-### Install and create kernel for the notebook dependencies
+## Install and create kernel for the notebook dependencies
 
 This commands can be used to prepare environment for the notebook to run, just pointing to the notebook.
 
@@ -227,7 +227,7 @@ This commands can be used to prepare environment for the notebook to run, just p
 horus kernel-create [YOUR_NOTEBOOK].ipynb
 ```
 
-### Discover notebook content about dependencies
+## Discover notebook content about dependencies
 
 This command is used to discover dependencies used in the notebook and create a Pipfile (empty if packages are not identified).
 NOTE: Please keep in mind this feature is under development and the packages identified need to be checked by humans.
@@ -240,7 +240,7 @@ Adding `--show-only` won't store file locally, but only show it to stdout.
 
 Adding `--force` will store file at the desired/default path even if one exists. If no `--force` is provided the CLI will simply fail.
 
-### Save content about dependencies in notebook metadata
+## Save content about dependencies in notebook metadata
 
 This command is used to save content in notebook metadata.
 
@@ -266,7 +266,7 @@ horus save [YOUR_NOTEBOOK].ipynb  --pipfile-lock
 horus save [YOUR_NOTEBOOK].ipynb  --thoth-config
 ```
 
-### Create/Modify/Remove requirements in Pipfile in notebook metadata
+## Create/Modify/Remove requirements in Pipfile in notebook metadata
 
 ```bash
 horus requirements [YOUR_NOTEBOOK].ipynb  --add tensorflow

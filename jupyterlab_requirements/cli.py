@@ -153,11 +153,6 @@ def version(ctx, json_output: bool = False):
     help="Extract Pipfile and Pipfile.lock in overlay with kernel name.",
 )
 @click.option(
-    "--show-only",
-    is_flag=True,
-    help="If active only the content will be shown but not extracted.",
-)
-@click.option(
     "--force",
     is_flag=True,
     help="Force actions for extraction.",
@@ -170,7 +165,6 @@ def extract(
     pipfile_lock: bool = False,
     thoth_config: bool = False,
     use_overlay: bool = False,
-    show_only: bool = False,
     force: bool = False,
 ):
     """Extract dependencies from notebook metadata.
@@ -184,7 +178,7 @@ def extract(
     extract_all = False
 
     if not pipfile and not pipfile_lock and not thoth_config:
-        # If no parameter to be extracted is set, extract all
+        # If no parameter to be extracted is set, extract all is set.
         extract_all = True
 
     notebook = get_notebook_content(notebook_path=path)
@@ -200,10 +194,9 @@ def extract(
     kernel_name = kernelspec.get("name")
     click.echo(f"Kernel name is: {kernel_name!s}")
 
-    if not show_only:
-        store_path: Path = Path(store_files_path)
+    store_path: Path = Path(store_files_path)
 
-    if use_overlay and not show_only:
+    if use_overlay:
         if not kernel_name:
             raise KeyError("No kernel name identified in notebook metadata kernelspec.")
 
@@ -227,21 +220,18 @@ def extract(
 
     if pipfile or extract_all:
 
-        if show_only:
-            click.echo(f"\nPipfile:\n\n{pipfile_.to_string()}")
+        pipfile_path = store_path.joinpath("Pipfile")
 
-            if not extract_all:
-                ctx.exit(0)
+        if pipfile_path.exists() and not force:
+            raise FileExistsError(
+                f"Cannot store Pipfile because it already exists at path: {pipfile_path.as_posix()!r}. "
+                "Use --force to overwrite existing content or --show-only to visualize it."
+            )
         else:
-            pipfile_path = store_path.joinpath("Pipfile")
+            pipfile_.to_file(path=pipfile_path)
 
-            if pipfile_path.exists() and not force:
-                raise FileExistsError(
-                    f"Cannot store Pipfile because it already exists at path: {pipfile_path.as_posix()!r}. "
-                    "Use --force to overwrite existing content or --show-only to visualize it."
-                )
-            else:
-                pipfile_.to_file(path=pipfile_path)
+        if not extract_all:
+            ctx.exit(0)
 
     if pipfile_lock or extract_all:
         pipfile_lock_string = notebook_metadata.get("requirements_lock")
@@ -251,21 +241,18 @@ def extract(
 
         pipfile_lock_ = PipfileLock.from_string(pipfile_content=pipfile_lock_string, pipfile=pipfile_)
 
-        if show_only:
-            click.echo(f"\nPipfile.lock:\n\n{pipfile_lock_.to_string()}")
+        pipfile_lock_path = store_path.joinpath("Pipfile.lock")
 
-            if not extract_all:
-                ctx.exit(0)
+        if pipfile_lock_path.exists() and not force:
+            raise FileExistsError(
+                f"Cannot store Pipfile.lock because it already exists at path: {pipfile_lock_path.as_posix()!r}. "
+                "Use --force to overwrite existing content or --show-only to visualize it."
+            )
         else:
-            pipfile_lock_path = store_path.joinpath("Pipfile.lock")
+            pipfile_lock_.to_file(path=pipfile_lock_path)
 
-            if pipfile_lock_path.exists() and not force:
-                raise FileExistsError(
-                    f"Cannot store Pipfile.lock because it already exists at path: {pipfile_lock_path.as_posix()!r}. "
-                    "Use --force to overwrite existing content or --show-only to visualize it."
-                )
-            else:
-                pipfile_lock_.to_file(path=pipfile_lock_path)
+        if not extract_all:
+            ctx.exit(0)
 
     if thoth_config or extract_all:
         thoth_config_string = notebook_metadata.get("thoth_config")
@@ -275,20 +262,120 @@ def extract(
 
         config = _Configuration()
         config.load_config_from_string(thoth_config_string)
-        if show_only:
-            click.echo(f"\n.thoth.yaml:\n\n{yaml.dump(config.content)}")
 
-            if not extract_all:
-                ctx.exit(0)
+        yaml_path = Path(".thoth.yaml")
+        if yaml_path.exists() and not force:
+            raise FileExistsError(
+                f"Cannot store .thoth.yaml because it already exists at path: {yaml_path.as_posix()!r}. "
+                "Use --force to overwrite existing content or --show-only to visualize it."
+            )
         else:
-            yaml_path = Path(".thoth.yaml")
-            if yaml_path.exists() and not force:
-                raise FileExistsError(
-                    f"Cannot store .thoth.yaml because it already exists at path: {yaml_path.as_posix()!r}. "
-                    "Use --force to overwrite existing content or --show-only to visualize it."
-                )
-            else:
-                config.save_config()
+            config.save_config()
+
+        if not extract_all:
+            ctx.exit(0)
+
+    ctx.exit(0)
+
+
+@cli.command("show")
+@click.pass_context
+@click.argument("path")
+@click.option(
+    "--pipfile",
+    is_flag=True,
+    help="Show Pipfile.",
+)
+@click.option(
+    "--pipfile-lock",
+    is_flag=True,
+    help="Show Pipfile.lock.",
+)
+@click.option(
+    "--thoth-config",
+    is_flag=True,
+    help="Show .thoth.yaml.",
+)
+def show(
+    ctx: click.Context,
+    path: str,
+    pipfile: bool = False,
+    pipfile_lock: bool = False,
+    thoth_config: bool = False,
+):
+    """Show dependencies from notebook metadata.
+
+    Examples:
+        horus show [YOUR_NOTEBOOK].ipynb
+        horus show [YOUR_NOTEBOOK].ipynb  --pipfile
+        horus show [YOUR_NOTEBOOK].ipynb  --pipfile-lock
+        horus show [YOUR_NOTEBOOK].ipynb  --thoth-config
+    """
+    show_all = False
+
+    if not pipfile and not pipfile_lock and not thoth_config:
+        # If no parameter to be shown is set, show all is set.
+        show_all = True
+
+    notebook = get_notebook_content(notebook_path=path)
+    notebook_metadata = notebook.get("metadata")
+
+    language_info = notebook_metadata.get("language_info")
+    language = language_info.get("name")
+
+    if language != "python":
+        raise Exception("Only Python kernels are currently supported.")
+
+    kernelspec = notebook_metadata.get("kernelspec")
+    kernel_name = kernelspec.get("name")
+    click.echo(f"Kernel name is: {kernel_name!s}")
+
+    dependency_resolution_engine = notebook_metadata.get("dependency_resolution_engine")
+
+    if not dependency_resolution_engine:
+        raise KeyError("No Resolution engine identified in notebook metadata.")
+
+    click.echo(f"Resolution engine identified: {dependency_resolution_engine!s}")
+
+    if pipfile or pipfile_lock or show_all:
+        pipfile_string = notebook_metadata.get("requirements")
+
+        if not pipfile_string:
+            raise KeyError("No Pipfile identified in notebook metadata.")
+
+        pipfile_ = Pipfile.from_string(pipfile_string)
+
+    if pipfile or show_all:
+        click.echo(f"\nPipfile:\n\n{pipfile_.to_string()}")
+
+        if not show_all:
+            ctx.exit(0)
+
+    if pipfile_lock or show_all:
+        pipfile_lock_string = notebook_metadata.get("requirements_lock")
+
+        if not pipfile_lock_string:
+            raise KeyError("No Pipfile.lock identified in notebook metadata.")
+
+        pipfile_lock_ = PipfileLock.from_string(pipfile_content=pipfile_lock_string, pipfile=pipfile_)
+
+        click.echo(f"\nPipfile.lock:\n\n{pipfile_lock_.to_string()}")
+
+        if not show_all:
+            ctx.exit(0)
+
+    if thoth_config or show_all:
+        thoth_config_string = notebook_metadata.get("thoth_config")
+
+        if not thoth_config_string:
+            raise KeyError("No .thoth.yaml identified in notebook metadata.")
+
+        config = _Configuration()
+        config.load_config_from_string(thoth_config_string)
+        click.echo(f"\n.thoth.yaml:\n\n{yaml.dump(config.content)}")
+
+        if not show_all:
+            ctx.exit(0)
 
     ctx.exit(0)
 
@@ -686,7 +773,7 @@ def check_metadata_content(notebook_metadata: dict) -> list:
             result.append(
                 {
                     "message": f"kernel {kernel_name} selected does not match your dependencies. "
-                    "Please run horus lock --[RESOLUTION_ENGINE] (thoth or pipenv)",
+                    "Please run command horus lock [NOTEBOOK].ipynb",
                     "type": "WARNING",
                 }
             )
