@@ -1,6 +1,6 @@
 # Changelog for Thoth's Template GitHub Project
 
-## [0.1.0] - 2019-Sep-11 - goern
+## [0.0.0] - 2020-Nov-2 - pacospace
 
 ### Added
 

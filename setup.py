@@ -74,6 +74,7 @@ def _get_install_requires():
 
 setup_args = dict(
     name=name,
+    entry_points={"console_scripts": ["horus=jupyterlab_requirements.cli:cli"]},
     version=version,
     url="https://github.com/thoth-station/jupyterlab-requirements",
     author="Francesco Murdaca",

@@ -43,14 +43,14 @@ from thamos.discover import discover_python_version
 
 from jupyterlab_requirements import __version__
 
-from dependency_management import create_kernel
-from dependency_management import delete_kernel
-from dependency_management import get_packages
-from dependency_management import get_thoth_config
-from dependency_management import install_packages
-from dependency_management import load_files
-from dependency_management import lock_dependencies_with_pipenv
-from dependency_management import lock_dependencies_with_thoth
+from .dependency_management import create_kernel
+from .dependency_management import delete_kernel
+from .dependency_management import get_packages
+from .dependency_management import get_thoth_config
+from .dependency_management import install_packages
+from .dependency_management import load_files
+from .dependency_management import lock_dependencies_with_pipenv
+from .dependency_management import lock_dependencies_with_thoth
 
 
 _LOGGER = logging.getLogger("thoth.jupyterlab_requirements.cli")
