@@ -12,6 +12,8 @@ thamos = ">=1.16.1"
 thoth-python = "*"
 thoth-common = "*"
 jupyterlab = ">3."
+rich = "*"
+pyyaml = "*"
 
 [dev-packages]
 jupyter-packaging = "*"

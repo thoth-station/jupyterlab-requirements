@@ -87,6 +87,12 @@ setup_args = dict(
     zip_safe=False,
     include_package_data=True,
     python_requires=">=3.8",
+    project_urls={
+        "Documentation": "https://github.com/thoth-station/jupyterlab-requirements/blob/master/README.md",
+        "Source Code": "https://github.com/thoth-station/jupyterlab-requirements/",
+        "Issues": "https://github.com/thoth-station/jupyterlab-requirements/issues",
+        "Changelog": "https://github.com/thoth-station/jupyterlab-requirements/blob/master/CHANGELOG.md",
+    },
     license="GPLv3+",
     platforms="Linux, Mac OS X, Windows",
     keywords=["Jupyter", "JupyterLab"],

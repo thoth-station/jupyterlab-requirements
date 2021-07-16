@@ -19,12 +19,12 @@
 import json
 import logging
 import subprocess
-import shutil
-
-from pathlib import Path
 
 from jupyter_server.base.handlers import APIHandler
 from tornado import web
+
+from .lib import create_kernel
+from .lib import delete_kernel
 
 
 _LOGGER = logging.getLogger("jupyterlab_requirements.kernel_handler")
@@ -35,47 +35,16 @@ class JupyterKernelHandler(APIHandler):
 
     @web.authenticated
     def post(self):
-        """Create kernel using new virtual environment."""
+        """POST request for JupyterKernelHandler."""
         input_data = self.get_json_body()
 
         kernel_name: str = input_data["kernel_name"]
 
-        home = Path.home()
-        complete_path = home.joinpath(".local/share/thoth/kernels")
-
-        _LOGGER.info(f"Setting new jupyter kernel {kernel_name} from {complete_path}/{kernel_name}.")
-
-        package = "ipykernel"
-        check_install = subprocess.run(
-            f". {kernel_name}/bin/activate &&"
-            f"python3 -c \"import sys, pkgutil; sys.exit(0 if pkgutil.find_loader('{package}') else 1)\"",
-            shell=True,
-            cwd=complete_path,
-            capture_output=True,
+        kernels_path = create_kernel(
+            kernel_name=kernel_name,
         )
 
-        if check_install.returncode != 0:
-            _LOGGER.debug(f"ipykernel is not installed in the host!: {check_install.stderr}")
-            _ = subprocess.run(f". {kernel_name}/bin/activate && pip install ipykernel", shell=True, cwd=complete_path)
-        else:
-            _LOGGER.debug("ipykernel is already present on the host!")
-
-        _LOGGER.debug(f"Installing kernelspec called {kernel_name}.")
-
-        try:
-            process_output = subprocess.run(
-                f". {kernel_name}/bin/activate && ipython kernel install --user"
-                f" --name={kernel_name} --display-name 'Python ({kernel_name})'",
-                shell=True,
-                cwd=complete_path,
-                capture_output=True,
-            )
-            _LOGGER.info(process_output.stdout.decode("utf-8"))
-
-        except Exception as e:
-            _LOGGER.error(f"Could not enter environment {e}")
-
-        self.finish(json.dumps({"data": f"installed kernel {kernel_name} at {complete_path}"}))
+        self.finish(json.dumps({"data": f"installed kernel {kernel_name} at {kernels_path}"}))
 
     @web.authenticated
     def get(self):
@@ -110,32 +79,13 @@ class JupyterKernelHandler(APIHandler):
 
         {"message": "", "error": False}
 
-        # Delete jupyter kernel
-        try:
-            command_output = subprocess.run(
-                f"jupyter kernelspec remove -f {kernel_name}",
-                shell=True,
-                capture_output=True,
-            )
-            _LOGGER.debug(command_output.returncode)
-
-        except Exception as e:
-            _LOGGER.error(f"Could not delete selected kernel: {e}")
-
-        # Delete folder from host
-        home = Path.home()
-        complete_path = home.joinpath(".local/share/thoth/kernels")
-        env_path = complete_path.joinpath(kernel_name)
-
-        if env_path.exists():
-            try:
-                shutil.rmtree(env_path)
-            except Exception as e:
-                _LOGGER.warning(f"Repo at {env_path.as_posix()} was not removed because of: {e}")
+        command_output = delete_kernel(kernel_name=kernel_name)
 
         if command_output.returncode == 0:
-            self.finish(json.dumps({"message": f"{kernel_name} successfully delete", "error": False}))
+            self.finish(json.dumps({"message": f"{kernel_name} kernel successfully deleted", "error": False}))
         else:
             self.finish(
-                json.dumps({"message": f"{kernel_name} could not be delete, please check pod logs", "error": True})
+                json.dumps(
+                    {"message": f"{kernel_name} kernel could not be deleted, please check pod logs", "error": True}
+                )
             )

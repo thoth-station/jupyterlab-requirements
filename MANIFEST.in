@@ -1,3 +1,4 @@
+include horus
 include LICENSE
 include README.md
 include pyproject.toml
@@ -6,6 +7,7 @@ include requirements.txt
 include package.json
 include install.json
 include ts*.json
+include preview.gif
 
 graft jupyterlab_requirements/labextension
 
