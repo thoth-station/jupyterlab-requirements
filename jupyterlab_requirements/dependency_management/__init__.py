@@ -38,6 +38,8 @@ from .lib import load_files
 from .lib import lock_dependencies_with_pipenv
 from .lib import lock_dependencies_with_thoth
 
+from .magic_commands import HorusMagics
+
 __all__ = [
     "DependencyManagementBaseHandler",
     "DependenciesFilesHandler",
@@ -59,4 +61,5 @@ __all__ = [
     "load_files",
     "lock_dependencies_with_pipenv",
     "lock_dependencies_with_thoth",
+    "HorusMagics",
 ]
