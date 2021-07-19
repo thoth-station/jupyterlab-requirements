@@ -224,7 +224,7 @@ horus extract [YOUR_NOTEBOOK].ipynb  --thoth-config
 This commands can be used to prepare environment for the notebook to run, just pointing to the notebook.
 
 ```bash
-horus kernel-create [YOUR_NOTEBOOK].ipynb
+horus set-kernel [YOUR_NOTEBOOK].ipynb
 ```
 
 ## Discover notebook content about dependencies
@@ -268,15 +268,21 @@ horus save [YOUR_NOTEBOOK].ipynb  --thoth-config
 
 ## Create/Modify/Remove requirements in Pipfile in notebook metadata
 
+You can add requirement to Pipfile in your notebook, using the following command:
+
 ```bash
 horus requirements [YOUR_NOTEBOOK].ipynb  --add tensorflow
 ```
+
+If you want to remove a requirement instead, you can use the following command:
 
 ```bash
 horus requirements [YOUR_NOTEBOOK].ipynb  --remove tensorflow
 ```
 
-### Lock pipfile in notebook metadata
+## Lock pipfile in notebook metadata
+
+Adding `--kernel-name` can use a certain kernel name (default to `jupyterlab-requirements`).
 
 Using Thoth resolution engine:
 
@@ -290,8 +296,11 @@ Adding `--set-timeout` will set timeout for request to thoth.
 
 Adding `--force` will force request to thoth if one analysis result already exists.
 
-Adding `--kernel-name` can use a certain kernel name (default to `jupyterlab-requirements`).
+Adding `--os-name` will use OS name in request to Thoth.
 
+Adding `--os-version` will use OS version in request to Thoth.
+
+Adding `--python-version` will use python version in request to Thoth.
 
 Usign Pipenv resolution engine:
 
