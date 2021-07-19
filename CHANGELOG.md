@@ -310,3 +310,7 @@ all the things that you see...
 ## Release 0.9.1 (2021-07-16T21:34:07)
 ### Features
 * Fix CLI during setup
+
+## Release 0.9.2 (2021-07-19T08:32:20)
+### Bug Fixes
+* Some adjustments and fixes
