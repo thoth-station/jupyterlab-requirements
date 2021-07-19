@@ -22,6 +22,7 @@ import subprocess
 
 from jupyter_server.base.handlers import APIHandler
 from tornado import web
+from pathlib import Path
 
 from .lib import create_kernel
 from .lib import delete_kernel
@@ -40,9 +41,9 @@ class JupyterKernelHandler(APIHandler):
 
         kernel_name: str = input_data["kernel_name"]
 
-        kernels_path = create_kernel(
-            kernel_name=kernel_name,
-        )
+        kernels_path: Path = Path.home().joinpath(".local/share/thoth/kernels")
+
+        create_kernel(kernel_name=kernel_name, kernels_path=kernels_path)
 
         self.finish(json.dumps({"data": f"installed kernel {kernel_name} at {kernels_path}"}))
 

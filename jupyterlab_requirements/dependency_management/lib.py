@@ -39,7 +39,7 @@ def install_packages(
     resolution_engine: str,
     kernels_path: Path = Path.home().joinpath(".local/share/thoth/kernels"),
     is_cli: bool = False,
-):
+) -> None:
     """Install dependencies in the virtualenv."""
     _LOGGER.info(f"kernel_name selected: {kernel_name}")
 
@@ -82,7 +82,7 @@ def install_packages(
     )
 
 
-def get_packages(kernel_name: str, kernels_path: Path = Path.home().joinpath(".local/share/thoth/kernels")):
+def get_packages(kernel_name: str, kernels_path: Path = Path.home().joinpath(".local/share/thoth/kernels")) -> dict:
     """Get packages in the virtualenv (pip list)."""
     _LOGGER.info(f"kernel_name selected: {kernel_name}")
 
@@ -101,7 +101,7 @@ def get_packages(kernel_name: str, kernels_path: Path = Path.home().joinpath(".l
     return packages
 
 
-def create_kernel(kernel_name: str, kernels_path: Path = Path.home().joinpath(".local/share/thoth/kernels")):
+def create_kernel(kernel_name: str, kernels_path: Path = Path.home().joinpath(".local/share/thoth/kernels")) -> None:
     """Create kernel using new virtualenv."""
     _LOGGER.info(f"Setting new jupyter kernel {kernel_name} from {kernels_path}/{kernel_name}.")
     package = "ipykernel"
@@ -133,8 +133,6 @@ def create_kernel(kernel_name: str, kernels_path: Path = Path.home().joinpath(".
 
     except Exception as e:
         _LOGGER.error(f"Could not enter environment {e}")
-
-    return kernels_path
 
 
 def delete_kernel(kernel_name: str, kernels_path: Path = Path.home().joinpath(".local/share/thoth/kernels")):
@@ -197,7 +195,7 @@ def lock_dependencies_with_thoth(
     force: bool,
     notebook_content: str,
     kernels_path: Path = Path.home().joinpath(".local/share/thoth/kernels"),
-):
+) -> typing.Tuple[int, dict]:
     """Lock dependencies using Thoth resolution engine."""
     initial_path = Path.cwd()
     # Get origin before changing path
@@ -301,7 +299,7 @@ def lock_dependencies_with_thoth(
 def get_thoth_config(
     kernel_name: str,
     kernels_path: Path = Path.home().joinpath(".local/share/thoth/kernels"),
-):
+) -> _Configuration:
     """Get Thoth config."""
     initial_path = Path.cwd()
     env_path = kernels_path.joinpath(kernel_name)
@@ -322,18 +320,16 @@ def get_thoth_config(
 
     config.load_config()
 
-    thoth_config = config.content
-    _LOGGER.info("Thoth config: %r", thoth_config)
     os.chdir(initial_path)
 
-    return thoth_config
+    return config
 
 
 def lock_dependencies_with_pipenv(
     kernel_name: str,
     pipfile_string: str,
     kernels_path: Path = Path.home().joinpath(".local/share/thoth/kernels"),
-):
+) -> typing.Tuple[int, dict]:
     """Lock dependencies using Pipenv resolution engine."""
     initial_path = Path.cwd()
     env_path = kernels_path.joinpath(kernel_name)

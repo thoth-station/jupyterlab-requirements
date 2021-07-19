@@ -41,7 +41,11 @@ class ThothConfigHandler(APIHandler):
         input_data = self.get_json_body()
         kernel_name: str = input_data["kernel_name"]
 
-        thoth_config = get_thoth_config(kernel_name=kernel_name)
+        config = get_thoth_config(kernel_name=kernel_name)
+
+        thoth_config = config.content
+        _LOGGER.info("Thoth config: %r", thoth_config)
+
         self.finish(json.dumps(thoth_config))
 
     @web.authenticated
