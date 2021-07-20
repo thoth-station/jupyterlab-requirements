@@ -1,6 +1,6 @@
 {
   "name": "jupyterlab_requirements",
-  "version": "0.9.2",
+  "version": "0.10.0",
   "description": "JupyterLab Extension for dependency management and optimization",
   "keywords": [
     "jupyter",

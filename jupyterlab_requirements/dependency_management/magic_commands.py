@@ -17,9 +17,9 @@
 
 """jupyterlab-requirements magic commands."""
 
-from IPython.core.magic import line_magic  # Called with %
+# from IPython.core.magic import line_magic  # Called with %
+# from IPython.core.magic import line_cell_magic  # Called with % or %%
 from IPython.core.magic import cell_magic  # Called with %%
-from IPython.core.magic import line_cell_magic  # Called with % or %%
 from IPython.core.magic import magics_class, Magics
 
 
@@ -27,20 +27,8 @@ from IPython.core.magic import magics_class, Magics
 class HorusMagics(Magics):
     """Horus jupyterlab-requirements CLI as magic commands."""
 
-    @line_magic
-    def abra(self, line):
-        """Abra test."""
-        print("test horus")
-        return line
-
     @cell_magic
-    def show(self, line, cell):
-        """Show test."""
-        print("test horus")
-        return line, cell
-
-    @line_cell_magic
     def horus(self, line, cell):
-        """Horus test."""
-        print("test horus")
+        """Show test."""
+        print("This is Horus: jupyterlab-requirements CLI")
         return line, cell
