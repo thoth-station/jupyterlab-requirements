@@ -11,7 +11,7 @@ runtime_environments:
     recommendation_type: latest
 
 managers:
-  - name: update
+  - name: thoth-advise
     configuration:
       labels: [bot]
   - name: info
