@@ -81,6 +81,7 @@ export class ManageDependenciesButtonExtension
             onClick: this.openWidget,
             tooltip: 'Manage Dependencies ...'
         });
+        console.log('loading horus magic command extension');
         // load automatically Horus magic commands
         const code: string = "%load_ext jupyterlab_requirements"
         this.panel.sessionContext.session.kernel.requestExecute({

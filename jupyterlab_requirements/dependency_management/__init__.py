@@ -29,9 +29,11 @@ from .thoth import ThothAdviseHandler
 from .thoth_config_handler import ThothConfigHandler
 from .thoth_invectio import ThothInvectioHandler
 
+from .lib import _EMOJI
+from .lib import check_metadata_content
 from .lib import create_kernel
 from .lib import delete_kernel
-from .lib import get_packages
+from .lib import get_notebook_content
 from .lib import get_thoth_config
 from .lib import install_packages
 from .lib import load_files
@@ -53,13 +55,15 @@ __all__ = [
     "ThothConfigHandler",
     "ThothInvectioHandler",
     "YamlSpecHandler",
+    "check_metadata_content",
     "create_kernel",
     "delete_kernel",
-    "get_packages",
+    "get_notebook_content",
     "get_thoth_config",
     "install_packages",
     "load_files",
     "lock_dependencies_with_pipenv",
     "lock_dependencies_with_thoth",
     "HorusMagics",
+    "_EMOJI",
 ]

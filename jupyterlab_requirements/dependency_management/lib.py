@@ -22,9 +22,12 @@ import logging
 import shutil
 import typing
 import tempfile
+import json
 
 from virtualenv import cli_run
 from pathlib import Path
+
+from rich.text import Text
 
 from thoth.python import Project, Pipfile, PipfileLock
 from thamos.lib import advise_using_config, _get_origin
@@ -32,6 +35,177 @@ from thoth.common import ThothAdviserIntegrationEnum
 from thamos.config import _Configuration
 
 _LOGGER = logging.getLogger("jupyterlab_requirements.lib")
+
+
+_EMOJI = {
+    "WARNING": Text("\u26a0\ufe0f WARNING", style="yellow"),
+    "ERROR": Text("\u274c ERROR", style="bold red"),
+    "INFO": Text("\u2714\ufe0f INFO", "green"),
+}
+
+
+def get_notebook_content(notebook_path: str):
+    """Get JSON of the notebook content."""
+    actual_path = Path(notebook_path)
+
+    if not actual_path.exists():
+        raise FileNotFoundError(f"There is no file at this path: {actual_path.as_posix()!r}")
+
+    if actual_path.suffix != ".ipynb":
+        raise Exception("File submitted is not .ipynb")
+
+    with open(notebook_path) as notebook_content:
+        notebook = json.load(notebook_content)
+
+    return notebook
+
+
+def check_metadata_content(notebook_metadata: dict) -> list:
+    """Check the metadata of notebook for dependencies."""
+    result = []
+
+    language = notebook_metadata["language_info"]["name"]
+
+    if language and language != "python":
+        result.append(
+            {
+                "message": "Only python programming language is supported.",
+                "type": "ERROR",
+            }
+        )
+
+        return result
+
+    kernel_name = notebook_metadata["kernelspec"]["name"]
+
+    result.append(
+        {
+            "message": f"kernel name: {kernel_name}",
+            "type": "INFO",
+        }
+    )
+
+    if "dependency_resolution_engine" not in notebook_metadata.keys():
+        result.append(
+            {
+                "message": "dependency_resolution_engine key is not present in notebook metadata. "
+                "It will be set after creating Pipfile and running `horus lock [YOUR_NOTEBOOK].ipynb`",
+                "type": "WARNING",
+            }
+        )
+    else:
+        result.append(
+            {
+                "message": f"dependency resolution engine: {notebook_metadata['dependency_resolution_engine']}",
+                "type": "INFO",
+            }
+        )
+
+    resolution_engine = notebook_metadata.get("dependency_resolution_engine")
+
+    if resolution_engine == "thoth":
+        for thoth_specific_key in ["thoth_config"]:
+            if thoth_specific_key not in notebook_metadata.keys():
+                result.append(
+                    {
+                        "message": f"{thoth_specific_key} key is not present in notebook metadata. "
+                        "You can run `horus lock [YOUR_NOTEBOOK].ipynb`.",
+                        "type": "ERROR",
+                    }
+                )
+            else:
+                result.append(
+                    {
+                        "message": f"{thoth_specific_key} key is present in notebook metadata.",
+                        "type": "INFO",
+                    }
+                )
+
+    for mandatory_key in ["requirements"]:
+        if mandatory_key not in notebook_metadata.keys():
+            result.append(
+                {
+                    "message": f"{mandatory_key} key is not present in notebook metadata. "
+                    "You can run `horus requirements [YOUR_NOTEBOOK].ipynb` with its options to set them.",
+                    "type": "ERROR",
+                }
+            )
+        else:
+            result.append(
+                {
+                    "message": f"{mandatory_key} key is present in notebook metadata",
+                    "type": "INFO",
+                }
+            )
+
+    for mandatory_key in ["requirements_lock"]:
+        if mandatory_key not in notebook_metadata.keys():
+            result.append(
+                {
+                    "message": f"{mandatory_key} key is not present in notebook metadata. "
+                    "You can run `horus lock [YOUR_NOTEBOOK].ipynb` if Pipfile already exists.",
+                    "type": "ERROR",
+                }
+            )
+        else:
+            result.append(
+                {
+                    "message": f"{mandatory_key} key is present in notebook metadata.",
+                    "type": "INFO",
+                }
+            )
+
+    if "requirements" in notebook_metadata and "requirements_lock" in notebook_metadata:
+        project = Project.from_strings(
+            pipfile_str=notebook_metadata["requirements"], pipfile_lock_str=notebook_metadata["requirements_lock"]
+        )
+
+        if project.pipfile_lock.meta.hash["sha256"] != project.pipfile.hash()["sha256"]:
+            result.append(
+                {
+                    "message": f"Pipfile hash stated in Pipfile.lock {project.pipfile_lock.meta.hash['sha256'][:6]} "
+                    f"does not correspond to Pipfile hash {project.pipfile.hash()['sha256'][:6]} - was Pipfile "
+                    "adjusted? Then you should run `horus lock [NOTEBOOK].ipynb`.",
+                    "type": "ERROR",
+                }
+            )
+        else:
+            result.append(
+                {
+                    "message": f"Pipfile hash stated in Pipfile.lock {project.pipfile_lock.meta.hash['sha256'][:6]} "
+                    f"correspond to Pipfile hash {project.pipfile.hash()['sha256'][:6]}.",
+                    "type": "INFO",
+                }
+            )
+
+        kernel_packages = get_packages(kernel_name=kernel_name)
+        notebook_packages = project.pipfile_lock.packages
+
+        check = 0
+        for package in notebook_packages:
+            if str(package.name) in kernel_packages:
+                if str(package.version) in kernel_packages[str(package.name)]:
+                    check += 1
+            else:
+                break
+
+        if check == len([p for p in notebook_packages]):
+            result.append(
+                {
+                    "message": f"kernel {kernel_name} selected has all dependencies installed.",
+                    "type": "INFO",
+                }
+            )
+        else:
+            result.append(
+                {
+                    "message": f"kernel {kernel_name} selected does not match your dependencies. "
+                    "Please run command horus set-kernel [NOTEBOOK].ipynb to create kernel for your notebook.",
+                    "type": "WARNING",
+                }
+            )
+
+    return result
 
 
 def install_packages(

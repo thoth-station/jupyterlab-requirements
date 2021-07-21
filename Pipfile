@@ -14,6 +14,7 @@ thoth-common = "*"
 jupyterlab = ">3."
 rich = "*"
 pyyaml = "*"
+ipynbname = "*"
 
 [dev-packages]
 jupyter-packaging = "*"
