@@ -32,13 +32,16 @@ from .thoth_invectio import ThothInvectioHandler
 from .lib import _EMOJI
 from .lib import check_metadata_content
 from .lib import create_kernel
+from .lib import create_pipfile_from_packages
 from .lib import delete_kernel
 from .lib import get_notebook_content
 from .lib import get_thoth_config
+from .lib import horus_requirements_command
 from .lib import install_packages
 from .lib import load_files
 from .lib import lock_dependencies_with_pipenv
 from .lib import lock_dependencies_with_thoth
+from .lib import save_notebook_content
 
 from .magic_commands import HorusMagics
 
@@ -57,13 +60,16 @@ __all__ = [
     "YamlSpecHandler",
     "check_metadata_content",
     "create_kernel",
+    "create_pipfile_from_packages",
     "delete_kernel",
     "get_notebook_content",
     "get_thoth_config",
+    "horus_requirements_command",
     "install_packages",
     "load_files",
     "lock_dependencies_with_pipenv",
     "lock_dependencies_with_thoth",
+    "save_notebook_content",
     "HorusMagics",
     "_EMOJI",
 ]

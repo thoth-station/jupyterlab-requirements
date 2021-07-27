@@ -23,6 +23,7 @@ import shutil
 import typing
 import tempfile
 import json
+import sys
 
 from virtualenv import cli_run
 from pathlib import Path
@@ -30,9 +31,14 @@ from pathlib import Path
 from rich.text import Text
 
 from thoth.python import Project, Pipfile, PipfileLock
-from thamos.lib import advise_using_config, _get_origin
+from thoth.python import PipfileMeta
+from thoth.python import Source, PackageVersion
+
 from thoth.common import ThothAdviserIntegrationEnum
+
+from thamos.lib import advise_using_config, _get_origin
 from thamos.config import _Configuration
+from thamos.discover import discover_python_version
 
 _LOGGER = logging.getLogger("jupyterlab_requirements.lib")
 
@@ -601,3 +607,93 @@ def lock_dependencies_with_pipenv(
     os.chdir(initial_path)
 
     return returncode, result
+
+
+def horus_requirements_command(
+    path: str,
+    index_url: str,
+    dev: bool,
+    add: typing.Optional[typing.List[str]] = None,
+    remove: typing.Optional[typing.List[str]] = None,
+    save: bool = True,
+):
+    """Horus requirements command."""
+    notebook = get_notebook_content(notebook_path=path)
+    notebook_metadata = dict(notebook.get("metadata"))
+
+    pipfile_string = notebook_metadata.get("requirements")
+
+    if not pipfile_string:
+        python_version = discover_python_version()
+        pipfile_ = create_pipfile_from_packages(packages=[], python_version=python_version)
+    else:
+        pipfile_ = Pipfile.from_string(pipfile_string)
+
+    if add:
+        for req in add:
+            _LOGGER.info(
+                "Adding %r to %s requirements",
+                req,
+                "development" if dev else "default",
+            )
+            pipfile_.add_requirement(req, is_dev=dev, index_url=index_url, force=True)
+
+    if remove:
+        for req in remove:
+            any_change = False
+
+            if req in pipfile_.packages.packages:
+                pipfile_.packages.packages.pop(req)
+                _LOGGER.info(
+                    "Removed %r from default requirements",
+                    req,
+                )
+                any_change = True
+
+            if req in pipfile_.dev_packages.packages:
+                pipfile_.dev_packages.packages.pop(req)
+                _LOGGER.info(
+                    "Removed %r from development requirements",
+                    req,
+                )
+                any_change = True
+
+            if not any_change:
+                _LOGGER.error(
+                    "Requirement %r not found in requirements, " "aborting making any changes.",
+                    req,
+                )
+                sys.exit(1)
+
+    if save:
+        notebook_metadata["requirements"] = json.dumps(pipfile_.to_dict())
+
+        notebook["metadata"] = notebook_metadata
+        save_notebook_content(notebook_path=path, notebook=notebook)
+
+    return pipfile_
+
+
+def create_pipfile_from_packages(packages: list, python_version: str):
+    """Create Pipfile from list of packages."""
+    source = Source(url="https://pypi.org/simple", name="pypi", verify_ssl=True)
+
+    pipfile_meta = PipfileMeta(sources={"pypi": source}, requires={"python_version": python_version})
+
+    packages_versions = []
+
+    for package_name in packages:
+        package_version = PackageVersion(name=package_name, version="*", develop=False)
+        packages_versions.append(package_version)
+
+    pipfile_ = Pipfile.from_package_versions(packages=packages_versions, meta=pipfile_meta)
+
+    return pipfile_
+
+
+def save_notebook_content(notebook_path: str, notebook: dict):
+    """Save notebook content."""
+    with open(notebook_path, "w") as notebook_content:
+        json.dump(notebook, notebook_content)
+
+    return notebook

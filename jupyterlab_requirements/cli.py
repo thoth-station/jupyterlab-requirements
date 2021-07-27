@@ -34,8 +34,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
-from thoth.python import Pipfile, PipfileLock, PipfileMeta
-from thoth.python import Source, PackageVersion
+from thoth.python import Pipfile, PipfileLock
 from thamos.config import _Configuration
 from thamos.discover import discover_python_version
 
@@ -44,13 +43,16 @@ from jupyterlab_requirements import __version__
 from .dependency_management import _EMOJI
 from .dependency_management import check_metadata_content
 from .dependency_management import create_kernel
+from .dependency_management import create_pipfile_from_packages
 from .dependency_management import delete_kernel
 from .dependency_management import get_notebook_content
 from .dependency_management import get_thoth_config
+from .dependency_management import horus_requirements_command
 from .dependency_management import install_packages
 from .dependency_management import load_files
 from .dependency_management import lock_dependencies_with_pipenv
 from .dependency_management import lock_dependencies_with_thoth
+from .dependency_management import save_notebook_content
 
 
 _LOGGER = logging.getLogger("thoth.jupyterlab_requirements.cli")
@@ -359,14 +361,6 @@ def show(
     ctx.exit(0)
 
 
-def save_notebook_content(notebook_path: str, notebook: dict):
-    """Save notebook content."""
-    with open(notebook_path, "w") as notebook_content:
-        json.dump(notebook, notebook_content)
-
-    return notebook
-
-
 @cli.command("save")
 @click.pass_context
 @click.argument("path")
@@ -558,23 +552,6 @@ def _gather_libraries(notebook_path: str):
         _LOGGER.error(f"Could not gather libraries: {e}")
 
     return library_gathered
-
-
-def create_pipfile_from_packages(packages: list, python_version: str):
-    """Create Pipfile from list of packages."""
-    source = Source(url="https://pypi.org/simple", name="pypi", verify_ssl=True)
-
-    pipfile_meta = PipfileMeta(sources={"pypi": source}, requires={"python_version": python_version})
-
-    packages_versions = []
-
-    for package_name in packages:
-        package_version = PackageVersion(name=package_name, version="*", develop=False)
-        packages_versions.append(package_version)
-
-    pipfile_ = Pipfile.from_package_versions(packages=packages_versions, meta=pipfile_meta)
-
-    return pipfile_
 
 
 @cli.command("discover")
@@ -865,60 +842,18 @@ def requirements(
       horus requirements [YOUR_NOTEBOOK].ipynb --remove flask
     """
     if not add and not remove:
-        click.echo("No action selected. You can check horus requirements --help")
+        click.echo("No action selected. You can run `horus requirements --help`")
 
-    notebook = get_notebook_content(notebook_path=path)
-    notebook_metadata = dict(notebook.get("metadata"))
-
-    pipfile_string = notebook_metadata.get("requirements")
-
-    if not pipfile_string:
-        python_version = discover_python_version()
-        pipfile_ = create_pipfile_from_packages(packages=[], python_version=python_version)
-    else:
-        pipfile_ = Pipfile.from_string(pipfile_string)
-
-    if add:
-        for req in add:
-            _LOGGER.info(
-                "Adding %r to %s requirements",
-                req,
-                "development" if dev else "default",
-            )
-            pipfile_.add_requirement(req, is_dev=dev, index_url=index_url, force=True)
-
-    if remove:
-        for req in remove:
-            any_change = False
-
-            if req in pipfile_.packages.packages:
-                pipfile_.packages.packages.pop(req)
-                _LOGGER.info(
-                    "Removed %r from default requirements",
-                    req,
-                )
-                any_change = True
-
-            if req in pipfile_.dev_packages.packages:
-                pipfile_.dev_packages.packages.pop(req)
-                _LOGGER.info(
-                    "Removed %r from development requirements",
-                    req,
-                )
-                any_change = True
-
-            if not any_change:
-                _LOGGER.error(
-                    "Requirement %r not found in requirements, " "aborting making any changes.",
-                    req,
-                )
-                sys.exit(1)
+    pipfile_ = horus_requirements_command(
+        path=path,
+        index_url=index_url,
+        dev=dev,
+        add=add,
+        remove=remove,
+    )
 
     click.echo(f"\nPipfile:\n\n{pipfile_.to_string()}")
-    notebook_metadata["requirements"] = json.dumps(pipfile_.to_dict())
 
-    notebook["metadata"] = notebook_metadata
-    save_notebook_content(notebook_path=path, notebook=notebook)
     ctx.exit(0)
 
 

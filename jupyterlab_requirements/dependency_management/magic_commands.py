@@ -18,6 +18,7 @@
 """jupyterlab-requirements magic commands."""
 
 import os
+import json
 import logging
 import argparse
 import ipynbname
@@ -32,8 +33,9 @@ from IPython.core.magic import line_magic  # Called with %
 from IPython.core.magic import magics_class, Magics
 
 from .lib import _EMOJI
-from .lib import get_notebook_content
 from .lib import check_metadata_content
+from .lib import get_notebook_content
+from .lib import horus_requirements_command
 
 _LOGGER = logging.getLogger("thoth.jupyterlab_requirements.magic_commands")
 
@@ -52,24 +54,45 @@ class HorusMagics(Magics):
         # command: check
         _ = subparsers.add_parser("check", description="Check dependencies in notebook metadata.")
 
+        # command: check
+        requirements_command = subparsers.add_parser(
+            "requirements", description="Add/Remove one or multiple requirements from the notebook."
+        )
+        requirements_command.add_argument(
+            "--index-url",
+            "-i",
+            default="https://pypi.org/simple",
+            type=str,
+            help="Specify Python package index to be used as a source for the given requirement/s.",
+        )
+        requirements_command.add_argument(
+            "--add", action="store", nargs="+", type=str, help="Examples: --add tensorflow pytorch"
+        )
+        requirements_command.add_argument(
+            "--remove", action="store", nargs="+", type=str, help="Examples: --add tensorflow pytorch"
+        )
+
+        requirements_command.add_argument("--dev", help="increase output verbosity", action="store_true")
+
         opts = line.split()
         args = parser.parse_args(opts)
 
         if any([opt in {"-h", "--help"} for opt in opts]):
             # print help and return
-            return
+            return ""
 
         if args.verbose:
             _LOGGER.setLevel(logging.DEBUG)
 
         _LOGGER.debug("Debug mode is on")
 
+        nb_path = ipynbname.path()
+        nb_name = ipynbname.name()
+        _LOGGER.info(f"Notebook path: {nb_path}")
+
         if args.command == "check":
             _LOGGER.info("checking notebook content")
 
-            nb_path = ipynbname.path()
-            nb_name = ipynbname.name()
-            _LOGGER.info(f"Notebook path: {nb_path}")
             notebook = get_notebook_content(notebook_path=nb_path)
             notebook_metadata = notebook.get("metadata")
 
@@ -111,4 +134,13 @@ class HorusMagics(Magics):
 
             console = Console()
 
-        return console.print(table, justify="center")
+            return console.print(table, justify="center")
+
+        if args.command == "requirements":
+            _LOGGER.info("Managing requirements in notebook content.")
+
+            pipfile_ = horus_requirements_command(
+                path=nb_path, index_url=args.index_url, dev=args.dev, add=args.add, remove=args.remove, save=False
+            )
+
+            return json.dumps(pipfile_.to_dict())
