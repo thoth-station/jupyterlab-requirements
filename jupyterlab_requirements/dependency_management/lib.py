@@ -24,6 +24,7 @@ import typing
 import tempfile
 import json
 import sys
+import yaml
 
 from virtualenv import cli_run
 from pathlib import Path
@@ -697,3 +698,77 @@ def save_notebook_content(notebook_path: str, notebook: dict):
         json.dump(notebook, notebook_content)
 
     return notebook
+
+
+def horus_show_command(
+    path: str,
+    pipfile: bool = False,
+    pipfile_lock: bool = False,
+    thoth_config: bool = False,
+):
+    """Horus show command."""
+    show_all: bool = False
+
+    if not pipfile and not pipfile_lock and not thoth_config:
+        # If no parameter to be shown is set, show all is set.
+        show_all = True
+
+    results = {}
+    results["kernel_name"] = ""
+    results["dependency_resolution_engine"] = ""
+    results["pipfile"] = ""
+    results["pipfile_lock"] = ""
+    results["thoth_config"] = ""
+
+    notebook = get_notebook_content(notebook_path=path)
+    notebook_metadata = notebook.get("metadata")
+
+    language = notebook_metadata["language_info"]["name"]
+
+    if language and language != "python":
+        raise Exception("Only Python kernels are currently supported.")
+
+    kernelspec = notebook_metadata.get("kernelspec")
+    kernel_name = kernelspec.get("name")
+    results["kernel_name"] = kernel_name
+
+    dependency_resolution_engine = notebook_metadata.get("dependency_resolution_engine")
+    results["dependency_resolution_engine"] = dependency_resolution_engine
+
+    pipfile_string = notebook_metadata.get("requirements")
+
+    if pipfile or pipfile_lock or show_all:
+        if not pipfile_string:
+            results["pipfile"] = "No Pipfile identified in notebook metadata."
+        else:
+            pipfile_ = Pipfile.from_string(pipfile_string)
+
+            if pipfile or show_all:
+                results["pipfile"] = f"\nPipfile:\n\n{pipfile_.to_string()}"
+
+    if pipfile_lock or show_all:
+
+        if pipfile_string:
+            pipfile_lock_string = notebook_metadata.get("requirements_lock")
+
+            if not pipfile_lock_string:
+                results["pipfile_lock"] = "No Pipfile.lock identified in notebook metadata."
+            else:
+                pipfile_lock_ = PipfileLock.from_string(pipfile_content=pipfile_lock_string, pipfile=pipfile_)
+                results["pipfile_lock"] = f"\nPipfile.lock:\n\n{pipfile_lock_.to_string()}"
+        else:
+            results[
+                "pipfile_lock"
+            ] = "No Pipfile identified in notebook metadata, therefore Pipfile.lock cannot be created."
+
+    if thoth_config or show_all:
+        thoth_config_string = notebook_metadata.get("thoth_config")
+
+        if not thoth_config_string:
+            results["thoth_config"] = "No .thoth.yaml identified in notebook metadata."
+        else:
+            config = _Configuration()
+            config.load_config_from_string(thoth_config_string)
+            results["thoth_config"] = f"\n.thoth.yaml:\n\n{yaml.dump(config.content)}"
+
+    return results

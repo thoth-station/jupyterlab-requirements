@@ -36,6 +36,7 @@ from .lib import _EMOJI
 from .lib import check_metadata_content
 from .lib import get_notebook_content
 from .lib import horus_requirements_command
+from .lib import horus_show_command
 
 _LOGGER = logging.getLogger("thoth.jupyterlab_requirements.magic_commands")
 
@@ -54,7 +55,7 @@ class HorusMagics(Magics):
         # command: check
         _ = subparsers.add_parser("check", description="Check dependencies in notebook metadata.")
 
-        # command: check
+        # command: requirements
         requirements_command = subparsers.add_parser(
             "requirements", description="Add/Remove one or multiple requirements from the notebook."
         )
@@ -72,7 +73,15 @@ class HorusMagics(Magics):
             "--remove", action="store", nargs="+", type=str, help="Examples: --add tensorflow pytorch"
         )
 
-        requirements_command.add_argument("--dev", help="increase output verbosity", action="store_true")
+        requirements_command.add_argument("--dev", help="Set dev dependencies.", action="store_true")
+
+        # command: show
+        show_command = subparsers.add_parser("show", description="Show dependencies from notebook metadata.")
+        show_command.add_argument("--pipfile", help="Set dev dependencies.", action="store_true")
+
+        show_command.add_argument("--pipfile-lock", help="Set dev dependencies.", action="store_true")
+
+        show_command.add_argument("--thoth-config", help="Set dev dependencies.", action="store_true")
 
         opts = line.split()
         args = parser.parse_args(opts)
@@ -144,3 +153,50 @@ class HorusMagics(Magics):
             )
 
             return json.dumps(pipfile_.to_dict())
+
+        if args.command == "show":
+            _LOGGER.info("Show dependencies content from notebook content.")
+
+            results = horus_show_command(
+                path=nb_path,
+                pipfile=args.pipfile,
+                pipfile_lock=args.pipfile_lock,
+                thoth_config=args.thoth_config,
+            )
+
+            result = []
+            for r in results:
+
+                result.append(
+                    {
+                        "type": r,
+                        "result": results[r],
+                    }
+                )
+
+            table = Table()
+
+            header = set()
+            for item in result:
+                for key in item.keys():
+                    header.add(key)
+
+            header_sorted = sorted(header)
+            for element in header_sorted:
+                table.add_column(
+                    element.replace("_", " ").capitalize(),
+                    style="cyan",
+                    overflow="fold",
+                )
+
+            for item in result:
+                row = []
+                for key in header_sorted:
+                    entry = item.get(key)
+                    row.append(entry if entry is not None else "-")
+
+                table.add_row(*row)
+
+            console = Console()
+
+            return console.print(table, justify="center")

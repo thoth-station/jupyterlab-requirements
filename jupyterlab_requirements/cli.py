@@ -40,19 +40,20 @@ from thamos.discover import discover_python_version
 
 from jupyterlab_requirements import __version__
 
-from .dependency_management import _EMOJI
-from .dependency_management import check_metadata_content
-from .dependency_management import create_kernel
-from .dependency_management import create_pipfile_from_packages
-from .dependency_management import delete_kernel
-from .dependency_management import get_notebook_content
-from .dependency_management import get_thoth_config
-from .dependency_management import horus_requirements_command
-from .dependency_management import install_packages
-from .dependency_management import load_files
-from .dependency_management import lock_dependencies_with_pipenv
-from .dependency_management import lock_dependencies_with_thoth
-from .dependency_management import save_notebook_content
+from jupyterlab_requirements.dependency_management import _EMOJI
+from jupyterlab_requirements.dependency_management import check_metadata_content
+from jupyterlab_requirements.dependency_management import create_kernel
+from jupyterlab_requirements.dependency_management import create_pipfile_from_packages
+from jupyterlab_requirements.dependency_management import delete_kernel
+from jupyterlab_requirements.dependency_management import get_notebook_content
+from jupyterlab_requirements.dependency_management import get_thoth_config
+from jupyterlab_requirements.dependency_management import horus_requirements_command
+from jupyterlab_requirements.dependency_management import horus_show_command
+from jupyterlab_requirements.dependency_management import install_packages
+from jupyterlab_requirements.dependency_management import load_files
+from jupyterlab_requirements.dependency_management import lock_dependencies_with_pipenv
+from jupyterlab_requirements.dependency_management import lock_dependencies_with_thoth
+from jupyterlab_requirements.dependency_management import save_notebook_content
 
 
 _LOGGER = logging.getLogger("thoth.jupyterlab_requirements.cli")
@@ -289,74 +290,27 @@ def show(
         horus show [YOUR_NOTEBOOK].ipynb  --pipfile-lock
         horus show [YOUR_NOTEBOOK].ipynb  --thoth-config
     """
-    show_all = False
+    results = horus_show_command(
+        path=path,
+        pipfile=pipfile,
+        pipfile_lock=pipfile_lock,
+        thoth_config=thoth_config,
+    )
+    click.echo(f"Kernel name is: {results['kernel_name']!s}")
 
-    if not pipfile and not pipfile_lock and not thoth_config:
-        # If no parameter to be shown is set, show all is set.
-        show_all = True
-
-    notebook = get_notebook_content(notebook_path=path)
-    notebook_metadata = notebook.get("metadata")
-
-    language = notebook_metadata["language_info"]["name"]
-
-    if language and language != "python":
-        raise Exception("Only Python kernels are currently supported.")
-
-    kernelspec = notebook_metadata.get("kernelspec")
-    kernel_name = kernelspec.get("name")
-    click.echo(f"Kernel name is: {kernel_name!s}")
-
-    dependency_resolution_engine = notebook_metadata.get("dependency_resolution_engine")
-
-    if not dependency_resolution_engine:
+    if not results["dependency_resolution_engine"]:
         click.echo("No Resolution engine identified in notebook metadata.")
     else:
-        click.echo(f"Resolution engine identified: {dependency_resolution_engine!s}")
+        click.echo(f"Resolution engine identified: {results['dependency_resolution_engine']!s}")
 
-    pipfile_string = notebook_metadata.get("requirements")
+    if results["pipfile"]:
+        click.echo(results["pipfile"])
 
-    if pipfile or pipfile_lock or show_all:
-        if not pipfile_string:
-            click.echo("No Pipfile identified in notebook metadata.")
-        else:
-            pipfile_ = Pipfile.from_string(pipfile_string)
+    if results["pipfile_lock"]:
+        click.echo(results["pipfile_lock"])
 
-            if pipfile or show_all:
-                click.echo(f"\nPipfile:\n\n{pipfile_.to_string()}")
-
-                if not show_all:
-                    ctx.exit(0)
-
-    if pipfile_lock or show_all:
-
-        if not pipfile_string:
-            click.echo("No Pipfile identified in notebook metadata, therefore Pipfile.lock cannot be created.")
-        else:
-            pipfile_lock_string = notebook_metadata.get("requirements_lock")
-
-            if not pipfile_lock_string:
-                click.echo("No Pipfile.lock identified in notebook metadata.")
-            else:
-                pipfile_lock_ = PipfileLock.from_string(pipfile_content=pipfile_lock_string, pipfile=pipfile_)
-
-                click.echo(f"\nPipfile.lock:\n\n{pipfile_lock_.to_string()}")
-
-                if not show_all:
-                    ctx.exit(0)
-
-    if thoth_config or show_all:
-        thoth_config_string = notebook_metadata.get("thoth_config")
-
-        if not thoth_config_string:
-            click.echo("No .thoth.yaml identified in notebook metadata.")
-        else:
-            config = _Configuration()
-            config.load_config_from_string(thoth_config_string)
-            click.echo(f"\n.thoth.yaml:\n\n{yaml.dump(config.content)}")
-
-            if not show_all:
-                ctx.exit(0)
+    if results["thoth_config"]:
+        click.echo(results["thoth_config"])
 
     ctx.exit(0)
 

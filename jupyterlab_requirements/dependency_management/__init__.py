@@ -37,6 +37,7 @@ from .lib import delete_kernel
 from .lib import get_notebook_content
 from .lib import get_thoth_config
 from .lib import horus_requirements_command
+from .lib import horus_show_command
 from .lib import install_packages
 from .lib import load_files
 from .lib import lock_dependencies_with_pipenv
@@ -65,6 +66,7 @@ __all__ = [
     "get_notebook_content",
     "get_thoth_config",
     "horus_requirements_command",
+    "horus_show_command",
     "install_packages",
     "load_files",
     "lock_dependencies_with_pipenv",
