@@ -51,7 +51,7 @@ _EMOJI = {
 }
 
 
-def get_notebook_content(notebook_path: str):
+def get_notebook_content(notebook_path: str, py_format: bool = False):
     """Get JSON of the notebook content."""
     actual_path = Path(notebook_path)
 
@@ -61,10 +61,23 @@ def get_notebook_content(notebook_path: str):
     if actual_path.suffix != ".ipynb":
         raise Exception("File submitted is not .ipynb")
 
-    with open(notebook_path) as notebook_content:
-        notebook = json.load(notebook_content)
+    if not py_format:
+        with open(notebook_path) as notebook_content:
+            notebook = json.load(notebook_content)
 
-    return notebook
+        return notebook
+
+    else:
+        check_convert = subprocess.run(
+            f"jupyter nbconvert --to python {actual_path} --stdout", shell=True, capture_output=True
+        )
+
+        if check_convert.returncode != 0:
+            raise Exception(f"jupyter nbconvert failed converting notebook to .py: {check_convert.stderr!r}")
+
+        notebook_content_py = check_convert.stdout.decode("utf-8")
+
+        return notebook_content_py
 
 
 def check_metadata_content(notebook_metadata: dict) -> list:
@@ -770,5 +783,141 @@ def horus_show_command(
             config = _Configuration()
             config.load_config_from_string(thoth_config_string)
             results["thoth_config"] = f"\n.thoth.yaml:\n\n{yaml.dump(config.content)}"
+
+    return results
+
+
+def horus_lock_command(
+    path: str,
+    resolution_engine: str,
+    timeout: int,
+    force: bool,
+    recommendation_type: str,
+    kernel_name: typing.Optional[str] = None,
+    os_name: typing.Optional[str] = None,
+    os_version: typing.Optional[str] = None,
+    python_version: typing.Optional[str] = None,
+    save: bool = True,
+):
+    """Lock requirements in notebook metadata."""
+    results = {}
+    results["kernel_name"] = ""
+    results["runtime_environment"] = ""
+    results["dependency_resolution_engine"] = resolution_engine
+    results["lock_results"] = ""
+
+    notebook = get_notebook_content(notebook_path=path)
+    notebook_metadata = notebook.get("metadata")
+
+    kernelspec = notebook_metadata.get("kernelspec")
+    notebook_kernel = kernelspec.get("name")
+
+    if not kernel_name:
+        kernel = notebook_kernel
+    else:
+        kernel = kernel_name
+
+    if kernel == "python3":
+        kernel = "jupyterlab-requirements"
+
+    results["kernel_name"] = kernel
+
+    pipfile_string = notebook_metadata.get("requirements")
+
+    if not pipfile_string:
+        raise KeyError(
+            "No Pipfile identified in notebook metadata."
+            "You can start creating one with command: "
+            "`horus requirements [NOTEBOOK].ipynb --add [PACKAGE NAME]`"
+        )
+
+    pipfile_ = Pipfile.from_string(pipfile_string)
+
+    error = False
+    if resolution_engine == "thoth":
+
+        thoth_config_string = notebook_metadata.get("thoth_config")
+
+        if not thoth_config_string:
+            thoth_config = get_thoth_config(kernel_name=kernel)
+        else:
+            thoth_config = _Configuration()
+            thoth_config.load_config_from_string(thoth_config_string)
+
+        try:
+            notebook_content_py = get_notebook_content(notebook_path=path, py_format=True)
+        except Exception as e:
+            _LOGGER.error(f"Could not get notebook content!: {e!r}")
+            notebook_content_py = ""
+
+        runtime_environment = thoth_config.get_runtime_environment()
+
+        runtime_environment["name"] = kernel
+
+        operating_system = {
+            "name": runtime_environment["operating_system"]["name"],
+            "version": runtime_environment["operating_system"]["version"],
+        }
+
+        if os_name:
+            operating_system["name"] = os_name
+
+        if os_version:
+            operating_system["version"] = os_version
+
+        runtime_environment["operating_system"] = operating_system
+
+        if python_version:
+            runtime_environment["python_version"] = python_version
+
+        runtime_environment["recommendation_type"] = recommendation_type
+
+        results["runtime_environment"] = runtime_environment
+
+        # Assign runtime environment to thoth config runtime environment.
+        thoth_config.set_runtime_environment(runtime_environment=runtime_environment, force=True)
+
+        _, advise = lock_dependencies_with_thoth(
+            kernel_name=kernel,
+            pipfile_string=pipfile_string,
+            config=json.dumps(thoth_config.content),
+            timeout=timeout,
+            force=force,
+            notebook_content=notebook_content_py,
+        )
+
+        if not advise["error"]:
+            pipfile_ = Pipfile.from_dict(advise["requirements"])
+            pipfile_lock_ = PipfileLock.from_dict(advise["requirement_lock"], pipfile_)
+            notebook_metadata["thoth_config"] = json.dumps(thoth_config)
+
+            advise["requirements"] = pipfile_.to_dict()
+            advise["requirements_lock"] = pipfile_lock_.to_dict()
+        else:
+            error = True
+        results["lock_results"] = advise
+
+    if resolution_engine == "pipenv":
+        _, pipenv_result = lock_dependencies_with_pipenv(kernel_name=kernel, pipfile_string=pipfile_.to_string())
+        if not pipenv_result["error"]:
+            pipfile_lock_ = PipfileLock.from_dict(pipenv_result["requirements_lock"], pipfile_)
+        else:
+            error = True
+
+        pipenv_result["requirements"] = pipfile_.to_dict()
+        pipenv_result["requirements_lock"] = pipfile_lock_.to_dict()
+        results["lock_results"] = pipenv_result
+
+    if save and not error:
+        notebook_metadata["dependency_resolution_engine"] = resolution_engine
+        notebook_metadata["requirements"] = json.dumps(pipfile_.to_dict())
+        notebook_metadata["requirements_lock"] = json.dumps(pipfile_lock_.to_dict())
+
+        # Assign kernel name to kernelspec.
+        kernelspec["name"] = kernel
+        notebook_metadata["kernelspec"] = kernelspec
+
+        notebook["metadata"] = notebook_metadata
+        save_notebook_content(notebook_path=path, notebook=notebook)
 
     return results

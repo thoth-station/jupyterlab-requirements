@@ -46,13 +46,11 @@ from jupyterlab_requirements.dependency_management import create_kernel
 from jupyterlab_requirements.dependency_management import create_pipfile_from_packages
 from jupyterlab_requirements.dependency_management import delete_kernel
 from jupyterlab_requirements.dependency_management import get_notebook_content
-from jupyterlab_requirements.dependency_management import get_thoth_config
+from jupyterlab_requirements.dependency_management import horus_lock_command
 from jupyterlab_requirements.dependency_management import horus_requirements_command
 from jupyterlab_requirements.dependency_management import horus_show_command
 from jupyterlab_requirements.dependency_management import install_packages
 from jupyterlab_requirements.dependency_management import load_files
-from jupyterlab_requirements.dependency_management import lock_dependencies_with_pipenv
-from jupyterlab_requirements.dependency_management import lock_dependencies_with_thoth
 from jupyterlab_requirements.dependency_management import save_notebook_content
 
 
@@ -459,33 +457,11 @@ def save(
     ctx.exit(0)
 
 
-def get_notebook_content_py(notebook_path: str) -> str:
-    """Get notebook content in .py format."""
-    actual_path = Path(notebook_path)
-
-    if not actual_path.exists():
-        raise FileNotFoundError(f"There is no file at this path: {actual_path.as_posix()!r}")
-
-    if actual_path.suffix != ".ipynb":
-        raise Exception("File submitted is not .ipynb")
-
-    check_convert = subprocess.run(
-        f"jupyter nbconvert --to python {actual_path} --stdout", shell=True, capture_output=True
-    )
-
-    if check_convert.returncode != 0:
-        raise Exception(f"jupyter nbconvert failed converting notebook to .py: {check_convert.stderr!r}")
-
-    notebook_content_py = check_convert.stdout.decode("utf-8")
-
-    return notebook_content_py
-
-
 def _gather_libraries(notebook_path: str):
     """Gather libraries with invectio."""
     library_gathered = []
     try:
-        notebook_content_py = get_notebook_content_py(notebook_path=notebook_path)
+        notebook_content_py = get_notebook_content(notebook_path=notebook_path, py_format=True)
 
         try:
             tree = ast.parse(notebook_content_py)
@@ -892,126 +868,37 @@ def lock(
 
     click.echo(f"Resolution engine used: {resolution_engine}")
 
-    notebook = get_notebook_content(notebook_path=path)
-    notebook_metadata = notebook.get("metadata")
+    results = horus_lock_command(
+        path=path,
+        resolution_engine=resolution_engine,
+        timeout=timeout,
+        force=force,
+        recommendation_type=recommendation_type,
+        kernel_name=kernel_name,
+        os_name=os_name,
+        os_version=os_version,
+        python_version=python_version,
+    )
 
-    kernelspec = notebook_metadata.get("kernelspec")
-    notebook_kernel = kernelspec.get("name")
-
-    if not kernel_name:
-        kernel = notebook_kernel
-    else:
-        kernel = kernel_name
-
-    if kernel == "python3":
+    if results["kernel_name"] == "python3":
         click.echo("python3 kernel name, cannot be overwritten, assigning default jupyterlab-requirements")
-        kernel = "jupyterlab-requirements"
 
-    click.echo(f"Kernel name is: {kernel!s}")
+    click.echo(f"Kernel name is: {results['kernel_name']!s}")
+    click.echo(f"runtime environment used: {results['runtime_environment']}")
 
-    pipfile_string = notebook_metadata.get("requirements")
-
-    if not pipfile_string:
-        raise KeyError(
-            "No Pipfile identified in notebook metadata."
-            "You can start creating one with command: "
-            "`horus requirements [NOTEBOOK].ipynb --add [PACKAGE NAME]`"
-        )
-
-    pipfile_ = Pipfile.from_string(pipfile_string)
-
-    if resolution_engine == "thoth":
-
-        thoth_config_string = notebook_metadata.get("thoth_config")
-
-        if not thoth_config_string:
-            thoth_config = get_thoth_config(kernel_name=kernel)
-        else:
-            thoth_config = _Configuration()
-            thoth_config.load_config_from_string(thoth_config_string)
-
-        try:
-            notebook_content_py = get_notebook_content_py(notebook_path=path)
-        except Exception as e:
-            _LOGGER.error(f"Could not get notebook content!: {e!r}")
-            notebook_content_py = ""
-
-        runtime_environment = thoth_config.get_runtime_environment()
-
-        runtime_environment["name"] = kernel
-
-        operating_system = {
-            "name": runtime_environment["operating_system"]["name"],
-            "version": runtime_environment["operating_system"]["version"],
-        }
-
-        if os_name:
-            operating_system["name"] = os_name
-
-        if os_version:
-            operating_system["version"] = os_version
-
-        runtime_environment["operating_system"] = operating_system
-
-        if python_version:
-            runtime_environment["python_version"] = python_version
-
-        runtime_environment["recommendation_type"] = recommendation_type
-
-        click.echo(f"runtime environment used: {runtime_environment}")
-
-        # Assign runtime environment to thoth config runtime environment.
-        thoth_config.set_runtime_environment(runtime_environment=runtime_environment, force=True)
-
-        returncode, advise = lock_dependencies_with_thoth(
-            kernel_name=kernel,
-            pipfile_string=pipfile_string,
-            config=json.dumps(thoth_config.content),
-            timeout=timeout,
-            force=force,
-            notebook_content=notebook_content_py,
-        )
-
-        if returncode != 0 or advise["error"]:
-            click.echo({"error_msg": advise["error_msg"]})
-
-            ctx.exit(returncode)
-        else:
-            pipfile_ = Pipfile.from_dict(advise["requirements"])
-            pipfile_lock_ = PipfileLock.from_dict(advise["requirement_lock"], pipfile_)
-            _LOGGER.debug(f"\nPipfile:\n\n{pipfile_.to_string()}")
-            _LOGGER.debug(f"\nPipfile.lock:\n\n{pipfile_lock_.to_string()}")
+    if results["lock_results"]["error"]:
+        click.echo({"error_msg": results["lock_results"]["error_msg"]})
+        ctx.exit(1)
+    else:
+        if resolution_engine == "thoth":
             click.echo("Thoth successfully resolved your stack.")
-            notebook_metadata["thoth_config"] = json.dumps(thoth_config)
-
-    if resolution_engine == "pipenv":
-        returncode, result = lock_dependencies_with_pipenv(kernel_name=kernel, pipfile_string=pipfile_.to_string())
-
-        if returncode != 0 or result["error"]:
-            click.echo({"error_msg": result["error_msg"]})
-
-            ctx.exit(returncode)
         else:
-            pipfile_lock_ = PipfileLock.from_dict(result["requirements_lock"], pipfile_)
-            _LOGGER.debug(f"\nPipfile:\n\n{pipfile_string}")
-            _LOGGER.debug(f"\nPipfile.lock:\n\n{pipfile_lock_.to_string()}")
             click.echo("Pipenv successfully resolved your stack.")
 
-    notebook_metadata["dependency_resolution_engine"] = resolution_engine
-    notebook_metadata["requirements"] = json.dumps(pipfile_.to_dict())
-    notebook_metadata["requirements_lock"] = json.dumps(pipfile_lock_.to_dict())
-
-    # Assign kernel name to kernelspec.
-    kernelspec["name"] = kernel
-    notebook_metadata["kernelspec"] = kernelspec
-
-    notebook["metadata"] = notebook_metadata
-    save_notebook_content(notebook_path=path, notebook=notebook)
-
-    click.echo(
-        "All dependencies content is stored in notebook metadata. "
-        "Run `horus set-kernel [NOTEBOOK].ipynb` to prepare the kernel for your notebook."
-    )
+        click.echo(
+            "All dependencies content is stored in notebook metadata. "
+            "Run `horus set-kernel [NOTEBOOK].ipynb` to prepare the kernel for your notebook."
+        )
 
 
 __name__ == "__main__" and cli()

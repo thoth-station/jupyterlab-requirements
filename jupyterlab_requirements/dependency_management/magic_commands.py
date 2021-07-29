@@ -37,6 +37,7 @@ from .lib import check_metadata_content
 from .lib import get_notebook_content
 from .lib import horus_requirements_command
 from .lib import horus_show_command
+from .lib import horus_lock_command
 
 _LOGGER = logging.getLogger("thoth.jupyterlab_requirements.magic_commands")
 
@@ -72,17 +73,62 @@ class HorusMagics(Magics):
         requirements_command.add_argument(
             "--remove", action="store", nargs="+", type=str, help="Examples: --add tensorflow pytorch"
         )
-
         requirements_command.add_argument("--dev", help="Set dev dependencies.", action="store_true")
 
         # command: show
         show_command = subparsers.add_parser("show", description="Show dependencies from notebook metadata.")
-        show_command.add_argument("--pipfile", help="Set dev dependencies.", action="store_true")
+        show_command.add_argument("--pipfile", help="Show Pipfile (if available).", action="store_true")
+        show_command.add_argument("--pipfile-lock", help="Show Pipfile.lock (if available).", action="store_true")
+        show_command.add_argument("--thoth-config", help="Show .thoth.yaml (if available).", action="store_true")
 
-        show_command.add_argument("--pipfile-lock", help="Set dev dependencies.", action="store_true")
+        # command: lock
+        lock_command = subparsers.add_parser(
+            "lock", description="Lock requirements in notebook metadata [default Thoth]."
+        )
+        lock_command.add_argument("--force", help="Force request to Thoth.", action="store_true")
+        lock_command.add_argument(
+            "--kernel-name",
+            default="jupyterlab-requirements",
+            type=str,
+            help="Specify kernel name to be used when creating it.",
+        )
 
-        show_command.add_argument("--thoth-config", help="Set dev dependencies.", action="store_true")
+        # Only Thoth
+        lock_command.add_argument(
+            "--recommendation-type",
+            choices=["latest", "stable", "performance", "security"],
+            default="latest",
+            type=str,
+            const="all",
+            nargs="?",
+            help="Specify recommendation type for thoth advise.",
+        )
+        lock_command.add_argument(
+            "--timeout",
+            default=180,
+            type=int,
+            help="Set timeout for Thoth request.",
+        )
+        lock_command.add_argument(
+            "--os-name",
+            type=str,
+            help="Use OS name for request to Thoth.",
+        )
+        lock_command.add_argument(
+            "--os-version",
+            type=str,
+            help="Use OS version for request to Thoth.",
+        )
+        lock_command.add_argument(
+            "--python-version",
+            type=str,
+            help="Use Python version for request to Thoth.",
+        )
 
+        # Use Pipenv
+        lock_command.add_argument("--pipenv", help="Use pipenv resolution engine.", action="store_true")
+
+        ## Parse inputs
         opts = line.split()
         args = parser.parse_args(opts)
 
@@ -200,3 +246,24 @@ class HorusMagics(Magics):
             console = Console()
 
             return console.print(table, justify="center")
+
+        if args.command == "lock":
+            _LOGGER.info("Show dependencies content from notebook content.")
+
+            results = horus_lock_command(
+                path=nb_path,
+                resolution_engine="thoth" if not args.pipenv else "pipenv",
+                timeout=args.timeout,
+                force=args.force,
+                recommendation_type=args.recommendation_type,
+                kernel_name=args.kernel_name,
+                os_name=args.os_name,
+                os_version=args.os_version,
+                python_version=args.python_version,
+                save=False,
+            )
+
+            if not results["lock_results"]["error"]:
+                return json.dumps(results).replace("'", "")
+            else:
+                return Exception(results["lock_results"]["error_msg"])
