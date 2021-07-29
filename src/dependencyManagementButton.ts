@@ -81,12 +81,6 @@ export class ManageDependenciesButtonExtension
             onClick: this.openWidget,
             tooltip: 'Manage Dependencies ...'
         });
-        console.log('loading horus magic command extension');
-        // load automatically Horus magic commands
-        const code: string = "%load_ext jupyterlab_requirements"
-        this.panel.sessionContext.session.kernel.requestExecute({
-            code,
-        });
         // Add the toolbar button to the notebook
         panel.toolbar.insertItem(THOTH_TOOLBAR_BUTTON_POSITION, 'dependencyManagement', manageDependenciesButton);
         // The ToolbarButton class implements `IDisposable`, so the

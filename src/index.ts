@@ -9,18 +9,28 @@
  * @since  0.0.1
  */
 
+import _ from "lodash";
+
+// JupyterLab
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import {
+  INotebookTracker,
+  NotebookActions,
+  NotebookPanel
+} from '@jupyterlab/notebook';
 
+import { Kernel } from '@jupyterlab/services';
 import { IMainMenu } from '@jupyterlab/mainmenu';
-import { Menu } from '@lumino/widgets';
 import { ICommandPalette } from '@jupyterlab/apputils';
+import { Menu } from '@lumino/widgets';
 
 // Customizations
 import { ManageDependenciesButtonExtension } from './dependencyManagementButton';
 import { KernelHandler } from './kernelHandlerMenu'
+import { Requirements } from "./types/requirements";
 
 /**
  * The command IDs used by the console plugin.
@@ -30,35 +40,89 @@ import { KernelHandler } from './kernelHandlerMenu'
   kernelHandler: 'kernel-handler: delete'
 };
 
-/**
- * Activate the JupyterLab extension.
- *
- * @param app Jupyter Front End
- */
+const PLUGIN_ID = 'jupyterlab_requirements'
 
 /**
- * Initialization data for the jupyterlab_requirements extension.
+ * The dask dashboard extension.
  */
+ const extension: JupyterFrontEndPlugin<void> = {
+  activate,
+  id: PLUGIN_ID,
+  requires: [
+    ICommandPalette,
+    IMainMenu,
+    INotebookTracker
+  ],
+  autoStart: true
+};
 
-const extension: JupyterFrontEndPlugin<string> = {
-  id: 'jupyterlab_requirements',
-  autoStart: true,
-  requires: [ICommandPalette, IMainMenu],
-  /**
+/**
+ * Export the extension as default.
+ */
+export default extension;
+
+/**
    * Activate the JupyterLab extension.
    *
    * @param app Jupyter Front End
-   * @param palette Jupyter Commands Palette
+   * @param commandPalette Jupyter Commands Palette
    * @param mainMenu Jupyter Menu
-   * @param translator Jupyter Translator
-   * @param launcher [optional] Jupyter Launcher
-   */
-  activate: (
+   * @param notebookTracker INotebookTracker
+*/
+async function activate(
     app: JupyterFrontEnd,
-    palette: ICommandPalette,
+    commandPalette: ICommandPalette,
     mainMenu: IMainMenu,
-  ) => {
+    notebookTracker: INotebookTracker
+  ): Promise<void> {
     const { commands } = app;
+
+    // Load automatically Horus magic commands when starting notebook
+    notebookTracker.widgetAdded.connect((sender, nbPanel: NotebookPanel) => {
+      const sessionContext = nbPanel.sessionContext;
+
+      sessionContext.ready.then(() => {
+        const session = sessionContext.session;
+        let kernel = session.kernel;
+        // Check to see if we found a kernel, and if its language is python.
+        if (!(ThothPrivate.shouldUseKernel(kernel))) {
+          console.log("kernel approved: ", kernel.name.toString())
+        }
+
+        const code: string = "%load_ext jupyterlab_requirements"
+        kernel.requestExecute({
+          code
+        })
+
+        console.log('loaded horus magic command extension');
+
+        // Use new message introduced in https://github.com/jupyterlab/jupyterlab/issues/10259
+        NotebookActions.selectionExecuted.connect((sender, args) => {
+          const { lastCell, notebook } = args;
+          const cell = lastCell.model.value
+
+          if ( cell.text.startsWith( "%horus requirements" ) ) {
+              console.log("special cell", cell)
+              const id = notebook.activeCellIndex
+              const cell_ = notebook.model.cells.get(id - 1)
+              const cell_response: {} = cell_.toJSON()
+              const outputs = _.get(cell_response, "outputs")
+
+              let notebook_metadata = notebook.model.metadata
+
+              if ( _.size(outputs) > 0 ) {
+                const requirements: string = _.get(_.get(outputs[0], "data"), "text/plain")
+                const parsed_req = requirements.substr(1, requirements.length - 2)
+                let jsonObject: Requirements = JSON.parse(parsed_req);
+                notebook_metadata.set('requirements', JSON.stringify(jsonObject))
+              }
+
+              nbPanel.context.save()
+            }
+        });
+
+      });
+    });
 
     // Add button in notebook menu
     try {
@@ -89,7 +153,7 @@ const extension: JupyterFrontEndPlugin<string> = {
 
     // Add the command to the command palette
     const category = 'Kernel';
-    palette.addItem({
+    commandPalette.addItem({
       command,
       category,
       args: { origin: 'from the palette' }
@@ -103,9 +167,21 @@ const extension: JupyterFrontEndPlugin<string> = {
 
     // Add the command to the menu
     tutorialMenu.addItem({ command, args: { origin: 'from the menu' } });
-
-    return "ready"
-    }
 };
 
-export default extension;
+namespace ThothPrivate {
+
+  /**
+   * Consider only valid Python kernels.
+   */
+    export async function shouldUseKernel(
+      kernel: Kernel.IKernelConnection | null | undefined
+    ): Promise<boolean> {
+      if (!kernel) {
+        return false;
+      }
+      const spec = await kernel.spec;
+      return !!spec && spec.language.toLowerCase().indexOf('python') !== -1;
+    }
+
+}
