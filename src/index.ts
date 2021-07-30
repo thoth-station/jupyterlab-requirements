@@ -127,7 +127,7 @@ async function activate(
               nbPanel.context.save()
           }
 
-          // Handle horus lock cells (lock + install and set-kernel)
+          // Handle horus lock calls (lock + install and set-kernel)
           if ( cell.text.startsWith( "%horus lock" ) ) {
             const id = notebook.activeCellIndex
             const cell_ = notebook.model.cells.get(id - 1)
@@ -177,7 +177,7 @@ async function activate(
               nbPanel.context.save()
           }
 
-          // Handle horus requirements calls
+          // Handle horus discover calls
           if ( cell.text.startsWith( "%horus discover" ) ) {
             const id = notebook.activeCellIndex
             const cell_ = notebook.model.cells.get(id - 1)

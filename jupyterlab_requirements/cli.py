@@ -680,7 +680,7 @@ def lock(
 
     click.echo(f"Resolution engine used: {resolution_engine}")
 
-    results = horus_lock_command(
+    results, lock_results = horus_lock_command(
         path=path,
         resolution_engine=resolution_engine,
         timeout=timeout,
@@ -698,8 +698,8 @@ def lock(
     click.echo(f"Kernel name is: {results['kernel_name']!s}")
     click.echo(f"runtime environment used: {results['runtime_environment']}")
 
-    if results["lock_results"]["error"]:
-        click.echo({"error_msg": results["lock_results"]["error_msg"]})
+    if lock_results["error"]:
+        click.echo({"error_msg": lock_results["error_msg"]})
         ctx.exit(1)
     else:
         if resolution_engine == "thoth":

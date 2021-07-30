@@ -98,11 +98,8 @@ def check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -> list
             )
 
             return result
-    if notebook_metadata.get("kernelspec"):
-        kernelspec = notebook_metadata.get("kernelspec")
-        kernel_name = kernelspec.get("name")
-    else:
-        kernel_name = "python3"
+
+    kernel_name = notebook_metadata["kernelspec"]["name"]
 
     result.append(
         {
@@ -879,16 +876,12 @@ def horus_lock_command(
     results["kernel_name"] = ""
     results["runtime_environment"] = ""
     results["dependency_resolution_engine"] = resolution_engine
-    results["lock_results"] = {}
 
     notebook = get_notebook_content(notebook_path=path)
     notebook_metadata = notebook.get("metadata")
 
-    if notebook_metadata.get("kernelspec"):
-        kernelspec = notebook_metadata.get("kernelspec")
-        notebook_kernel = kernelspec.get("name")
-    else:
-        notebook_kernel = "python3"
+    kernelspec = notebook_metadata.get("kernelspec")
+    notebook_kernel = kernelspec.get("name")
 
     if not kernel_name:
         kernel = notebook_kernel
@@ -955,7 +948,7 @@ def horus_lock_command(
         # Assign runtime environment to thoth config runtime environment.
         thoth_config.set_runtime_environment(runtime_environment=runtime_environment, force=True)
 
-        _, advise = lock_dependencies_with_thoth(
+        _, lock_results = lock_dependencies_with_thoth(
             kernel_name=kernel,
             pipfile_string=requirements,
             config=json.dumps(thoth_config.content),
@@ -964,25 +957,21 @@ def horus_lock_command(
             notebook_content=notebook_content_py,
         )
 
-        if not advise["error"]:
-            requirements = advise["requirements"]
-            requirements_lock = advise["requirement_lock"]
+        if not lock_results["error"]:
+            requirements = lock_results["requirements"]
+            requirements_lock = lock_results["requirement_lock"]
             notebook_metadata["thoth_config"] = json.dumps(thoth_config)
 
         else:
             error = True
 
-        results["lock_results"]: dict = advise
-
     if resolution_engine == "pipenv":
-        _, pipenv_result = lock_dependencies_with_pipenv(kernel_name=kernel, pipfile_string=pipfile_.to_string())
+        _, lock_results = lock_dependencies_with_pipenv(kernel_name=kernel, pipfile_string=pipfile_.to_string())
 
-        if not pipenv_result["error"]:
-            requirements_lock = pipenv_result["requirements_lock"]
+        if not lock_results["error"]:
+            requirements_lock = lock_results["requirements_lock"]
         else:
             error = True
-
-        results["lock_results"]: dict = pipenv_result
 
     if save_on_disk and not error:
         home = Path.home()
@@ -1028,7 +1017,7 @@ def horus_lock_command(
         notebook["metadata"] = notebook_metadata
         save_notebook_content(notebook_path=path, notebook=notebook)
 
-    return results
+    return results, lock_results
 
 
 def horus_set_kernel_command(
@@ -1053,11 +1042,8 @@ def horus_set_kernel_command(
         if language and language != "python":
             raise Exception("Only Python kernels are currently supported.")
 
-    if notebook_metadata.get("kernelspec"):
-        kernelspec = notebook_metadata.get("kernelspec")
-        notebook_kernel = kernelspec.get("name")
-    else:
-        notebook_kernel = "python3"
+    kernelspec = notebook_metadata.get("kernelspec")
+    notebook_kernel = kernelspec.get("name")
 
     if not kernel_name:
         kernel = notebook_kernel

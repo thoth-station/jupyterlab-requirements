@@ -277,7 +277,7 @@ class HorusMagics(Magics):
         if args.command == "lock":
             _LOGGER.info("Show dependencies content from notebook content.")
 
-            lock_results = horus_lock_command(
+            results, lock_results = horus_lock_command(
                 path=nb_path,
                 resolution_engine="thoth" if not args.pipenv else "pipenv",
                 timeout=args.timeout,
@@ -291,23 +291,23 @@ class HorusMagics(Magics):
                 save_on_disk=True,
             )
 
-            if lock_results["lock_results"]["error"]:
-                return Exception(lock_results["lock_results"]["error_msg"])
+            if lock_results["error"]:
+                return Exception(lock_results["error_msg"])
             else:
                 _LOGGER.info("Set kernel for dependencies in notebook metadata.")
 
-                results = horus_set_kernel_command(
+                kernel_results = horus_set_kernel_command(
                     path=nb_path,
                     kernel_name=args.kernel_name,
                     save_in_notebook=False,
-                    resolution_engine=lock_results["dependency_resolution_engine"],
+                    resolution_engine=results["dependency_resolution_engine"],
                     is_magic_command=True,
                 )
 
                 return json.dumps(
                     {
-                        "kernel_name": results["kernel_name"],
-                        "resolution_engine": lock_results["dependency_resolution_engine"],
+                        "kernel_name": kernel_results["kernel_name"],
+                        "resolution_engine": results["dependency_resolution_engine"],
                     }
                 )
 
@@ -316,12 +316,12 @@ class HorusMagics(Magics):
             packages = gather_libraries(notebook_path=nb_path)
 
             if packages:
-                print(f"Thoth invectio libraries gathered: {json.dumps(packages)}")
+                _LOGGER.info(f"Thoth invectio libraries gathered: {json.dumps(packages)}")
             else:
-                print(f"No libraries discovered from notebook at path: {nb_path}")
+                _LOGGER.info(f"No libraries discovered from notebook at path: {nb_path}")
 
             python_version = discover_python_version()
-            print(f"Python version discovered from host: {python_version}")
+            _LOGGER.info(f"Python version discovered from host: {python_version}")
             pipfile = create_pipfile_from_packages(packages=packages, python_version=python_version)
 
             return json.dumps({"requirements": pipfile.to_dict(), "force": args.force})
