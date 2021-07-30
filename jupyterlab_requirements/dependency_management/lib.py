@@ -98,8 +98,11 @@ def check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -> list
             )
 
             return result
-
-    kernel_name = notebook_metadata["kernelspec"]["name"]
+    if notebook_metadata.get("kernelspec"):
+        kernelspec = notebook_metadata.get("kernelspec")
+        kernel_name = kernelspec.get("name")
+    else:
+        kernel_name = "python3"
 
     result.append(
         {
@@ -808,8 +811,12 @@ def horus_show_command(
         if language and language != "python":
             raise Exception("Only Python kernels are currently supported.")
 
-    kernelspec = notebook_metadata.get("kernelspec")
-    kernel_name = kernelspec.get("name")
+    if notebook_metadata.get("kernelspec"):
+        kernelspec = notebook_metadata.get("kernelspec")
+        kernel_name = kernelspec.get("name")
+    else:
+        kernel_name = "python3"
+
     results["kernel_name"] = kernel_name
 
     dependency_resolution_engine = notebook_metadata.get("dependency_resolution_engine")
@@ -877,8 +884,11 @@ def horus_lock_command(
     notebook = get_notebook_content(notebook_path=path)
     notebook_metadata = notebook.get("metadata")
 
-    kernelspec = notebook_metadata.get("kernelspec")
-    notebook_kernel = kernelspec.get("name")
+    if notebook_metadata.get("kernelspec"):
+        kernelspec = notebook_metadata.get("kernelspec")
+        notebook_kernel = kernelspec.get("name")
+    else:
+        notebook_kernel = "python3"
 
     if not kernel_name:
         kernel = notebook_kernel
@@ -1043,8 +1053,11 @@ def horus_set_kernel_command(
         if language and language != "python":
             raise Exception("Only Python kernels are currently supported.")
 
-    kernelspec = notebook_metadata.get("kernelspec")
-    notebook_kernel = kernelspec.get("name")
+    if notebook_metadata.get("kernelspec"):
+        kernelspec = notebook_metadata.get("kernelspec")
+        notebook_kernel = kernelspec.get("name")
+    else:
+        notebook_kernel = "python3"
 
     if not kernel_name:
         kernel = notebook_kernel
@@ -1118,5 +1131,116 @@ def horus_set_kernel_command(
         notebook_metadata["kernelspec"] = kernelspec
         notebook["metadata"] = notebook_metadata
         save_notebook_content(notebook_path=path, notebook=notebook)
+
+    return results
+
+
+def horus_extract_command(
+    notebook_path: str,
+    store_files_path: str,
+    pipfile: bool = False,
+    pipfile_lock: bool = False,
+    thoth_config: bool = False,
+    use_overlay: bool = False,
+    force: bool = False,
+):
+    """Horus extract command."""
+    results = {}
+    results["kernel_name"] = ""
+    results["resolution_engine"] = ""
+
+    extract_all: bool = False
+
+    if not pipfile and not pipfile_lock and not thoth_config:
+        # If no parameter to be extracted is set, extract all is set.
+        extract_all = True
+
+    notebook = get_notebook_content(notebook_path=notebook_path)
+    notebook_metadata = notebook.get("metadata")
+
+    if notebook_metadata.get("language_info"):
+        language = notebook_metadata["language_info"]["name"]
+
+        if language and language != "python":
+            raise Exception("Only Python kernels are currently supported.")
+
+    if notebook_metadata.get("kernelspec"):
+        kernelspec = notebook_metadata.get("kernelspec")
+        kernel_name = kernelspec.get("name")
+    else:
+        kernel_name = "python3"
+
+    results["kernel_name"] = kernel_name
+    store_path: Path = Path(store_files_path)
+
+    if use_overlay:
+        if not kernel_name:
+            raise KeyError("No kernel name identified in notebook metadata kernelspec.")
+
+        store_path = store_path.joinpath("overlays").joinpath(kernel_name)
+        store_path.mkdir(parents=True, exist_ok=True)
+
+    dependency_resolution_engine = notebook_metadata.get("dependency_resolution_engine")
+
+    if not dependency_resolution_engine:
+        raise KeyError("No Resolution engine identified in notebook metadata.")
+
+    results["resolution_engine"] = dependency_resolution_engine
+
+    if pipfile or pipfile_lock or extract_all:
+        pipfile_string = notebook_metadata.get("requirements")
+
+        if not pipfile_string:
+            raise KeyError("No Pipfile identified in notebook metadata.")
+
+        pipfile_ = Pipfile.from_string(pipfile_string)
+
+    if pipfile or extract_all:
+
+        pipfile_path = store_path.joinpath("Pipfile")
+
+        if pipfile_path.exists() and not force:
+            raise FileExistsError(
+                f"Cannot store Pipfile because it already exists at path: {pipfile_path.as_posix()!r}. "
+                "Use --force to overwrite existing content or --show-only to visualize it."
+            )
+        else:
+            pipfile_.to_file(path=pipfile_path)
+
+    if pipfile_lock or extract_all:
+        pipfile_lock_string = notebook_metadata.get("requirements_lock")
+
+        if not pipfile_lock_string:
+            raise KeyError("No Pipfile.lock identified in notebook metadata.")
+
+        pipfile_lock_ = PipfileLock.from_string(pipfile_content=pipfile_lock_string, pipfile=pipfile_)
+
+        pipfile_lock_path = store_path.joinpath("Pipfile.lock")
+
+        if pipfile_lock_path.exists() and not force:
+            raise FileExistsError(
+                f"Cannot store Pipfile.lock because it already exists at path: {pipfile_lock_path.as_posix()!r}. "
+                "Use --force to overwrite existing content or --show-only to visualize it."
+            )
+        else:
+            pipfile_lock_.to_file(path=pipfile_lock_path)
+
+    if thoth_config or extract_all:
+        thoth_config_string = notebook_metadata.get("thoth_config")
+
+        if not thoth_config_string:
+            raise KeyError("No .thoth.yaml identified in notebook metadata.")
+
+        config = _Configuration()
+        config.load_config_from_string(thoth_config_string)
+
+        yaml_path = Path(".thoth.yaml")
+        if yaml_path.exists() and not force:
+            raise FileExistsError(
+                f"Cannot store .thoth.yaml because it already exists at path: {yaml_path.as_posix()!r}. "
+                "Use --force to overwrite existing content or --show-only to visualize it."
+            )
+        else:
+            config.save_config()
 
     return results

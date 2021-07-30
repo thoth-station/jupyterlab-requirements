@@ -35,6 +35,7 @@ from .lib import check_metadata_content
 from .lib import create_pipfile_from_packages
 from .lib import gather_libraries
 from .lib import get_notebook_content
+from .lib import horus_extract_command
 from .lib import horus_lock_command
 from .lib import horus_requirements_command
 from .lib import horus_set_kernel_command
@@ -62,6 +63,7 @@ __all__ = [
     "create_pipfile_from_packages",
     "gather_libraries",
     "get_notebook_content",
+    "horus_extract_command",
     "horus_set_kernel_command",
     "horus_lock_command",
     "horus_requirements_command",

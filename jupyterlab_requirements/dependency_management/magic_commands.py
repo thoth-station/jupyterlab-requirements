@@ -38,6 +38,7 @@ from .lib import check_metadata_content
 from .lib import create_pipfile_from_packages
 from .lib import gather_libraries
 from .lib import get_notebook_content
+from .lib import horus_extract_command
 from .lib import horus_requirements_command
 from .lib import horus_set_kernel_command
 from .lib import horus_show_command
@@ -133,11 +134,25 @@ class HorusMagics(Magics):
         lock_command.add_argument("--pipenv", help="Use pipenv resolution engine.", action="store_true")
 
         # command: set-kernel
-        set_kernel_command = subparsers.add_parser(
-            "discover", description="Discover dependencies from notebook content."
+        discover_command = subparsers.add_parser("discover", description="Discover dependencies from notebook content.")
+        discover_command.add_argument("--force", help="Force saving dependencies in the notebook.", action="store_true")
+
+        # command: extract
+        extract_command = subparsers.add_parser("extract", description="Extract dependencies from notebook metadata.")
+        extract_command.add_argument(
+            "--store-files-path",
+            default=".",
+            type=str,
+            help="Custom path used to store all files.",
         )
-        set_kernel_command.add_argument(
-            "--force", help="Force saving dependencies in the notebook.", action="store_true"
+        extract_command.add_argument("--pipfile", help="Extract Pipfile (if available).", action="store_true")
+        extract_command.add_argument("--pipfile-lock", help="Extract Pipfile.lock (if available).", action="store_true")
+        extract_command.add_argument("--thoth-config", help="Extract .thoth.yaml (if available).", action="store_true")
+        extract_command.add_argument(
+            "--force", help="Force extracting dependencies files from notebook.", action="store_true"
+        )
+        extract_command.add_argument(
+            "--use-overlay", help="Extract Pipfile and Pipfile.lock in overlay with kernel name.", action="store_true"
         )
 
         ## Parse inputs
@@ -309,8 +324,17 @@ class HorusMagics(Magics):
             print(f"Python version discovered from host: {python_version}")
             pipfile = create_pipfile_from_packages(packages=packages, python_version=python_version)
 
-            return json.dumps(
-                {
-                    "requirements": pipfile.to_dict()
-                    "force": args.force
-                })
+            return json.dumps({"requirements": pipfile.to_dict(), "force": args.force})
+
+        if args.command == "extract":
+            _LOGGER.info("Extract dependencies content from notebook content.")
+
+            _ = horus_extract_command(
+                notebook_path=nb_path,
+                store_files_path=args.store_files_path,
+                pipfile=args.pipfile,
+                pipfile_lock=args.pipfile_lock,
+                thoth_config=args.thoth_config,
+                use_overlay=args.use_overlay,
+                force=args.force,
+            )

@@ -42,6 +42,7 @@ from jupyterlab_requirements.dependency_management import check_metadata_content
 from jupyterlab_requirements.dependency_management import create_pipfile_from_packages
 from jupyterlab_requirements.dependency_management import gather_libraries
 from jupyterlab_requirements.dependency_management import get_notebook_content
+from jupyterlab_requirements.dependency_management import horus_extract_command
 from jupyterlab_requirements.dependency_management import horus_lock_command
 from jupyterlab_requirements.dependency_management import horus_requirements_command
 from jupyterlab_requirements.dependency_management import horus_set_kernel_command
@@ -149,104 +150,22 @@ def extract(
         horus extract [YOUR_NOTEBOOK].ipynb  --pipfile-lock
         horus extract [YOUR_NOTEBOOK].ipynb  --thoth-config
     """
-    extract_all = False
+    results = horus_extract_command(
+        notebook_path=path,
+        store_files_path=store_files_path,
+        pipfile=pipfile,
+        pipfile_lock=pipfile_lock,
+        thoth_config=thoth_config,
+        use_overlay=use_overlay,
+        force=force,
+    )
 
-    if not pipfile and not pipfile_lock and not thoth_config:
-        # If no parameter to be extracted is set, extract all is set.
-        extract_all = True
+    click.echo(f"Kernel name is: {results['kernel_name']!s}")
 
-    notebook = get_notebook_content(notebook_path=path)
-    notebook_metadata = notebook.get("metadata")
-
-    language = notebook_metadata["language_info"]["name"]
-
-    if language and language != "python":
-        raise Exception("Only Python kernels are currently supported.")
-
-    kernelspec = notebook_metadata.get("kernelspec")
-    kernel_name = kernelspec.get("name")
-    click.echo(f"Kernel name is: {kernel_name!s}")
-
-    store_path: Path = Path(store_files_path)
-
-    if use_overlay:
-        if not kernel_name:
-            raise KeyError("No kernel name identified in notebook metadata kernelspec.")
-
-        store_path = store_path.joinpath("overlays").joinpath(kernel_name)
-        store_path.mkdir(parents=True, exist_ok=True)
-
-    dependency_resolution_engine = notebook_metadata.get("dependency_resolution_engine")
-
-    if not dependency_resolution_engine:
-        raise KeyError("No Resolution engine identified in notebook metadata.")
-
-    click.echo(f"Resolution engine identified: {dependency_resolution_engine!s}")
-
-    if pipfile or pipfile_lock or extract_all:
-        pipfile_string = notebook_metadata.get("requirements")
-
-        if not pipfile_string:
-            raise KeyError("No Pipfile identified in notebook metadata.")
-
-        pipfile_ = Pipfile.from_string(pipfile_string)
-
-    if pipfile or extract_all:
-
-        pipfile_path = store_path.joinpath("Pipfile")
-
-        if pipfile_path.exists() and not force:
-            raise FileExistsError(
-                f"Cannot store Pipfile because it already exists at path: {pipfile_path.as_posix()!r}. "
-                "Use --force to overwrite existing content or --show-only to visualize it."
-            )
-        else:
-            pipfile_.to_file(path=pipfile_path)
-
-        if not extract_all:
-            ctx.exit(0)
-
-    if pipfile_lock or extract_all:
-        pipfile_lock_string = notebook_metadata.get("requirements_lock")
-
-        if not pipfile_lock_string:
-            raise KeyError("No Pipfile.lock identified in notebook metadata.")
-
-        pipfile_lock_ = PipfileLock.from_string(pipfile_content=pipfile_lock_string, pipfile=pipfile_)
-
-        pipfile_lock_path = store_path.joinpath("Pipfile.lock")
-
-        if pipfile_lock_path.exists() and not force:
-            raise FileExistsError(
-                f"Cannot store Pipfile.lock because it already exists at path: {pipfile_lock_path.as_posix()!r}. "
-                "Use --force to overwrite existing content or --show-only to visualize it."
-            )
-        else:
-            pipfile_lock_.to_file(path=pipfile_lock_path)
-
-        if not extract_all:
-            ctx.exit(0)
-
-    if thoth_config or extract_all:
-        thoth_config_string = notebook_metadata.get("thoth_config")
-
-        if not thoth_config_string:
-            raise KeyError("No .thoth.yaml identified in notebook metadata.")
-
-        config = _Configuration()
-        config.load_config_from_string(thoth_config_string)
-
-        yaml_path = Path(".thoth.yaml")
-        if yaml_path.exists() and not force:
-            raise FileExistsError(
-                f"Cannot store .thoth.yaml because it already exists at path: {yaml_path.as_posix()!r}. "
-                "Use --force to overwrite existing content or --show-only to visualize it."
-            )
-        else:
-            config.save_config()
-
-        if not extract_all:
-            ctx.exit(0)
+    if not results["resolution_engine"]:
+        click.echo("No Resolution engine identified in notebook metadata.")
+    else:
+        click.echo(f"Resolution engine identified: {results['resolution_engine']!s}")
 
     ctx.exit(0)
 
