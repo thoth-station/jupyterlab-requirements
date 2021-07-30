@@ -177,7 +177,37 @@ async function activate(
               nbPanel.context.save()
           }
 
+          // Handle horus requirements calls
+          if ( cell.text.startsWith( "%horus discover" ) ) {
+            const id = notebook.activeCellIndex
+            const cell_ = notebook.model.cells.get(id - 1)
+            const cell_response: {} = cell_.toJSON()
+            const outputs = _.get(cell_response, "outputs")
+
+            if ( _.size(outputs) > 0  && _.has(outputs[0], "data") ) {
+              let notebook_metadata = notebook.model.metadata
+
+              const results: string = _.get(_.get(outputs[0], "data"), "text/plain")
+              const parsed_results = results.substr(1, results.length - 2)
+              let jsonObject: {} = JSON.parse(parsed_results);
+              const requirements: Requirements = _.get(jsonObject, "resolution_engine")
+              const force: boolean = _.get(jsonObject, "force")
+
+              if ( !notebook_metadata.has('requirements') || force == true) {
+                notebook_metadata.set('requirements', JSON.stringify(requirements))
+              }
+              else {
+                kernel.requestExecute({
+                  code: "print('requirements already exist in notebook metadata, use --force to overwrite them!')"
+                })
+              }
+            }
+
+            nbPanel.context.save()
+          }
+
         });
+
       });
     });
 

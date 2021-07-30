@@ -31,11 +31,12 @@ from IPython.core.magic import line_magic  # Called with %
 # from IPython.core.magic import line_cell_magic  # Called with % or %%
 # from IPython.core.magic import cell_magic  # Called with %%
 from IPython.core.magic import magics_class, Magics
-
-from jupyterlab_requirements import __version__
+from thamos.discover import discover_python_version
 
 from .lib import _EMOJI
 from .lib import check_metadata_content
+from .lib import create_pipfile_from_packages
+from .lib import gather_libraries
 from .lib import get_notebook_content
 from .lib import horus_requirements_command
 from .lib import horus_set_kernel_command
@@ -133,13 +134,10 @@ class HorusMagics(Magics):
 
         # command: set-kernel
         set_kernel_command = subparsers.add_parser(
-            "set-kernel", description="Create kernel using dependencies in notebook metadata."
+            "discover", description="Discover dependencies from notebook content."
         )
         set_kernel_command.add_argument(
-            "--kernel-name",
-            default="jupyterlab-requirements",
-            type=str,
-            help="Specify kernel name to be used when creating it.",
+            "--force", help="Force saving dependencies in the notebook.", action="store_true"
         )
 
         ## Parse inputs
@@ -297,3 +295,22 @@ class HorusMagics(Magics):
                         "resolution_engine": lock_results["dependency_resolution_engine"],
                     }
                 )
+
+        if args.command == "discover":
+            _LOGGER.info("Discover dependencies from notebook content.")
+            packages = gather_libraries(notebook_path=nb_path)
+
+            if packages:
+                print(f"Thoth invectio libraries gathered: {json.dumps(packages)}")
+            else:
+                print(f"No libraries discovered from notebook at path: {nb_path}")
+
+            python_version = discover_python_version()
+            print(f"Python version discovered from host: {python_version}")
+            pipfile = create_pipfile_from_packages(packages=packages, python_version=python_version)
+
+            return json.dumps(
+                {
+                    "requirements": pipfile.to_dict()
+                    "force": args.force
+                })

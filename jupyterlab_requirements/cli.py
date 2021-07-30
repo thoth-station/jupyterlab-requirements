@@ -20,14 +20,11 @@
 import logging
 import os
 import json
-import ast
 import sys
 import subprocess
 import yaml
 import click
 import typing
-import invectio
-import distutils.sysconfig as sysconfig
 
 from typing import Optional
 from pathlib import Path
@@ -43,6 +40,7 @@ from jupyterlab_requirements import __version__
 from jupyterlab_requirements.dependency_management import _EMOJI
 from jupyterlab_requirements.dependency_management import check_metadata_content
 from jupyterlab_requirements.dependency_management import create_pipfile_from_packages
+from jupyterlab_requirements.dependency_management import gather_libraries
 from jupyterlab_requirements.dependency_management import get_notebook_content
 from jupyterlab_requirements.dependency_management import horus_lock_command
 from jupyterlab_requirements.dependency_management import horus_requirements_command
@@ -455,33 +453,6 @@ def save(
     ctx.exit(0)
 
 
-def _gather_libraries(notebook_path: str):
-    """Gather libraries with invectio."""
-    library_gathered = []
-    try:
-        notebook_content_py = get_notebook_content(notebook_path=notebook_path, py_format=True)
-
-        try:
-            tree = ast.parse(notebook_content_py)
-        except Exception:
-            raise
-
-        visitor = invectio.lib.InvectioLibraryUsageVisitor()
-        visitor.visit(tree)
-
-        report = visitor.get_module_report()
-
-        std_lib_path = Path(sysconfig.get_python_lib(standard_lib=True))
-        std_lib = {p.name.rstrip(".py") for p in std_lib_path.iterdir()}
-
-        libs = filter(lambda k: k not in std_lib | set(sys.builtin_module_names), report)
-        library_gathered = list(libs)
-    except Exception as e:
-        _LOGGER.error(f"Could not gather libraries: {e}")
-
-    return library_gathered
-
-
 @cli.command("discover")
 @click.pass_context
 @click.argument("path")
@@ -511,7 +482,7 @@ def discover(ctx: click.Context, path: str, store_files_path: str, show_only: bo
 
         horus discover [YOUR_NOTEBOOK].ipynb --force
     """
-    packages = _gather_libraries(notebook_path=path)
+    packages = gather_libraries(notebook_path=path)
 
     if packages:
         click.echo(f"Thoth invectio libraries gathered: {json.dumps(packages)}")

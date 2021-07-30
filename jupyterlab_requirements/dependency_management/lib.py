@@ -17,6 +17,7 @@
 """Library with core methods for jupyterlab-requirements."""
 
 import os
+import ast
 import subprocess
 import logging
 import shutil
@@ -25,6 +26,8 @@ import tempfile
 import json
 import sys
 import yaml
+import invectio
+import distutils.sysconfig as sysconfig
 
 from virtualenv import cli_run
 from pathlib import Path
@@ -34,7 +37,6 @@ from rich.text import Text
 from thoth.python import Project, Pipfile, PipfileLock
 from thoth.python import PipfileMeta
 from thoth.python import Source, PackageVersion
-
 from thoth.common import ThothAdviserIntegrationEnum
 
 from thamos.lib import advise_using_config, _get_origin
@@ -389,6 +391,33 @@ def delete_kernel(kernel_name: str, kernels_path: Path = Path.home().joinpath(".
             _LOGGER.warning(f"Repo at {env_path.as_posix()} was not removed because of: {e}")
 
     return command_output
+
+
+def gather_libraries(notebook_path: str):
+    """Gather libraries with invectio."""
+    library_gathered = []
+    try:
+        notebook_content_py = get_notebook_content(notebook_path=notebook_path, py_format=True)
+
+        try:
+            tree = ast.parse(notebook_content_py)
+        except Exception:
+            raise
+
+        visitor = invectio.lib.InvectioLibraryUsageVisitor()
+        visitor.visit(tree)
+
+        report = visitor.get_module_report()
+
+        std_lib_path = Path(sysconfig.get_python_lib(standard_lib=True))
+        std_lib = {p.name.rstrip(".py") for p in std_lib_path.iterdir()}
+
+        libs = filter(lambda k: k not in std_lib | set(sys.builtin_module_names), report)
+        library_gathered = list(libs)
+    except Exception as e:
+        _LOGGER.error(f"Could not gather libraries: {e}")
+
+    return library_gathered
 
 
 def load_files(base_path: str) -> typing.Tuple[str, typing.Optional[str]]:
