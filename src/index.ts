@@ -26,12 +26,16 @@ import { Kernel } from '@jupyterlab/services';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ICommandPalette } from '@jupyterlab/apputils';
 import { Menu } from '@lumino/widgets';
+import { INotification } from "jupyterlab_toastify";
 
 // Customizations
 import { ManageDependenciesButtonExtension } from './dependencyManagementButton';
 import { KernelHandler } from './kernelHandlerMenu'
 import { Requirements, RequirementsLock } from "./types/requirements";
 import { ThothConfig } from "./types/thoth";
+import { get_kernel_name } from "./notebook";
+import { retrieve_config_file } from "./thoth";
+import { get_dependencies } from "./kernel";
 
 /**
  * The command IDs used by the console plugin.
@@ -104,13 +108,14 @@ async function activate(
           const { lastCell, notebook } = args;
           const cell = lastCell.model.value
 
+          // Handle horus requirements calls
           if ( cell.text.startsWith( "%horus requirements" ) ) {
               const id = notebook.activeCellIndex
               const cell_ = notebook.model.cells.get(id - 1)
               const cell_response: {} = cell_.toJSON()
               const outputs = _.get(cell_response, "outputs")
 
-              if ( _.size(outputs) > 0 ) {
+              if ( _.size(outputs) > 0  && _.has(outputs[0], "data") ) {
                 let notebook_metadata = notebook.model.metadata
 
                 const requirements: string = _.get(_.get(outputs[0], "data"), "text/plain")
@@ -120,39 +125,59 @@ async function activate(
               }
 
               nbPanel.context.save()
-            }
+          }
 
-            if ( cell.text.startsWith( "%horus lock" ) ) {
-              const id = notebook.activeCellIndex
-              const cell_ = notebook.model.cells.get(id - 1)
-              const cell_response: {} = cell_.toJSON()
-              const outputs = _.get(cell_response, "outputs")
+          // Handle horus lock cells (lock + install and set-kernel)
+          if ( cell.text.startsWith( "%horus lock" ) ) {
+            const id = notebook.activeCellIndex
+            const cell_ = notebook.model.cells.get(id - 1)
+            const cell_response: {} = cell_.toJSON()
+            const outputs = _.get(cell_response, "outputs")
 
-              if ( _.size(outputs) > 0 ) {
+            _.forEach(outputs, function(output) {
+              if ( _.size(output) > 0  && _.has(output, "data") ) {
+                console.debug(output)
+                const results: string = _.get(_.get(output, "data"), "text/plain")
+                const parsed_results = results.substr(1, results.length - 2)
+                let jsonObject: {} = JSON.parse(parsed_results);
+                console.debug("output", jsonObject)
+                console.debug(typeof jsonObject)
+                const kernel_name: string = _.get(jsonObject, "kernel_name")
+                console.debug("kernel_name", kernel_name)
+                const resolution_engine: string = _.get(jsonObject, "resolution_engine")
+                console.debug("resolution_engine", resolution_engine)
+
                 let notebook_metadata = notebook.model.metadata
-
-                const lock: string = _.get(_.get(outputs[0], "data"), "text/plain")
-                const parsed_lock = lock.substr(1, lock.length - 2)
-                let jsonObject = JSON.parse(parsed_lock);
-                const resolution_engine: string = _.get(jsonObject, "dependency_resolution_engine")
-                const lock_results = _.get(jsonObject, "lock_results")
+                notebook_metadata.set('dependency_resolution_engine', resolution_engine)
 
                 if ( resolution_engine == "thoth" ) {
-                  const requirements: Requirements = _.get(lock_results, "requirements")
-                  notebook_metadata.set('requirements', JSON.stringify(requirements))
-                  const thoth_config: ThothConfig = _.get(lock_results, "thoth_config")
+                  let thoth_config: Promise<ThothConfig> = retrieve_config_file(kernel_name)
                   notebook_metadata.set('thoth_config', JSON.stringify(thoth_config))
                 }
 
-                const requirements_lock: RequirementsLock = _.get(lock_results, "requirements_lock")
-                notebook_metadata.set('requirements_lock', JSON.stringify(requirements_lock))
-                notebook_metadata.set('dependency_resolution_engine', JSON.stringify(resolution_engine))
+                get_dependencies(kernel_name).then(value => {
+                  const requirements: Requirements = _.get(value, "requirements")
+                  console.debug("Pipfile", requirements)
+                  const requirements_lock: RequirementsLock = _.get(value, "requirements_lock")
+                  console.debug("Pipfile.lock", requirements_lock)
+                  notebook_metadata.set('requirements', JSON.stringify(requirements))
+                  notebook_metadata.set('requirements_lock', JSON.stringify(requirements_lock))
+                })
+
+                // Check if kernel name is already assigned to notebook and if yes, do nothing
+                const current_kernel = get_kernel_name( nbPanel, true )
+                if ( current_kernel == kernel_name ) {
+                  INotification.info("kernel name to be assigned " + kernel_name + " already set for the current notebook (" + current_kernel + "). Kernel won't be restarted.")
+                }
+                else {
+                  nbPanel.sessionContext.session.changeKernel({"name": kernel_name})
+                }
               }
-
+            })
               nbPanel.context.save()
-            }
-        });
+          }
 
+        });
       });
     });
 
@@ -215,5 +240,4 @@ namespace ThothPrivate {
       const spec = await kernel.spec;
       return !!spec && spec.language.toLowerCase().indexOf('python') !== -1;
     }
-
 }

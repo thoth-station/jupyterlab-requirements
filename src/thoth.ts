@@ -32,7 +32,6 @@ export async function retrieve_config_file (
   } catch (reason) {
     console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
   }
-
 }
 
 export async function update_thoth_config_on_disk (

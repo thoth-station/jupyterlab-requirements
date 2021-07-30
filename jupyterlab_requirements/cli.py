@@ -42,14 +42,12 @@ from jupyterlab_requirements import __version__
 
 from jupyterlab_requirements.dependency_management import _EMOJI
 from jupyterlab_requirements.dependency_management import check_metadata_content
-from jupyterlab_requirements.dependency_management import create_kernel
 from jupyterlab_requirements.dependency_management import create_pipfile_from_packages
-from jupyterlab_requirements.dependency_management import delete_kernel
 from jupyterlab_requirements.dependency_management import get_notebook_content
 from jupyterlab_requirements.dependency_management import horus_lock_command
 from jupyterlab_requirements.dependency_management import horus_requirements_command
+from jupyterlab_requirements.dependency_management import horus_set_kernel_command
 from jupyterlab_requirements.dependency_management import horus_show_command
-from jupyterlab_requirements.dependency_management import install_packages
 from jupyterlab_requirements.dependency_management import load_files
 from jupyterlab_requirements.dependency_management import save_notebook_content
 
@@ -625,90 +623,14 @@ def set_kernel(ctx: click.Context, path: str, kernel_name: Optional[str]) -> Non
     Examples:
         horus set-kernel [YOUR_NOTEBOOK].ipynb
     """
-    # 0. Check if all metadata for dependencies are present in the notebook
-    notebook = get_notebook_content(notebook_path=path)
-    notebook_metadata = notebook.get("metadata")
-    result = check_metadata_content(notebook_metadata=notebook_metadata)
+    results = horus_set_kernel_command(path=path, kernel_name=kernel_name)
 
-    if any(item.get("type") == "ERROR" for item in result):
-        click.echo(
-            "Kernel with dependencies cannot be created.\n" f"Please run `horus check {path}` for more information."
-        )
-        sys.exit(1)
-
-    language = notebook_metadata["language_info"]["name"]
-
-    if language and language != "python":
-        raise Exception("Only Python kernels are currently supported.")
-
-    kernelspec = notebook_metadata.get("kernelspec")
-    notebook_kernel = kernelspec.get("name")
-
-    if not kernel_name:
-        kernel = notebook_kernel
-    else:
-        kernel = kernel_name
-
-    if kernel == "python3":
+    if results["kernel_name"] == "python3":
         click.echo("python3 kernel name, cannot be overwritten, assigning default jupyterlab-requirements")
-        kernel = "jupyterlab-requirements"
 
-    click.echo(f"Kernel name is: {kernel!s}")
+    click.echo(f"Kernel name is: {results['kernel_name']!s}")
 
-    home = Path.home()
-    store_path: Path = home.joinpath(".local/share/thoth/kernels")
-
-    dependency_resolution_engine = notebook_metadata.get("dependency_resolution_engine")
-
-    if not dependency_resolution_engine:
-        raise KeyError("No Resolution engine identified in notebook metadata.")
-
-    click.echo(f"Resolution engine identified: {dependency_resolution_engine!s}")
-
-    complete_path: Path = store_path.joinpath(kernel)
-
-    if complete_path.exists():
-        delete_kernel(kernel_name=kernel)
-
-    complete_path.mkdir(parents=True, exist_ok=True)
-
-    # 1. Get Pipfile, Pipfile.lock and .thoth.yaml and store them in ./.local/share/kernel/{kernel_name}
-
-    # requirements
-    pipfile_string = notebook_metadata.get("requirements")
-    pipfile_ = Pipfile.from_string(pipfile_string)
-    pipfile_path = complete_path.joinpath("Pipfile")
-    pipfile_.to_file(path=pipfile_path)
-
-    # requirements lock
-    pipfile_lock_string = notebook_metadata.get("requirements_lock")
-    pipfile_lock_ = PipfileLock.from_string(pipfile_content=pipfile_lock_string, pipfile=pipfile_)
-    pipfile_lock_path = complete_path.joinpath("Pipfile.lock")
-    pipfile_lock_.to_file(path=pipfile_lock_path)
-
-    if dependency_resolution_engine == "thoth":
-        # thoth
-        thoth_config_string = notebook_metadata.get("thoth_config")
-        config = _Configuration()
-        config.load_config_from_string(thoth_config_string)
-        config_path = complete_path.joinpath(".thoth.yaml")
-        config.save_config(path=config_path)
-
-    # 2. Create virtualenv and install dependencies
-    click.echo("Installing requirements with micropipenv...")
-    install_packages(kernel_name=kernel, resolution_engine=dependency_resolution_engine, is_cli=True)
-    click.echo(f"Requirements installed using micropipenv in virtualenv at {complete_path}.")
-
-    # 3. Install packages using micropipenv
-    click.echo("Installing kernel for Jupyter notebooks...")
-    create_kernel(kernel_name=kernel)
-    click.echo(f"Installed kernelspec called {kernel}.")
-
-    # Update kernel name if different name selected.
-    kernelspec["name"] = kernel
-    notebook_metadata["kernelspec"] = kernelspec
-    notebook["metadata"] = notebook_metadata
-    save_notebook_content(notebook_path=path, notebook=notebook)
+    click.echo(f"Resolution engine identified: {results['dependency_resolution_engine']!s}")
 
     ctx.exit(0)
 

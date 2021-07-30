@@ -36,6 +36,7 @@ from .lib import _EMOJI
 from .lib import check_metadata_content
 from .lib import get_notebook_content
 from .lib import horus_requirements_command
+from .lib import horus_set_kernel_command
 from .lib import horus_show_command
 from .lib import horus_lock_command
 
@@ -128,6 +129,17 @@ class HorusMagics(Magics):
         # Use Pipenv
         lock_command.add_argument("--pipenv", help="Use pipenv resolution engine.", action="store_true")
 
+        # command: set-kernel
+        set_kernel_command = subparsers.add_parser(
+            "set-kernel", description="Create kernel using dependencies in notebook metadata."
+        )
+        set_kernel_command.add_argument(
+            "--kernel-name",
+            default="jupyterlab-requirements",
+            type=str,
+            help="Specify kernel name to be used when creating it.",
+        )
+
         ## Parse inputs
         opts = line.split()
         args = parser.parse_args(opts)
@@ -151,7 +163,7 @@ class HorusMagics(Magics):
             notebook = get_notebook_content(notebook_path=nb_path)
             notebook_metadata = notebook.get("metadata")
 
-            result = check_metadata_content(notebook_metadata=notebook_metadata)
+            result = check_metadata_content(notebook_metadata=notebook_metadata, is_cli=False)
 
             result.insert(
                 0,
@@ -250,7 +262,7 @@ class HorusMagics(Magics):
         if args.command == "lock":
             _LOGGER.info("Show dependencies content from notebook content.")
 
-            results = horus_lock_command(
+            lock_results = horus_lock_command(
                 path=nb_path,
                 resolution_engine="thoth" if not args.pipenv else "pipenv",
                 timeout=args.timeout,
@@ -260,10 +272,26 @@ class HorusMagics(Magics):
                 os_name=args.os_name,
                 os_version=args.os_version,
                 python_version=args.python_version,
-                save=False,
+                save_in_notebook=False,
+                save_on_disk=True,
             )
 
-            if not results["lock_results"]["error"]:
-                return json.dumps(results).replace("'", "")
+            if lock_results["lock_results"]["error"]:
+                return Exception(lock_results["lock_results"]["error_msg"])
             else:
-                return Exception(results["lock_results"]["error_msg"])
+                _LOGGER.info("Set kernel for dependencies in notebook metadata.")
+
+                results = horus_set_kernel_command(
+                    path=nb_path,
+                    kernel_name=args.kernel_name,
+                    save_in_notebook=False,
+                    resolution_engine=lock_results["dependency_resolution_engine"],
+                    is_magic_command=True,
+                )
+
+                return json.dumps(
+                    {
+                        "kernel_name": results["kernel_name"],
+                        "resolution_engine": lock_results["dependency_resolution_engine"],
+                    }
+                )

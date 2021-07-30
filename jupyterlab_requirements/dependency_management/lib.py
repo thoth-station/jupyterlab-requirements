@@ -80,7 +80,7 @@ def get_notebook_content(notebook_path: str, py_format: bool = False):
         return notebook_content_py
 
 
-def check_metadata_content(notebook_metadata: dict) -> list:
+def check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -> list:
     """Check the metadata of notebook for dependencies."""
     result = []
 
@@ -106,10 +106,15 @@ def check_metadata_content(notebook_metadata: dict) -> list:
     )
 
     if "dependency_resolution_engine" not in notebook_metadata.keys():
+        if is_cli:
+            command = "horus lock [NOTEBOOK].ipynb"
+        else:
+            command = "%horus lock"
+
         result.append(
             {
                 "message": "dependency_resolution_engine key is not present in notebook metadata. "
-                "It will be set after creating Pipfile and running `horus lock [YOUR_NOTEBOOK].ipynb`",
+                f"It will be set after creating Pipfile and running {command}",
                 "type": "WARNING",
             }
         )
@@ -126,10 +131,16 @@ def check_metadata_content(notebook_metadata: dict) -> list:
     if resolution_engine == "thoth":
         for thoth_specific_key in ["thoth_config"]:
             if thoth_specific_key not in notebook_metadata.keys():
+
+                if is_cli:
+                    command = "horus lock [NOTEBOOK].ipynb"
+                else:
+                    command = "%horus lock"
+
                 result.append(
                     {
                         "message": f"{thoth_specific_key} key is not present in notebook metadata. "
-                        "You can run `horus lock [YOUR_NOTEBOOK].ipynb`.",
+                        f"You can run {command}.",
                         "type": "ERROR",
                     }
                 )
@@ -143,10 +154,16 @@ def check_metadata_content(notebook_metadata: dict) -> list:
 
     for mandatory_key in ["requirements"]:
         if mandatory_key not in notebook_metadata.keys():
+
+            if is_cli:
+                command = "horus requirements [NOTEBOOK].ipynb"
+            else:
+                command = "%horus requirements"
+
             result.append(
                 {
                     "message": f"{mandatory_key} key is not present in notebook metadata. "
-                    "You can run `horus requirements [YOUR_NOTEBOOK].ipynb` with its options to set them.",
+                    f"You can run {command} with its options to set them.",
                     "type": "ERROR",
                 }
             )
@@ -160,13 +177,19 @@ def check_metadata_content(notebook_metadata: dict) -> list:
 
     for mandatory_key in ["requirements_lock"]:
         if mandatory_key not in notebook_metadata.keys():
+            if is_cli:
+                command = "horus lock [NOTEBOOK].ipynb"
+            else:
+                command = "%horus lock"
+
             result.append(
                 {
                     "message": f"{mandatory_key} key is not present in notebook metadata. "
-                    "You can run `horus lock [YOUR_NOTEBOOK].ipynb` if Pipfile already exists.",
+                    f"You can run {command} if Pipfile already exists.",
                     "type": "ERROR",
                 }
             )
+
         else:
             result.append(
                 {
@@ -181,11 +204,16 @@ def check_metadata_content(notebook_metadata: dict) -> list:
         )
 
         if project.pipfile_lock.meta.hash["sha256"] != project.pipfile.hash()["sha256"]:
+            if is_cli:
+                command = "horus lock [NOTEBOOK].ipynb"
+            else:
+                command = "%horus lock"
+
             result.append(
                 {
                     "message": f"Pipfile hash stated in Pipfile.lock {project.pipfile_lock.meta.hash['sha256'][:6]} "
                     f"does not correspond to Pipfile hash {project.pipfile.hash()['sha256'][:6]} - was Pipfile "
-                    "adjusted? Then you should run `horus lock [NOTEBOOK].ipynb`.",
+                    f"adjusted? Then you should run {command}.",
                     "type": "ERROR",
                 }
             )
@@ -217,10 +245,15 @@ def check_metadata_content(notebook_metadata: dict) -> list:
                 }
             )
         else:
+            if is_cli:
+                command = "horus set-kernel [NOTEBOOK].ipynb"
+            else:
+                command = "%horus set-kernel"
+
             result.append(
                 {
                     "message": f"kernel {kernel_name} selected does not match your dependencies. "
-                    "Please run command horus set-kernel [NOTEBOOK].ipynb to create kernel for your notebook.",
+                    f"Please run command {command} to create kernel for your notebook.",
                     "type": "WARNING",
                 }
             )
@@ -233,14 +266,15 @@ def install_packages(
     resolution_engine: str,
     kernels_path: Path = Path.home().joinpath(".local/share/thoth/kernels"),
     is_cli: bool = False,
+    is_magic_command: bool = False,
 ) -> None:
     """Install dependencies in the virtualenv."""
     _LOGGER.info(f"kernel_name selected: {kernel_name}")
 
-    env_name = kernel_name
-    env_path = kernels_path.joinpath(env_name)
+    env_path = kernels_path.joinpath(kernel_name)
 
-    env_path.mkdir(parents=True, exist_ok=True)
+    if not is_magic_command:
+        env_path.mkdir(parents=True, exist_ok=True)
 
     package_manager: str = "micropipenv"
 
@@ -323,6 +357,7 @@ def create_kernel(kernel_name: str, kernels_path: Path = Path.home().joinpath(".
             cwd=kernels_path,
             capture_output=True,
         )
+
         _LOGGER.info(process_output.stdout.decode("utf-8"))
 
     except Exception as e:
@@ -460,9 +495,10 @@ def lock_dependencies_with_thoth(
     except Exception as api_error:
         _LOGGER.warning(f"error locking dependencies using Thoth: {api_error}")
         advise["error"] = True
-        advise[
-            "error_msg"
-        ] = f"Error locking dependencies, check pod logs for more details about the error. {api_error}"
+        if not advise.get("error_msg"):
+            advise[
+                "error_msg"
+            ] = f"Error locking dependencies, check pod logs for more details about the error. {api_error}"
         returncode = 1
 
     finally:
@@ -797,14 +833,15 @@ def horus_lock_command(
     os_name: typing.Optional[str] = None,
     os_version: typing.Optional[str] = None,
     python_version: typing.Optional[str] = None,
-    save: bool = True,
+    save_in_notebook: bool = True,
+    save_on_disk: bool = False,
 ):
     """Lock requirements in notebook metadata."""
     results = {}
     results["kernel_name"] = ""
     results["runtime_environment"] = ""
     results["dependency_resolution_engine"] = resolution_engine
-    results["lock_results"] = ""
+    results["lock_results"] = {}
 
     notebook = get_notebook_content(notebook_path=path)
     notebook_metadata = notebook.get("metadata")
@@ -822,16 +859,16 @@ def horus_lock_command(
 
     results["kernel_name"] = kernel
 
-    pipfile_string = notebook_metadata.get("requirements")
+    requirements = notebook_metadata.get("requirements")
 
-    if not pipfile_string:
+    if not requirements:
         raise KeyError(
             "No Pipfile identified in notebook metadata."
             "You can start creating one with command: "
             "`horus requirements [NOTEBOOK].ipynb --add [PACKAGE NAME]`"
         )
 
-    pipfile_ = Pipfile.from_string(pipfile_string)
+    pipfile_ = Pipfile.from_string(requirements)
 
     error = False
     if resolution_engine == "thoth":
@@ -879,7 +916,7 @@ def horus_lock_command(
 
         _, advise = lock_dependencies_with_thoth(
             kernel_name=kernel,
-            pipfile_string=pipfile_string,
+            pipfile_string=requirements,
             config=json.dumps(thoth_config.content),
             timeout=timeout,
             force=force,
@@ -887,36 +924,166 @@ def horus_lock_command(
         )
 
         if not advise["error"]:
-            pipfile_ = Pipfile.from_dict(advise["requirements"])
-            pipfile_lock_ = PipfileLock.from_dict(advise["requirement_lock"], pipfile_)
+            requirements = advise["requirements"]
+            requirements_lock = advise["requirement_lock"]
             notebook_metadata["thoth_config"] = json.dumps(thoth_config)
 
-            advise["requirements"] = pipfile_.to_dict()
-            advise["requirements_lock"] = pipfile_lock_.to_dict()
         else:
             error = True
+
         results["lock_results"] = advise
 
     if resolution_engine == "pipenv":
         _, pipenv_result = lock_dependencies_with_pipenv(kernel_name=kernel, pipfile_string=pipfile_.to_string())
+
         if not pipenv_result["error"]:
-            pipfile_lock_ = PipfileLock.from_dict(pipenv_result["requirements_lock"], pipfile_)
+            requirements_lock = pipenv_result["requirements_lock"]
         else:
             error = True
 
-        pipenv_result["requirements"] = pipfile_.to_dict()
-        pipenv_result["requirements_lock"] = pipfile_lock_.to_dict()
         results["lock_results"] = pipenv_result
 
-    if save and not error:
+    if save_on_disk and not error:
+        home = Path.home()
+        store_path: Path = home.joinpath(".local/share/thoth/kernels")
+
+        complete_path: Path = store_path.joinpath(kernel)
+
+        complete_path.mkdir(parents=True, exist_ok=True)
+
+        _LOGGER.info("Path used to store dependencies is: %r", complete_path.as_posix())
+
+        requirements_format = "pipenv"
+
+        if resolution_engine == "thoth":
+            project = Project.from_dict(requirements, requirements_lock)
+        else:
+            project = Project.from_dict(pipfile_.to_dict(), requirements_lock)
+
+        pipfile_path = complete_path.joinpath("Pipfile")
+        pipfile_lock_path = complete_path.joinpath("Pipfile.lock")
+
+        if requirements_format == "pipenv":
+            _LOGGER.debug("Writing to Pipfile/Pipfile.lock in %r", complete_path)
+            project.to_files(pipfile_path=pipfile_path, pipfile_lock_path=pipfile_lock_path)
+
+        if resolution_engine == "thoth":
+            # thoth
+            thoth_config_string = json.dumps(thoth_config.content)
+            config = _Configuration()
+            config.load_config_from_string(thoth_config_string)
+            config_path = complete_path.joinpath(".thoth.yaml")
+            config.save_config(path=config_path)
+
+    if save_in_notebook and not error:
         notebook_metadata["dependency_resolution_engine"] = resolution_engine
-        notebook_metadata["requirements"] = json.dumps(pipfile_.to_dict())
-        notebook_metadata["requirements_lock"] = json.dumps(pipfile_lock_.to_dict())
+        notebook_metadata["requirements"] = requirements
+        notebook_metadata["requirements_lock"] = requirements_lock
 
         # Assign kernel name to kernelspec.
         kernelspec["name"] = kernel
         notebook_metadata["kernelspec"] = kernelspec
 
+        notebook["metadata"] = notebook_metadata
+        save_notebook_content(notebook_path=path, notebook=notebook)
+
+    return results
+
+
+def horus_set_kernel_command(
+    path: str,
+    kernel_name: typing.Optional[str],
+    save_in_notebook: bool = True,
+    resolution_engine: typing.Optional[str] = None,
+    is_magic_command: bool = False,
+):
+    """Create kernel using dependencies in notebook metadata."""
+    results = {}
+    results["kernel_name"] = ""
+    results["dependency_resolution_engine"] = ""
+
+    # 0. Check if all metadata for dependencies are present in the notebook
+    notebook = get_notebook_content(notebook_path=path)
+    notebook_metadata = notebook.get("metadata")
+
+    language = notebook_metadata["language_info"]["name"]
+
+    if language and language != "python":
+        raise Exception("Only Python kernels are currently supported.")
+
+    kernelspec = notebook_metadata.get("kernelspec")
+    notebook_kernel = kernelspec.get("name")
+
+    if not kernel_name:
+        kernel = notebook_kernel
+    else:
+        kernel = kernel_name
+
+    if kernel == "python3":
+        kernel = "jupyterlab-requirements"
+
+    results["kernel_name"] = kernel_name
+
+    home = Path.home()
+    store_path: Path = home.joinpath(".local/share/thoth/kernels")
+
+    if not resolution_engine:
+        dependency_resolution_engine = notebook_metadata.get("dependency_resolution_engine")
+
+        if not dependency_resolution_engine:
+            raise KeyError("No Resolution engine identified in notebook metadata.")
+    else:
+        dependency_resolution_engine = resolution_engine
+
+    results["dependency_resolution_engine"] = dependency_resolution_engine
+
+    complete_path: Path = store_path.joinpath(kernel)
+
+    if not is_magic_command:
+        if complete_path.exists():
+            delete_kernel(kernel_name=kernel)
+
+        complete_path.mkdir(parents=True, exist_ok=True)
+
+    # 1. Get Pipfile, Pipfile.lock and .thoth.yaml and store them in ./.local/share/kernel/{kernel_name}
+
+    # requirements
+    if not is_magic_command:
+        pipfile_string = notebook_metadata.get("requirements")
+        pipfile_ = Pipfile.from_string(pipfile_string)
+        pipfile_path = complete_path.joinpath("Pipfile")
+        pipfile_.to_file(path=pipfile_path)
+
+    # requirements lock
+    if not is_magic_command:
+        pipfile_lock_string = notebook_metadata.get("requirements_lock")
+        pipfile_lock_ = PipfileLock.from_string(pipfile_content=pipfile_lock_string, pipfile=pipfile_)
+        pipfile_lock_path = complete_path.joinpath("Pipfile.lock")
+        pipfile_lock_.to_file(path=pipfile_lock_path)
+
+    if dependency_resolution_engine == "thoth" and not is_magic_command:
+        # thoth
+        thoth_config_string = notebook_metadata.get("thoth_config")
+        config = _Configuration()
+        config.load_config_from_string(thoth_config_string)
+        config_path = complete_path.joinpath(".thoth.yaml")
+        config.save_config(path=config_path)
+
+    # 2. Create virtualenv and install dependencies
+    install_packages(
+        kernel_name=kernel,
+        resolution_engine=dependency_resolution_engine,
+        is_cli=True,
+        is_magic_command=is_magic_command,
+    )
+
+    # 3. Install packages using micropipenv
+    create_kernel(kernel_name=kernel)
+
+    if save_in_notebook:
+        # Update kernel name if different name selected.
+        kernelspec["name"] = kernel
+        notebook_metadata["kernelspec"] = kernelspec
         notebook["metadata"] = notebook_metadata
         save_notebook_content(notebook_path=path, notebook=notebook)
 
