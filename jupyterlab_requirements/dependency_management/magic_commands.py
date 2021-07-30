@@ -32,6 +32,8 @@ from IPython.core.magic import line_magic  # Called with %
 # from IPython.core.magic import cell_magic  # Called with %%
 from IPython.core.magic import magics_class, Magics
 
+from jupyterlab_requirements import __version__
+
 from .lib import _EMOJI
 from .lib import check_metadata_content
 from .lib import get_notebook_content

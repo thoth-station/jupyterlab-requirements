@@ -17,9 +17,7 @@
 """Requirements API for jupyterlab requirements."""
 
 import json
-import os
 import logging
-import subprocess
 
 from pathlib import Path
 

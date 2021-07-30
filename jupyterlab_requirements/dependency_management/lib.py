@@ -84,17 +84,18 @@ def check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -> list
     """Check the metadata of notebook for dependencies."""
     result = []
 
-    language = notebook_metadata["language_info"]["name"]
+    if notebook_metadata.get("language_info"):
+        language = notebook_metadata["language_info"]["name"]
 
-    if language and language != "python":
-        result.append(
-            {
-                "message": "Only python programming language is supported.",
-                "type": "ERROR",
-            }
-        )
+        if language and language != "python":
+            result.append(
+                {
+                    "message": "Only python programming language is supported.",
+                    "type": "ERROR",
+                }
+            )
 
-        return result
+            return result
 
     kernel_name = notebook_metadata["kernelspec"]["name"]
 
@@ -772,10 +773,11 @@ def horus_show_command(
     notebook = get_notebook_content(notebook_path=path)
     notebook_metadata = notebook.get("metadata")
 
-    language = notebook_metadata["language_info"]["name"]
+    if notebook_metadata.get("language_info"):
+        language = notebook_metadata["language_info"]["name"]
 
-    if language and language != "python":
-        raise Exception("Only Python kernels are currently supported.")
+        if language and language != "python":
+            raise Exception("Only Python kernels are currently supported.")
 
     kernelspec = notebook_metadata.get("kernelspec")
     kernel_name = kernelspec.get("name")
@@ -931,7 +933,7 @@ def horus_lock_command(
         else:
             error = True
 
-        results["lock_results"] = advise
+        results["lock_results"]: dict = advise
 
     if resolution_engine == "pipenv":
         _, pipenv_result = lock_dependencies_with_pipenv(kernel_name=kernel, pipfile_string=pipfile_.to_string())
@@ -941,7 +943,7 @@ def horus_lock_command(
         else:
             error = True
 
-        results["lock_results"] = pipenv_result
+        results["lock_results"]: dict = pipenv_result
 
     if save_on_disk and not error:
         home = Path.home()
@@ -1006,10 +1008,11 @@ def horus_set_kernel_command(
     notebook = get_notebook_content(notebook_path=path)
     notebook_metadata = notebook.get("metadata")
 
-    language = notebook_metadata["language_info"]["name"]
+    if notebook_metadata.get("language_info"):
+        language = notebook_metadata["language_info"]["name"]
 
-    if language and language != "python":
-        raise Exception("Only Python kernels are currently supported.")
+        if language and language != "python":
+            raise Exception("Only Python kernels are currently supported.")
 
     kernelspec = notebook_metadata.get("kernelspec")
     notebook_kernel = kernelspec.get("name")
@@ -1022,7 +1025,7 @@ def horus_set_kernel_command(
     if kernel == "python3":
         kernel = "jupyterlab-requirements"
 
-    results["kernel_name"] = kernel_name
+    results["kernel_name"]: str = kernel
 
     home = Path.home()
     store_path: Path = home.joinpath(".local/share/thoth/kernels")
