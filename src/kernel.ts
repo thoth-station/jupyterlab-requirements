@@ -225,6 +225,35 @@ export async function store_dependencies (
 
 
 /**
+ * Function: Get dependencies locally.
+ */
+
+ export async function get_dependencies (
+  kernel_name: string,
+  init: RequestInit = {},
+): Promise<string> {
+
+  // POST request
+  const dataToSend = {
+    kernel_name: kernel_name,
+  };
+
+  const endpoint: string = 'file/stored'
+
+  try {
+    const results = await requestAPI<any>(endpoint, {
+      body: JSON.stringify(dataToSend),
+      method: 'POST'
+    })
+    console.log(results)
+    return JSON.parse(JSON.stringify(results));
+  } catch (reason) {
+    console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
+  }
+}
+
+
+/**
  * Function: Gather library usage from notebook cells.
  */
 

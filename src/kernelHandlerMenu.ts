@@ -39,5 +39,5 @@ export class KernelHandler extends Widget {
 
     }
 
-    private _kernel_handler: Widget;
+    private _kernel_handler: ReactWidget;
 }

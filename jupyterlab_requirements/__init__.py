@@ -22,9 +22,17 @@ from pathlib import Path
 from jupyter_server.utils import url_path_join
 
 from .dependency_management import YamlSpecHandler, DependencyManagementBaseHandler
-from .dependency_management import DependenciesFilesHandler, PipenvHandler, PythonVersionHandler, RootPathHandler
+from .dependency_management import (
+    DependenciesFilesHandler,
+    PipenvHandler,
+    PythonVersionHandler,
+    RootPathHandler,
+    DependenciesStoredHandler,
+)
 from .dependency_management import ThothConfigHandler, ThothAdviseHandler, ThothInvectioHandler
 from .dependency_management import JupyterKernelHandler, DependencyInstalledHandler, DependencyInstallHandler
+
+from .dependency_management import HorusMagics
 
 HERE = Path(__file__).parent.resolve()
 
@@ -34,6 +42,22 @@ __author__ = "Francesco Murdaca <francesco.murdaca91@gmail.com>"
 
 with (HERE / "labextension" / "package.json").open() as fid:
     data = json.load(fid)
+
+
+# In order to actually use these magics, you must register them with a
+# running IPython.
+
+
+def load_ipython_extension(ipython):
+    """Register magic commands when loading Ipython.
+
+    Any module file that define a function named `load_ipython_extension`
+    can be loaded via `%load_ext module.path` or be configured to be
+    autoloaded by IPython at startup time.
+    """
+    # You can register the class itself without instantiating it.  IPython will
+    # call the default constructor on it.
+    ipython.register_magics(HorusMagics)
 
 
 def _jupyter_labextension_paths():
@@ -85,6 +109,7 @@ def _load_jupyter_server_extension(lab_app):
         (url_path_join(base_url, f"/{url_path}/kernel/create"), JupyterKernelHandler),
         (url_path_join(base_url, f"/{url_path}/file/directory"), RootPathHandler),
         (url_path_join(base_url, f"/{url_path}/file/dependencies"), DependenciesFilesHandler),
+        (url_path_join(base_url, f"/{url_path}/file/stored"), DependenciesStoredHandler),
         (
             url_path_join(base_url, r"/jupyterlab_requirements/jupyterlab_requirements/tasks/%s" % r"(?P<index>\d+)"),
             DependencyManagementBaseHandler,

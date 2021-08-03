@@ -19,6 +19,7 @@
 from .api import YamlSpecHandler
 from .base import DependencyManagementBaseHandler
 from .dependencies_files_handler import DependenciesFilesHandler
+from .dependencies_stored_handler import DependenciesStoredHandler
 from .discover_handler import DependencyInstalledHandler
 from .discover_handler import PythonVersionHandler
 from .discover_handler import RootPathHandler
@@ -29,18 +30,25 @@ from .thoth import ThothAdviseHandler
 from .thoth_config_handler import ThothConfigHandler
 from .thoth_invectio import ThothInvectioHandler
 
-from .lib import create_kernel
-from .lib import delete_kernel
-from .lib import get_packages
-from .lib import get_thoth_config
-from .lib import install_packages
+from .lib import _EMOJI
+from .lib import check_metadata_content
+from .lib import create_pipfile_from_packages
+from .lib import gather_libraries
+from .lib import get_notebook_content
+from .lib import horus_extract_command
+from .lib import horus_lock_command
+from .lib import horus_requirements_command
+from .lib import horus_set_kernel_command
+from .lib import horus_show_command
 from .lib import load_files
-from .lib import lock_dependencies_with_pipenv
-from .lib import lock_dependencies_with_thoth
+from .lib import save_notebook_content
+
+from .magic_commands import HorusMagics
 
 __all__ = [
     "DependencyManagementBaseHandler",
     "DependenciesFilesHandler",
+    "DependenciesStoredHandler",
     "DependencyInstallHandler",
     "DependencyInstalledHandler",
     "JupyterKernelHandler",
@@ -51,12 +59,17 @@ __all__ = [
     "ThothConfigHandler",
     "ThothInvectioHandler",
     "YamlSpecHandler",
-    "create_kernel",
-    "delete_kernel",
-    "get_packages",
-    "get_thoth_config",
-    "install_packages",
+    "check_metadata_content",
+    "create_pipfile_from_packages",
+    "gather_libraries",
+    "get_notebook_content",
+    "horus_extract_command",
+    "horus_set_kernel_command",
+    "horus_lock_command",
+    "horus_requirements_command",
+    "horus_show_command",
     "load_files",
-    "lock_dependencies_with_pipenv",
-    "lock_dependencies_with_thoth",
+    "save_notebook_content",
+    "HorusMagics",
+    "_EMOJI",
 ]
