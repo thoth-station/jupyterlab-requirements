@@ -9,3 +9,4 @@ jupyterlab>=3.*
 jupyter-require>=0.4.0
 rich
 pyyaml
+ipynbname
