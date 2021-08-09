@@ -287,23 +287,23 @@ def install_packages(
     if is_cli or resolution_engine != "pipenv":
         cli_run([str(env_path)])
 
-    # 2. Install micropipenv if not installed already
-    check_install = subprocess.run(
-        f"python3 -c \"import sys, pkgutil; sys.exit(0 if pkgutil.find_loader('{package_manager}') else 1)\"",
-        shell=True,
-        cwd=kernels_path,
-        capture_output=True,
-    )
+    # 2. Install micropipenv and jupyterlab-requirements if not installed already
+    packages = [package_manager, "jupyterlab-requirements"]
 
-    if check_install.returncode != 0:
-        _LOGGER.debug("micropipenv is not installed in the host!: %r", check_install.stderr)
-        _ = subprocess.run(
-            "pip install micropipenv",
+    for package in packages:
+        check_install = subprocess.run(
+            f". {kernel_name}/bin/activate &&"
+            f"python3 -c \"import sys, pkgutil; sys.exit(0 if pkgutil.find_loader('{package}') else 1)\"",
             shell=True,
             cwd=kernels_path,
+            capture_output=True,
         )
-    else:
-        _LOGGER.debug("micropipenv is already present on the host!")
+
+        if check_install.returncode != 0:
+            _LOGGER.debug(f"{package} is not installed in the host!: %r", check_install.stderr)
+            _ = subprocess.run(f". {kernel_name}/bin/activate && pip install {package}", shell=True, cwd=kernels_path)
+        else:
+            _LOGGER.debug(f"{package} is already present on the host!")
 
     # 3. Install packages using micropipenv
     _ = subprocess.run(
@@ -335,7 +335,9 @@ def get_packages(kernel_name: str, kernels_path: Path = Path.home().joinpath(".l
 def create_kernel(kernel_name: str, kernels_path: Path = Path.home().joinpath(".local/share/thoth/kernels")) -> None:
     """Create kernel using new virtualenv."""
     _LOGGER.info(f"Setting new jupyter kernel {kernel_name} from {kernels_path}/{kernel_name}.")
+
     package = "ipykernel"
+
     check_install = subprocess.run(
         f". {kernel_name}/bin/activate &&"
         f"python3 -c \"import sys, pkgutil; sys.exit(0 if pkgutil.find_loader('{package}') else 1)\"",
@@ -345,10 +347,10 @@ def create_kernel(kernel_name: str, kernels_path: Path = Path.home().joinpath(".
     )
 
     if check_install.returncode != 0:
-        _LOGGER.debug("ipykernel is not installed in the host!: %r", check_install.stderr)
-        _ = subprocess.run(f". {kernel_name}/bin/activate && pip install ipykernel", shell=True, cwd=kernels_path)
+        _LOGGER.debug(f"{package} is not installed in the host!: %r", check_install.stderr)
+        _ = subprocess.run(f". {kernel_name}/bin/activate && pip install {package}", shell=True, cwd=kernels_path)
     else:
-        _LOGGER.debug("ipykernel is already present on the host!")
+        _LOGGER.debug(f"{package} is already present on the host!")
 
     _LOGGER.debug(f"Installing kernelspec called {kernel_name}.")
 
