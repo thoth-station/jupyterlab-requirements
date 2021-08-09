@@ -1,5 +1,24 @@
 # Changelog for Thoth's Template GitHub Project
 
+## Release 0.10.0 (2021-08-09T12:46:31)
+### Features
+* Update README
+* Add horus extract magic command
+* Add horus discover magic command
+* Fix language_info missing when notebooks starts
+* Add horus lock magic command
+* Adjust instantiation of horus magic commands and use feature for notification when to save content
+* add horus show magic command
+* Add horus requirements magic command
+* Add check magic command
+* Add nbextension entry points
+* WIP: Introduce magic commands
+* Add link to v0.9.2 video
+* use thoth-advise manager instead of update manager
+* :arrow_up: Automatic update of dependencies by Kebechet
+### Improvements
+* Merge lock and intall/create kernel command for magic commands
+
 ## [0.0.0] - 2020-Nov-2 - pacospace
 
 ### Added
