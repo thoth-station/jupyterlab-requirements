@@ -179,7 +179,6 @@ export async function delete_kernel (
       body: JSON.stringify(dataToSend),
       method: 'DELETE'
     });
-    console.log(message)
     return message;
   } catch (reason) {
     console.error('Error on DELETE /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
@@ -245,7 +244,6 @@ export async function store_dependencies (
       body: JSON.stringify(dataToSend),
       method: 'POST'
     })
-    console.log(results)
     return JSON.parse(JSON.stringify(results));
   } catch (reason) {
     console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
