@@ -233,12 +233,13 @@ def check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -> list
         notebook_packages = project.pipfile_lock.packages
 
         check = 0
-        for package in notebook_packages:
-            if str(package.name) in kernel_packages:
-                if str(package.version) in kernel_packages[str(package.name)]:
-                    check += 1
-            else:
-                break
+        if kernel_packages:
+            for package in notebook_packages:
+                if str(package.name) in kernel_packages:
+                    if str(package.version) in kernel_packages[str(package.name)]:
+                        check += 1
+                else:
+                    break
 
         if check == len([p for p in notebook_packages]):
             result.append(
@@ -317,17 +318,19 @@ def get_packages(kernel_name: str, kernels_path: Path = Path.home().joinpath(".l
     """Get packages in the virtualenv (pip list)."""
     _LOGGER.info(f"kernel_name selected: {kernel_name}")
 
-    process_output = subprocess.run(
-        f". {kernel_name}/bin/activate && pip list", shell=True, capture_output=True, cwd=kernels_path
-    )
-
-    processed_list = process_output.stdout.decode("utf-8").split("\n")[2:]
     packages = {}
 
-    for processed_package in processed_list:
-        if processed_package:
-            package_version = [el for el in processed_package.split(" ") if el != ""]
-            packages[package_version[0]] = package_version[1]
+    if kernels_path.joinpath(kernel_name).exists():
+        process_output = subprocess.run(
+            f". {kernel_name}/bin/activate && pip list", shell=True, capture_output=True, cwd=kernels_path
+        )
+
+        processed_list = process_output.stdout.decode("utf-8").split("\n")[2:]
+
+        for processed_package in processed_list:
+            if processed_package:
+                package_version = [el for el in processed_package.split(" ") if el != ""]
+                packages[package_version[0]] = package_version[1]
 
     return packages
 
