@@ -133,7 +133,17 @@ class HorusMagics(Magics):
         # Use Pipenv
         lock_command.add_argument("--pipenv", help="Use pipenv resolution engine.", action="store_true")
 
-        # command: set-kernel
+        # command: set
+        set_command = subparsers.add_parser(
+            "set-kernel", description="Set kernel from dependencies in notebook content."
+        )
+        set_command.add_argument(
+            "--kernel-name",
+            type=str,
+            help="Specify kernel name to be used when creating it.",
+        )
+
+        # command: discover
         discover_command = subparsers.add_parser("discover", description="Discover dependencies from notebook content.")
         discover_command.add_argument("--force", help="Force saving dependencies in the notebook.", action="store_true")
 
@@ -310,6 +320,21 @@ class HorusMagics(Magics):
                         "resolution_engine": results["dependency_resolution_engine"],
                     }
                 )
+
+        if args.command == "set-kernel":
+            _LOGGER.info("Set kernel for dependencies in notebook metadata.")
+
+            kernel_results = horus_set_kernel_command(
+                path=nb_path,
+                kernel_name=args.kernel_name if args.kernel_name else None,
+                save_in_notebook=False,
+            )
+
+            return json.dumps(
+                {
+                    "kernel_name": kernel_results["kernel_name"],
+                }
+            )
 
         if args.command == "discover":
             _LOGGER.info("Discover dependencies from notebook content.")
