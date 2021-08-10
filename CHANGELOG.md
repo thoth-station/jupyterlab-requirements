@@ -1,5 +1,10 @@
 # Changelog for Thoth's Template GitHub Project
 
+## Release 0.10.3 (2021-08-10T12:18:25)
+### Features
+* Fix missing kernelspect
+* Fix changelog version
+
 ## Release 0.10.2 (2021-08-10T11:41:28)
 ### Features
 * Fix missing magic command and atuomatic activation
