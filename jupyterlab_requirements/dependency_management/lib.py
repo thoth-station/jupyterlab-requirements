@@ -99,7 +99,13 @@ def check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -> list
 
             return result
 
-    kernel_name = notebook_metadata["kernelspec"]["name"]
+    kernelspec = notebook_metadata["kernelspec"]
+
+    if kernelspec:
+        kernel_name = kernelspec["name"]
+    else:
+        # kernelspec is not available only when a new notebook is started and not saved.
+        kernel_name = "ipykernel"
 
     result.append(
         {
