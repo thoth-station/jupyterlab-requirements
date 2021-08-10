@@ -36,7 +36,7 @@ from .dependency_management import HorusMagics
 
 HERE = Path(__file__).parent.resolve()
 
-__version__ = "0.10.1"
+__version__ = "0.10.2"
 __author__ = "Francesco Murdaca <francesco.murdaca91@gmail.com>"
 
 
