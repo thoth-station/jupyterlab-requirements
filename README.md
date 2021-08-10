@@ -61,6 +61,44 @@ jupyterlab-requirements extension for JupyterLab can be used in different ways:
 
 Currently this extension supports only `Python` kernels.
 
+
+## Resolution engines
+
+* [Thoth](https://thoth-station.ninja/)
+
+* [pipenv](https://github.com/pypa/pipenv)
+
+Currently Thoth is used by default and pipenv is backup. In the future user will be able to select specific one.
+
+## Virtual environment for you dependencies
+
+Virtualenv created to run your notebook according to your dependencies requirement is created in:
+
+`~/.local/share/thoth/kernels/{kernel_name}`
+
+## Dependencies installation
+
+Once lock file is created using any of available resolution engines, the dependencies will be installed in the virtualenv using
+[micropipenv](https://pypi.org/project/micropipenv/).
+
+## Overlays directory
+
+The dependencies stored in the notebook metadata are also stored into `overlays` folder (created automatically) using the kernel name by default.
+If you want to know more about the use of overlays, have a look [here](https://github.com/thoth-station/thamos#support-for-multiple-runtime-environments).
+
+## Thoth configuration file
+
+Thoth resolution engine is able to provide an optimized software stack based on the runtime environment you are using (more inputs are used, if you want to know more, have a look here [here](https://github.com/thoth-station/adviser)).
+
+In general different runtime environment will provide different effect on you application (e.g. more performance), therefore we include these information in the notebook metadata so that other can find out what runtime environment has been used to run a certain notebook.
+
+## Delete kernels
+
+If you have too many kernels, you can handle them directly from the menu.
+
+![kernel delete handler menu](preview.gif)
+
+
 # %horus magic command
 
 As of `v0.10.0` jupyterlab-requirements supports `%horus` magic command directly in the cells so that the user can speed up all dependency management taks, working in one place. Magic commands are automatically loaded when you start a notebook and they automatically identify the notebook you are using.
@@ -242,43 +280,6 @@ jupyterlab-requirements extension uses this information to provide users with li
 <div style="text-align:center">
 <img alt="User with code" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/UserwithCode.png">
 </div>
-
-## Resolution engines
-
-* [Thoth](https://thoth-station.ninja/)
-
-* [pipenv](https://github.com/pypa/pipenv)
-
-Currently Thoth is used by default and pipenv is backup. In the future user will be able to select specific one.
-
-## Virtual environment for you dependencies
-
-Virtualenv created to run your notebook according to your dependencies requirement is created in:
-
-`~/.local/share/thoth/kernels/{kernel_name}`
-
-## Dependencies installation
-
-Once lock file is created using any of available resolution engine. The dependencies are installed in the virtualenv using
-[micropipenv](https://pypi.org/project/micropipenv/).
-
-## Overlays directory
-
-The dependencies stored in the notebook metadata are also stored into `overlays` folder (created automatically) using the kernel name by default.
-If you want to know more about the use of overlays, have a look [here](https://github.com/thoth-station/thamos#support-for-multiple-runtime-environments).
-
-## Thoth configuration file
-
-Thoth resolution engine is able to provide an optimized software stack based on the runtime environment you are using (more inputs are used, if you want to know more, have a look here [here](https://github.com/thoth-station/adviser)).
-
-In general different runtime environment will provide different effect on you application (e.g. more performance), therefore we include these information in the notebook metadata so that other can find out what runtime environment has been used to run a certain notebook.
-
-## Delete kernels
-
-If you have too many kernels, you can handle them directly from the menu.
-
-![kernel delete handler menu](preview.gif)
-
 
 # Horus: jupyterlab-requirements CLI
 

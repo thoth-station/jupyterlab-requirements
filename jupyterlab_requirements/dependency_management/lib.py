@@ -1027,7 +1027,7 @@ def horus_lock_command(
 
 def horus_set_kernel_command(
     path: str,
-    kernel_name: typing.Optional[str],
+    kernel_name: typing.Optional[str] = None,
     save_in_notebook: bool = True,
     resolution_engine: typing.Optional[str] = None,
     is_magic_command: bool = False,

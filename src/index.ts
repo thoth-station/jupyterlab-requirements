@@ -141,7 +141,6 @@ async function activate(
                 const parsed_results = results.substr(1, results.length - 2)
                 let jsonObject: {} = JSON.parse(parsed_results);
                 console.debug("output", jsonObject)
-                console.debug(typeof jsonObject)
                 const kernel_name: string = _.get(jsonObject, "kernel_name")
                 console.debug("kernel_name", kernel_name)
                 const resolution_engine: string = _.get(jsonObject, "resolution_engine")
@@ -171,6 +170,39 @@ async function activate(
                 }
                 else {
                   nbPanel.sessionContext.session.changeKernel({"name": kernel_name})
+                }
+              }
+            })
+              nbPanel.context.save()
+          }
+
+          // Handle horus set-kernel calls
+          if ( cell.text.startsWith( "%horus set-kernel" ) ) {
+            const id = notebook.activeCellIndex
+            const cell_ = notebook.model.cells.get(id - 1)
+            const cell_response: {} = cell_.toJSON()
+            const outputs = _.get(cell_response, "outputs")
+
+            _.forEach(outputs, function(output) {
+              if ( _.size(output) > 0  && _.has(output, "data") ) {
+                console.debug(output)
+                const results: string = _.get(_.get(output, "data"), "text/plain")
+                const parsed_results = results.substr(1, results.length - 2)
+                let jsonObject: {} = JSON.parse(parsed_results);
+                console.debug("output", jsonObject)
+                const kernel_name: string = _.get(jsonObject, "kernel_name")
+                console.debug("kernel_name", kernel_name)
+
+                // Check if kernel name is already assigned to notebook and if yes, do nothing
+                const current_kernel = get_kernel_name( nbPanel, true )
+                if ( current_kernel == kernel_name ) {
+                  INotification.info("kernel name to be assigned " + kernel_name + " already set for the current notebook (" + current_kernel + "). Kernel won't be restarted.")
+
+                }
+
+                else {
+                  nbPanel.sessionContext.session.changeKernel({"name": kernel_name})
+
                 }
               }
             })
@@ -207,6 +239,14 @@ async function activate(
           }
 
         });
+
+        session.kernelChanged.connect((sender) => {
+
+          const code: string = "%load_ext jupyterlab_requirements"
+          session.kernel.requestExecute({
+            code
+          })
+        })
 
       });
     });
