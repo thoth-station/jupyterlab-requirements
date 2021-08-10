@@ -1,5 +1,12 @@
 # Changelog for Thoth's Template GitHub Project
 
+## Release 0.10.1 (2021-08-09T21:10:44)
+### Features
+* Adjust README
+* Fix missing check
+* Fix missing magic commands
+* Add missing requirement
+
 ## Release 0.10.0 (2021-08-09T12:46:31)
 ### Features
 * Update README
