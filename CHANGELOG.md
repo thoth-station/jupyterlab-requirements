@@ -1,5 +1,9 @@
 # Changelog for Thoth's Template GitHub Project
 
+## Release 0.10.4 (2021-08-10T12:29:07)
+### Features
+* Add missing check
+
 ## Release 0.10.3 (2021-08-10T12:18:25)
 ### Features
 * Fix missing kernelspect
