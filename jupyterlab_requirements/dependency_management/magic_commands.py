@@ -23,6 +23,7 @@ import logging
 import argparse
 import ipynbname
 
+from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 
@@ -178,12 +179,38 @@ class HorusMagics(Magics):
 
         _LOGGER.debug("Debug mode is on")
 
-        nb_path = ipynbname.path()
-        nb_name = ipynbname.name()
+        try:
+            nb_path = ipynbname.path()
+            nb_name = ipynbname.name()
+
+        except Exception as get_name_error:
+            _LOGGER.warning(get_name_error)
+            ## Jupyter Hub workaround
+            _LOGGER.info("Use workaround for JupyterHub.")
+
+            # Get current notebook name handled
+            home = Path.home()
+            store_path: Path = home.joinpath(".local/share/thoth/kernels")
+
+            file_name = "thoth_notebook_tracker.json"
+            file_path = store_path.joinpath(file_name)
+
+            _LOGGER.info("Path used to get notebook tracker is: %r", file_path.as_posix())
+
+            # Check if file with name exists and retrieve it
+            if file_path.exists():
+                with open(file_path) as json_file:
+                    data = json.load(json_file)
+
+                nb_name = data["notebook_name"]
+                nb_path = os.getcwd() + f"/{nb_name}"
+            else:
+                raise Exception("Could not obtain notebook path from file. Please open issue with Thoth team!")
+
         _LOGGER.info(f"Notebook path: {nb_path}")
 
         if args.command == "check":
-            _LOGGER.info("checking notebook content")
+            _LOGGER.info("Checking notebook content.")
 
             notebook = get_notebook_content(notebook_path=nb_path)
             notebook_metadata = notebook.get("metadata")

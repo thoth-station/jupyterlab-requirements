@@ -28,6 +28,7 @@ from .dependency_management import (
     PythonVersionHandler,
     RootPathHandler,
     DependenciesStoredHandler,
+    DependenciesNotebookNameHandler,
 )
 from .dependency_management import ThothConfigHandler, ThothAdviseHandler, ThothInvectioHandler
 from .dependency_management import JupyterKernelHandler, DependencyInstalledHandler, DependencyInstallHandler
@@ -110,6 +111,7 @@ def _load_jupyter_server_extension(lab_app):
         (url_path_join(base_url, f"/{url_path}/file/directory"), RootPathHandler),
         (url_path_join(base_url, f"/{url_path}/file/dependencies"), DependenciesFilesHandler),
         (url_path_join(base_url, f"/{url_path}/file/stored"), DependenciesStoredHandler),
+        (url_path_join(base_url, f"/{url_path}/file/notebook_name"), DependenciesNotebookNameHandler),
         (
             url_path_join(base_url, r"/jupyterlab_requirements/jupyterlab_requirements/tasks/%s" % r"(?P<index>\d+)"),
             DependencyManagementBaseHandler,

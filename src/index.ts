@@ -35,7 +35,7 @@ import { Requirements, RequirementsLock } from "./types/requirements";
 import { ThothConfig } from "./types/thoth";
 import { get_kernel_name } from "./notebook";
 import { retrieve_config_file } from "./thoth";
-import { get_dependencies } from "./kernel";
+import { get_dependencies, store_notebook_name } from "./kernel";
 
 /**
  * The command IDs used by the console plugin.
@@ -104,6 +104,22 @@ async function activate(
         console.log('loaded horus magic command extension');
 
         // Use new message introduced in https://github.com/jupyterlab/jupyterlab/issues/10259
+        // NotebookActions.executionScheduled: Emitted when a notebook cell execution got scheduled/started.
+        NotebookActions.selectionExecuted.connect((sender, args) => {
+          const { lastCell } = args;
+          const cell = lastCell.model.value
+
+          if ( cell.text.startsWith( "%horus" ) ) {
+            var file_path = nbPanel.context.path
+
+            store_notebook_name(file_path).then(message => {
+              console.debug("storing file name", message)
+            })
+          }
+        })
+
+        // Use new message introduced in https://github.com/jupyterlab/jupyterlab/issues/10259
+        // NotebookActions.selectionExecuted: Emitted after all selected notebook cells completed execution successfully/unsuccessfully.
         NotebookActions.selectionExecuted.connect((sender, args) => {
           const { lastCell, notebook } = args;
           const cell = lastCell.model.value
@@ -136,11 +152,11 @@ async function activate(
 
             _.forEach(outputs, function(output) {
               if ( _.size(output) > 0  && _.has(output, "data") ) {
-                console.debug(output)
+                console.debug("general output from cell", output)
                 const results: string = _.get(_.get(output, "data"), "text/plain")
                 const parsed_results = results.substr(1, results.length - 2)
                 let jsonObject: {} = JSON.parse(parsed_results);
-                console.debug("output", jsonObject)
+                console.debug("json object of the output", jsonObject)
                 const kernel_name: string = _.get(jsonObject, "kernel_name")
                 console.debug("kernel_name", kernel_name)
                 const resolution_engine: string = _.get(jsonObject, "resolution_engine")
@@ -173,7 +189,8 @@ async function activate(
                 }
               }
             })
-              nbPanel.context.save()
+
+            nbPanel.context.save()
           }
 
           // Handle horus set-kernel calls
@@ -206,7 +223,8 @@ async function activate(
                 }
               }
             })
-              nbPanel.context.save()
+
+            nbPanel.context.save()
           }
 
           // Handle horus discover calls
@@ -246,6 +264,8 @@ async function activate(
           session.kernel.requestExecute({
             code
           })
+
+          nbPanel.context.save()
         })
 
       });

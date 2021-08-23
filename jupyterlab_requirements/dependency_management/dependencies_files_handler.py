@@ -31,41 +31,6 @@ from thoth.python import Project
 _LOGGER = logging.getLogger("jupyterlab_requirements.dependencies_files_handler")
 
 
-class DependenciesStoredHandler(APIHandler):
-    """Dependencies files handler to retrieve dependencies files."""
-
-    @web.authenticated
-    def post(self):
-        """Get requirements file from disk."""
-        input_data = self.get_json_body()
-
-        kernel_name: str = input_data["kernel_name"]
-        home = Path.home()
-        store_path: Path = home.joinpath(".local/share/thoth/kernels")
-
-        env_path = Path(store_path).joinpath(kernel_name)
-
-        _LOGGER.info("Path used to get dependencies is: %r", env_path.as_posix())
-
-        # Delete and recreate folder
-        if env_path.exists():
-            _ = subprocess.call(f"rm -rf ./{kernel_name} ", shell=True, cwd=Path(store_path))
-
-        requirements_format = "pipenv"
-
-        pipfile_path = env_path.joinpath("Pipfile")
-        pipfile_lock_path = env_path.joinpath("Pipfile.lock")
-
-        if requirements_format == "pipenv":
-            _LOGGER.debug("Get Pipfile/Pipfile.lock in %r", env_path)
-            project = Project.from_files(pipfile_path=pipfile_path, pipfile_lock_path=pipfile_lock_path)
-
-        requirements = project.pipfile.to_dict()
-        requirements_locked = project.pipfile_lock.to_dict()
-
-        self.finish(json.dumps({"requirements": requirements, "requirements_lock": requirements_locked}))
-
-
 class DependenciesFilesHandler(APIHandler):
     """Dependencies files handler to store dependencies files."""
 
@@ -108,3 +73,34 @@ class DependenciesFilesHandler(APIHandler):
 
         os.chdir(initial_path)
         self.finish(json.dumps({"message": f"Successfully stored requirements at {env_path}!"}))
+
+
+class DependenciesNotebookNameHandler(APIHandler):
+    """Notebook name handler for notebook file name."""
+
+    @web.authenticated
+    def post(self):
+        """Store current notebook name handled."""
+        input_data = self.get_json_body()
+
+        notebook_path: str = input_data["notebook_path"]
+        notebook_name: str = Path(notebook_path).name
+
+        home = Path.home()
+        store_path: Path = home.joinpath(".local/share/thoth/kernels")
+        _LOGGER.info("Path used to store notebook handled is: %r", store_path.as_posix())
+
+        file_name = "thoth_notebook_tracker.json"
+
+        file_path = store_path.joinpath(file_name)
+
+        # Delete and recreate file in case
+        if file_path.exists():
+            _ = subprocess.call(f"rm -rf {file_name}", shell=True, cwd=store_path)
+
+        data = {"notebook_name": notebook_name}
+
+        with open(file_path, "w") as outfile:
+            json.dump(data, outfile)
+
+        self.finish({"message": f"Successfully stored notebook tracker at {file_path}!"})
