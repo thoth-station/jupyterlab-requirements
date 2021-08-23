@@ -106,7 +106,36 @@ async function activate(
 
         console.log('loaded horus magic command extension');
 
-        // Use new message introduced in https://github.com/jupyterlab/jupyterlab/issues/10259
+        // Clean notebook content from cells that use !pip install when starting
+        let number_of_cells = nbPanel.model.cells.length
+        var array = _.range(0, number_of_cells);
+
+        // Iterate over cells
+        let cells: Array<string> = []
+
+
+        // TODO: Clean notebook content from cells that use !pip install when starting
+        // TODO: Parse removed cell and add packages to requirements, until thamos new command
+
+        // const packages: string = "boto3"
+        // kernel.requestExecute({
+        //   code: "%horus requirements --add " + packages
+        // })
+        console.log('cleaned notebook from !pip install cells');
+
+        // Use new message introduced in https://github.com/jupyterlab/jupyterlab/pull/10493
+        // NotebookActions.executionScheduled: Emitted when a notebook cell execution got scheduled/started.
+        NotebookActions.executionScheduled.connect((sender, args) => {
+          const { cell } = args;
+
+          // Do not allow user to run pip
+          if ( cell.model.value.text.startsWith( "!pip" ) ) {
+            console.error("Do not use !pip install to handle dependencies, you cannot guarantee reproducibility. Use %horus magic commands.")
+          }
+
+        })
+
+        // Use new message introduced in https://github.com/jupyterlab/jupyterlab/pull/10493
         // NotebookActions.selectionExecuted: Emitted after all selected notebook cells completed execution successfully/unsuccessfully.
         NotebookActions.selectionExecuted.connect((sender, args) => {
           const { lastCell, notebook } = args;
@@ -239,7 +268,6 @@ async function activate(
             }
 
           }
-
         });
 
         session.kernelChanged.connect((sender) => {
