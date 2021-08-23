@@ -224,6 +224,34 @@ export async function store_dependencies (
 
 
 /**
+ * Function: Store current file name locally.
+ */
+
+ export async function store_notebook_name (
+  notebook_path: string,
+  init: RequestInit = {},
+): Promise<string> {
+
+  // POST request
+  const dataToSend = {
+    notebook_path: notebook_path
+  };
+
+  const endpoint: string = 'file/notebook_name'
+
+  try {
+    const message = await requestAPI<any>(endpoint, {
+      body: JSON.stringify(dataToSend),
+      method: 'POST'
+    });
+    return message;
+  } catch (reason) {
+    console.error('Error on POST /' + THOTH_JUPYTER_INTEGRATION_API_BASE_NAME + '/' + endpoint + ':', reason);
+  }
+}
+
+
+/**
  * Function: Get dependencies locally.
  */
 

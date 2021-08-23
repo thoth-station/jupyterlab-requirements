@@ -19,6 +19,7 @@
 from .api import YamlSpecHandler
 from .base import DependencyManagementBaseHandler
 from .dependencies_files_handler import DependenciesFilesHandler
+from .dependencies_files_handler import DependenciesNotebookNameHandler
 from .dependencies_stored_handler import DependenciesStoredHandler
 from .discover_handler import DependencyInstalledHandler
 from .discover_handler import PythonVersionHandler
@@ -49,6 +50,7 @@ __all__ = [
     "DependencyManagementBaseHandler",
     "DependenciesFilesHandler",
     "DependenciesStoredHandler",
+    "DependenciesNotebookNameHandler",
     "DependencyInstallHandler",
     "DependencyInstalledHandler",
     "JupyterKernelHandler",
