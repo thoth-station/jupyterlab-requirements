@@ -1,5 +1,12 @@
 # Changelog for Thoth's Template GitHub Project
 
+## Release 0.10.5 (2021-08-23T16:38:17)
+### Features
+* Changes for new patch release
+* Remove unusued file
+* Introduce workaround for using Horus in JupyterHub
+* Add development status link
+
 ## Release 0.10.4 (2021-08-10T12:29:07)
 ### Features
 * Add missing check
