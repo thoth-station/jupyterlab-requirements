@@ -88,7 +88,7 @@ class DependenciesNotebookNameHandler(APIHandler):
 
         home = Path.home()
         store_path: Path = home.joinpath(".local/share/thoth/kernels")
-        _LOGGER.info("Path used to store notebook handled is: %r", store_path.as_posix())
+        _LOGGER.debug("Path used to store notebook handled is: %r", store_path.as_posix())
 
         file_name = "thoth_notebook_tracker.json"
 
@@ -99,6 +99,8 @@ class DependenciesNotebookNameHandler(APIHandler):
             _ = subprocess.call(f"rm -rf {file_name}", shell=True, cwd=store_path)
 
         data = {"notebook_name": notebook_name}
+
+        store_path.mkdir(parents=True, exist_ok=True)
 
         with open(file_path, "w") as outfile:
             json.dump(data, outfile)
