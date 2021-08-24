@@ -1,5 +1,11 @@
 # Changelog for Thoth's Template GitHub Project
 
+## Release 0.10.7 (2021-08-24T17:54:11)
+### Features
+* Missing version for release
+### Bug Fixes
+* Save content after changing source
+
 ## Release 0.10.6 (2021-08-24T16:19:27)
 ### Bug Fixes
 * Fix case when repo is missing
