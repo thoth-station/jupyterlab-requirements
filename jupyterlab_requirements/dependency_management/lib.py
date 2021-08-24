@@ -399,7 +399,7 @@ def delete_kernel(kernel_name: str, kernels_path: Path = Path.home().joinpath(".
         try:
             shutil.rmtree(env_path)
         except Exception as e:
-            _LOGGER.warning(f"Repo at {env_path.as_posix()} was not removed because of: {e}")
+            _LOGGER.debug(f"Repo at {env_path.as_posix()} was not removed because of: {e}")
 
     return command_output
 
@@ -534,7 +534,7 @@ def lock_dependencies_with_thoth(
                 advise = {"requirements": pipfile, "requirement_lock": pipfile_lock, "error": False}
 
     except Exception as api_error:
-        _LOGGER.warning(f"error locking dependencies using Thoth: {api_error}")
+        _LOGGER.debug(f"error locking dependencies using Thoth: {api_error}")
         advise["error"] = True
         if not advise.get("error_msg"):
             advise[
@@ -560,7 +560,7 @@ def lock_dependencies_with_thoth(
                 _LOGGER.info("Writing to Pipfile/Pipfile.lock in %r", env_path.as_posix())
                 project.to_files(pipfile_path=pipfile_path, pipfile_lock_path=pipfile_lock_path)
         except Exception as e:
-            _LOGGER.warning("Requirements files have not been stored successfully %r", e)
+            _LOGGER.debug("Requirements files have not been stored successfully %r", e)
 
     os.chdir(initial_path)
 
@@ -642,7 +642,7 @@ def lock_dependencies_with_pipenv(
         try:
             subprocess.run("pip install pipenv", cwd=kernels_path, shell=True)
         except Exception as pipenv_install_error:
-            _LOGGER.warning("error installing pipenv: %r", pipenv_install_error)
+            _LOGGER.debug("error installing pipenv: %r", pipenv_install_error)
             result["error"] = True
             result["error_msg"] = pipenv_install_error
             returncode = 1
@@ -663,13 +663,13 @@ def lock_dependencies_with_pipenv(
             capture_output=True,
         )
     except Exception as pipenv_error:
-        _LOGGER.warning("error locking dependencies using Pipenv: %r", pipenv_error)
+        _LOGGER.debug("error locking dependencies using Pipenv: %r", pipenv_error)
         result["error"] = True
         result["error_msg"] = str(pipenv_error)
         returncode = 1
 
     if output.returncode != 0:
-        _LOGGER.warning("error in process trying to lock dependencies with pipenv: %r", output.stderr)
+        _LOGGER.debug("error in process trying to lock dependencies with pipenv: %r", output.stderr)
         result["error"] = True
         result["error_msg"] = str(output.stderr)
         returncode = 1
@@ -691,7 +691,7 @@ def lock_dependencies_with_pipenv(
             _LOGGER.debug(f"result from pipenv received: {result}")
 
         else:
-            _LOGGER.warning("Pipfile.lock cannot be found at: %r", str(pipfile_lock_path))
+            _LOGGER.debug("Pipfile.lock cannot be found at: %r", str(pipfile_lock_path))
             result["error"] = True
             result["error_msg"] = "Error retrieving Pipfile.lock created from pipenv."
 
