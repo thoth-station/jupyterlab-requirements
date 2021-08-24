@@ -184,7 +184,7 @@ class HorusMagics(Magics):
             nb_name = ipynbname.name()
 
         except Exception as get_name_error:
-            _LOGGER.warning(get_name_error)
+            _LOGGER.debug(get_name_error)
             ## Jupyter Hub workaround
             _LOGGER.info("Use workaround for JupyterHub.")
 
