@@ -115,6 +115,7 @@ async function activate(
             store_notebook_name(file_path).then(message => {
               console.debug("storing file name", message)
             })
+            nbPanel.context.save()
           }
         })
 
@@ -139,7 +140,6 @@ async function activate(
                 let jsonObject: Requirements = JSON.parse(parsed_req);
                 notebook_metadata.set('requirements', JSON.stringify(jsonObject))
               }
-
               nbPanel.context.save()
           }
 
