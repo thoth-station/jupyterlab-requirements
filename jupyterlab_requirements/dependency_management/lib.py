@@ -583,7 +583,7 @@ def get_thoth_config(
     config = _Configuration()
 
     if not config.config_file_exists():
-        _LOGGER.info("Thoth config does not exist, creating it...")
+        _LOGGER.debug("Thoth config does not exist, creating it...")
         try:
             config.create_default_config()
         except Exception as e:
@@ -958,6 +958,7 @@ def horus_lock_command(
 
         # Assign runtime environment to thoth config runtime environment.
         thoth_config.set_runtime_environment(runtime_environment=runtime_environment, force=True)
+        thoth_config.save_config()
 
         _, lock_results = lock_dependencies_with_thoth(
             kernel_name=kernel,
