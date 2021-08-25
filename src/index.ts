@@ -32,7 +32,6 @@ import { INotification } from "jupyterlab_toastify";
 import { ManageDependenciesButtonExtension } from './dependencyManagementButton';
 import { KernelHandler } from './kernelHandlerMenu'
 import { Requirements, RequirementsLock } from "./types/requirements";
-import { ThothConfig } from "./types/thoth";
 import { get_kernel_name } from "./notebook";
 import { retrieve_config_file } from "./thoth";
 import { get_dependencies, store_notebook_name } from "./kernel";
@@ -115,7 +114,6 @@ async function activate(
             store_notebook_name(file_path).then(message => {
               console.debug("storing file name", message)
             })
-            nbPanel.context.save()
           }
         })
 
@@ -140,7 +138,6 @@ async function activate(
                 let jsonObject: Requirements = JSON.parse(parsed_req);
                 notebook_metadata.set('requirements', JSON.stringify(jsonObject))
               }
-              nbPanel.context.save()
           }
 
           // Handle horus lock calls (lock + install and set-kernel)
@@ -166,8 +163,9 @@ async function activate(
                 notebook_metadata.set('dependency_resolution_engine', resolution_engine)
 
                 if ( resolution_engine == "thoth" ) {
-                  let thoth_config: Promise<ThothConfig> = retrieve_config_file(kernel_name)
-                  notebook_metadata.set('thoth_config', JSON.stringify(thoth_config))
+                  retrieve_config_file(kernel_name).then(thoth_config  => {
+                      notebook_metadata.set('thoth_config', JSON.stringify(thoth_config))
+                  })
                 }
 
                 get_dependencies(kernel_name).then(value => {
@@ -190,7 +188,6 @@ async function activate(
               }
             })
 
-            nbPanel.context.save()
           }
 
           // Handle horus set-kernel calls
@@ -224,7 +221,6 @@ async function activate(
               }
             })
 
-            nbPanel.context.save()
           }
 
           // Handle horus discover calls
@@ -253,7 +249,6 @@ async function activate(
               }
             }
 
-            nbPanel.context.save()
           }
 
         });
@@ -264,8 +259,6 @@ async function activate(
           session.kernel.requestExecute({
             code
           })
-
-          nbPanel.context.save()
         })
 
       });

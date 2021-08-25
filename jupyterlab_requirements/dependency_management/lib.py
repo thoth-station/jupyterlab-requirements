@@ -497,6 +497,7 @@ def lock_dependencies_with_thoth(
         response = advise_using_config(
             pipfile=pipfile_string,
             pipfile_lock="",  # TODO: Provide Pipfile.lock retrieved?
+            runtime_environment_name=kernel_name,
             force=force,
             config=config,
             origin=origin,
@@ -932,33 +933,67 @@ def horus_lock_command(
             _LOGGER.error(f"Could not get notebook content!: {e!r}")
             notebook_content_py = ""
 
-        runtime_environment = thoth_config.get_runtime_environment()
+        runtime_environments = []
+        is_present = False
+        for current_runtime_environment in thoth_config.content["runtime_environments"]:
 
-        runtime_environment["name"] = kernel
+            if current_runtime_environment.get("name") == kernel:
+                # runtime environment with same name exists
+                is_present = True
+                current_runtime_environment["name"] = kernel
+                operating_system = {
+                    "name": current_runtime_environment["operating_system"]["name"],
+                    "version": current_runtime_environment["operating_system"]["version"],
+                }
 
-        operating_system = {
-            "name": runtime_environment["operating_system"]["name"],
-            "version": runtime_environment["operating_system"]["version"],
-        }
+                if os_name:
+                    operating_system["name"] = os_name
 
-        if os_name:
-            operating_system["name"] = os_name
+                if os_version:
+                    operating_system["version"] = os_version
 
-        if os_version:
-            operating_system["version"] = os_version
+                current_runtime_environment["operating_system"] = operating_system
 
-        runtime_environment["operating_system"] = operating_system
+                if python_version:
+                    current_runtime_environment["python_version"] = python_version
 
-        if python_version:
-            runtime_environment["python_version"] = python_version
+                current_runtime_environment["recommendation_type"] = recommendation_type
 
-        runtime_environment["recommendation_type"] = recommendation_type
+                runtime_environment = current_runtime_environment
+            else:
+                runtime_environments.append(current_runtime_environment)
+
+        if not is_present:
+            # runtime environment with same name does not exists.
+            runtime_environment = dict(thoth_config.get_runtime_environment())
+            runtime_environment["name"] = kernel
+
+            operating_system = {
+                "name": runtime_environment["operating_system"]["name"],
+                "version": runtime_environment["operating_system"]["version"],
+            }
+
+            if os_name:
+                operating_system["name"] = os_name
+
+            if os_version:
+                operating_system["version"] = os_version
+
+            runtime_environment["operating_system"] = operating_system
+
+            if python_version:
+                runtime_environment["python_version"] = python_version
+
+            runtime_environment["recommendation_type"] = recommendation_type
 
         results["runtime_environment"] = runtime_environment
 
         # Assign runtime environment to thoth config runtime environment.
-        thoth_config.set_runtime_environment(runtime_environment=runtime_environment, force=True)
-        thoth_config.save_config()
+        runtime_environments.append(runtime_environment)
+        thoth_config.content["runtime_environments"] = runtime_environments
+
+        # TODO: Use adjusted method from thamos
+        # thoth_config.set_runtime_environment(runtime_environment=runtime_environment, force=True)
 
         _, lock_results = lock_dependencies_with_thoth(
             kernel_name=kernel,
@@ -972,7 +1007,7 @@ def horus_lock_command(
         if not lock_results["error"]:
             requirements = lock_results["requirements"]
             requirements_lock = lock_results["requirement_lock"]
-            notebook_metadata["thoth_config"] = json.dumps(thoth_config)
+            notebook_metadata["thoth_config"] = json.dumps(thoth_config.content)
 
         else:
             error = True
