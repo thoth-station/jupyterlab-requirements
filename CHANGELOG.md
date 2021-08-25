@@ -1,5 +1,11 @@
 # Changelog for Thoth's Template GitHub Project
 
+## Release 0.10.8 (2021-08-25T12:20:26)
+### Features
+* handle multiple runtimes
+* Fix  lock with thoth
+* Save thoth config after modifying runtime
+
 ## Release 0.10.7 (2021-08-24T17:54:11)
 ### Features
 * Missing version for release
