@@ -166,6 +166,15 @@ class HorusMagics(Magics):
             "--use-overlay", help="Extract Pipfile and Pipfile.lock in overlay with kernel name.", action="store_true"
         )
 
+        is_jupyterhub = False
+
+        try:
+            nb_path = ipynbname.path()
+            nb_name = ipynbname.name()
+        except Exception as get_name_error:
+            is_jupyterhub = True
+            _LOGGER.debug(get_name_error)
+
         ## Parse inputs
         opts = line.split()
         args = parser.parse_args(opts)
@@ -179,12 +188,7 @@ class HorusMagics(Magics):
 
         _LOGGER.debug("Debug mode is on")
 
-        try:
-            nb_path = ipynbname.path()
-            nb_name = ipynbname.name()
-
-        except Exception as get_name_error:
-            _LOGGER.debug(get_name_error)
+        if is_jupyterhub:
             ## Jupyter Hub workaround
             _LOGGER.info("Use workaround for JupyterHub.")
 
@@ -199,11 +203,14 @@ class HorusMagics(Magics):
 
             # Check if file with name exists and retrieve it
             if file_path.exists():
+
+                # Take file stored.
                 with open(file_path) as json_file:
                     data = json.load(json_file)
 
                 nb_name = data["notebook_name"]
-                nb_path = os.getcwd() + f"/{nb_name}"
+                nb_path = os.getcwd() + f"/{str(nb_name)}"
+
             else:
                 raise Exception("Could not obtain notebook path from file. Please open issue with Thoth team!")
 

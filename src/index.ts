@@ -89,6 +89,11 @@ async function activate(
         const session = sessionContext.session;
         let kernel = session.kernel;
 
+        var file_path = nbPanel.context.path
+        store_notebook_name(file_path).then(message => {
+          console.debug("storing file name", message)
+        })
+
         // Check to see if we found a kernel, and if its language is python.
         if (!(ThothPrivate.shouldUseKernel(kernel))) {
           console.debug("kernel approved: ", kernel.name.toString())
@@ -101,21 +106,6 @@ async function activate(
         })
 
         console.log('loaded horus magic command extension');
-
-        // Use new message introduced in https://github.com/jupyterlab/jupyterlab/issues/10259
-        // NotebookActions.executionScheduled: Emitted when a notebook cell execution got scheduled/started.
-        NotebookActions.selectionExecuted.connect((sender, args) => {
-          const { lastCell } = args;
-          const cell = lastCell.model.value
-
-          if ( cell.text.startsWith( "%horus" ) ) {
-            var file_path = nbPanel.context.path
-
-            store_notebook_name(file_path).then(message => {
-              console.debug("storing file name", message)
-            })
-          }
-        })
 
         // Use new message introduced in https://github.com/jupyterlab/jupyterlab/issues/10259
         // NotebookActions.selectionExecuted: Emitted after all selected notebook cells completed execution successfully/unsuccessfully.

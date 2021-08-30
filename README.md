@@ -51,13 +51,41 @@ jupyter labextension list
 
 ## Usage
 
-jupyterlab-requirements extension for JupyterLab can be used in different ways:
+You can use this extension for each of your notebook to guarantee they have the correct dependencies and kernel.
+This extension is able to add/remove dependencies, lock them and store them in the notebook metadata.
+In this way all the dependencies information required to repeat the environment are shipped with the notebook.
 
-- from notebook cells using %horus magic commands automatically loaded when the notebook is opened.
+In particular, in the notebook metadata you can find:
 
-- from UI using the button that appears when the notebook is opened.
+- requirements (Pipfile)
 
-- from CLI directly from terminal or integrated in automated pipelines.
+- requirements locked with all hashes (Pipfile.lock)
+
+- dependency resolution engine used (thoth or pipenv)
+
+- configuration file for runtiment environment (.thoth.yaml if you are using thoth resolution engine)
+
+All this information can allow reproducibility of the notebook.
+
+There are 3 ways to interact with this extension:
+
+- using `%horus` magic commands directly in your notebook's cells. To learn more about how to use the `%horus` magic commands check out the guide [here](https://github.com/thoth-station/jupyterlab-requirements#horus-magic-command) or the video [here](https://www.youtube.com/watch?v=FjVxNTXO70I)
+
+<div style="text-align:center">
+<img alt="JupyterLab Requirements Horus magic commands" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/JupyterLabRequirementsExtensionMC.jpg">
+</div>
+
+- using the `horus` CLI directly from terminal or integrated in pipelines ([check video](https://www.youtube.com/watch?v=fW0YKugL26g&t)).
+
+<div style="text-align:center">
+<img alt="JupyterLab Requirements Horus CLI" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/JupyterLabRequirementsExtensionCLI.jpg">
+</div>
+
+- using the `Manage Dependencies` button that appears in the notebook when it is opened:
+
+<div style="text-align:center">
+<img alt="JupyterLab Requirements UI" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/JupyterLabRequirementsExtension.jpg">
+</div>
 
 Currently this extension supports only `Python` kernels.
 
