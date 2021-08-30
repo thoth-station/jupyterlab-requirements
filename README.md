@@ -72,13 +72,13 @@ There are 3 ways to interact with this extension:
 - using `%horus` magic commands directly in your notebook's cells. To learn more about how to use the `%horus` magic commands check out the guide [here](https://github.com/thoth-station/jupyterlab-requirements#horus-magic-command) or the video [here](https://www.youtube.com/watch?v=FjVxNTXO70I)
 
 <div style="text-align:center">
-<img alt="JupyterLab Requirements Horus magic commands" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/JupyterLabRequirementsExtensionMC.jpg">
+<img alt="JupyterLab Requirements Horus magic commands" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/JupyterLabRequirementsExtensionMC.png">
 </div>
 
 - using the `horus` CLI directly from terminal or integrated in pipelines ([check video](https://www.youtube.com/watch?v=fW0YKugL26g&t)).
 
 <div style="text-align:center">
-<img alt="JupyterLab Requirements Horus CLI" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/JupyterLabRequirementsExtensionCLI.jpg">
+<img alt="JupyterLab Requirements Horus CLI" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/JupyterLabRequirementsExtensionCLI.png">
 </div>
 
 - using the `Manage Dependencies` button that appears in the notebook when it is opened:
