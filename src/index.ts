@@ -25,7 +25,6 @@ import {
 import { Kernel } from '@jupyterlab/services';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ICommandPalette } from '@jupyterlab/apputils';
-import { Menu } from '@lumino/widgets';
 import { INotification } from "jupyterlab_toastify";
 
 // Customizations
@@ -265,7 +264,7 @@ async function activate(
     }
 
     // Add button in main menu
-    const command = 'dependencies:kernel';
+    const command = commandIDs.kernelHandler;;
 
     function createPanel(): KernelHandler {
       const menu_extension = new KernelHandler();
@@ -274,8 +273,8 @@ async function activate(
 
     // Add a command
     commands.addCommand(command, {
-      label: 'Kernel delete...',
-      caption: 'Kernel delete...',
+      label: 'Delete Kernel...',
+      caption: 'Delete Kernel...',
       execute: (args: any) => {
         createPanel();
       }
@@ -289,14 +288,11 @@ async function activate(
       args: { origin: 'from the palette' }
     });
 
-    // Create a menu
-    // TODO: Move to Kernel Group menu
-    const tutorialMenu: Menu = new Menu({ commands });
-    tutorialMenu.title.label = 'Dependencies';
-    mainMenu.addMenu(tutorialMenu, { rank: 80 });
+    if ( mainMenu ) {
+      // Add command to Kernel Group
+      mainMenu.kernelMenu.addGroup( [{ command }], 30 )
+    }
 
-    // Add the command to the menu
-    tutorialMenu.addItem({ command, args: { origin: 'from the menu' } });
 };
 
 namespace ThothPrivate {
