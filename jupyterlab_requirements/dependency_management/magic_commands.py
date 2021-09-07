@@ -212,7 +212,11 @@ class HorusMagics(Magics):
                 nb_path = os.getcwd() + f"/{str(nb_name)}"
 
             else:
-                raise Exception("Could not obtain notebook path from file. Please open issue with Thoth team!")
+                raise Exception(
+                    "Could not obtain notebook path from file. Please open issue in"
+                    " https://github.com/thoth-station/jupyterlab-requirements/issues/new?assignees"
+                    "=&labels=bug&template=bug_report.md!"
+                )
 
         _LOGGER.info(f"Notebook path: {nb_path}")
 
