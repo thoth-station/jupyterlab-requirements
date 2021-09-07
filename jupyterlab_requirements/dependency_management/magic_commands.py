@@ -144,6 +144,11 @@ class HorusMagics(Magics):
             help="Specify kernel name to be used when creating it.",
         )
 
+        # command: clean
+        _ = subparsers.add_parser(
+            "clean", description="Clean notebook content from !pip cells that do not allow reproducibility."
+        )
+
         # command: discover
         discover_command = subparsers.add_parser("discover", description="Discover dependencies from notebook content.")
         discover_command.add_argument("--force", help="Force saving dependencies in the notebook.", action="store_true")
@@ -321,6 +326,9 @@ class HorusMagics(Magics):
             console = Console()
 
             return console.print(table, justify="center")
+
+        if args.command == "clean":
+            _LOGGER.info("Cleaning notebook content to allow reproducibility...")
 
         if args.command == "lock":
             _LOGGER.info("Show dependencies content from notebook content.")

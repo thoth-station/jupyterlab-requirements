@@ -106,33 +106,34 @@ async function activate(
 
         console.log('loaded horus magic command extension');
 
-        // Clean notebook content from cells that use !pip install when starting
-        let number_of_cells = nbPanel.model.cells.length
-        var array = _.range(0, number_of_cells);
+        notebookTracker.activeCellChanged.connect(() => {
 
-        // Iterate over cells
-        let cells: Array<string> = []
+          var track_change: boolean = false
+          notebookTracker.activeCell.editor.model.value.changed.connect(() => {
+            // user is typing
+            if ( notebookTracker.activeCell.editor.model.value.text.startsWith( "!pip" )) {
+              track_change = true
+              INotification.error("Do not use !pip install to handle dependencies, you cannot guarantee reproducibility. Use %horus magic commands!");
+            }
+          })
 
+          if ( (notebookTracker.activeCell.editor.model.value.text.startsWith( "!pip install" )) && ( track_change == false) ) {
+            INotification.error("Do not use !pip install to handle dependencies, you cannot guarantee reproducibility. Use `%horus clean` magic command to convert your cells.");
+          }
 
-        // TODO: Clean notebook content from cells that use !pip install when starting
-        // TODO: Parse removed cell and add packages to requirements, until thamos new command
-
-        // const packages: string = "boto3"
-        // kernel.requestExecute({
-        //   code: "%horus requirements --add " + packages
-        // })
-        console.log('cleaned notebook from !pip install cells');
+        });
 
         // Use new message introduced in https://github.com/jupyterlab/jupyterlab/pull/10493
         // NotebookActions.executionScheduled: Emitted when a notebook cell execution got scheduled/started.
         NotebookActions.executionScheduled.connect((sender, args) => {
           const { cell } = args;
 
-          // Do not allow user to run pip
-          if ( cell.model.value.text.startsWith( "!pip" ) ) {
-            console.error("Do not use !pip install to handle dependencies, you cannot guarantee reproducibility. Use %horus magic commands.")
+          // Do not allow users to run pip from notebook cells
+          if ( cell.editor.model.value.text.startsWith( "!pip" ) ) {
+            nbPanel.sessionContext.session.kernel.interrupt().then(message => {
+              INotification.error("Do not use !pip install to handle dependencies, you cannot guarantee reproducibility. Use %horus clean magic command to convert your cells.");
+            })
           }
-
         })
 
         // Use new message introduced in https://github.com/jupyterlab/jupyterlab/pull/10493
@@ -268,6 +269,71 @@ async function activate(
             }
 
           }
+
+          // Handle horus clean calls
+          if ( cell.text == "%horus clean" ) {
+
+            // Clean notebook content from cells that use !pip install
+            let number_of_cells = nbPanel.model.cells.length
+            var array = _.range(0, number_of_cells);
+
+            // Iterate over cells
+            let cells = notebook.model.cells
+
+            _.each(array, function (cell_number, key) {
+              let cell = notebook.model.cells.get(cell_number)
+              console.log(cell)
+
+              if ( (cell.type === "code") && ( cell.value.text.startsWith( "!pip" )) ) {
+                  const cell_text = cell.value.text
+
+                  console.log("cell n.", cell_number, cell_text);
+
+                  // Handle case with !pip install -r requirements.txt
+                  if ( cell.value.text == "!pip install -r requirements.txt" ) {
+                    var new_text = "#" + cell.value.text
+                  }
+
+                  else {
+
+                    // Handle case with !pip install <package name>
+                    const regex = /!pip install ([a-zA-Z0-9_.-]*)/g;
+                    const found = cell_text.match(regex);
+                    console.log(found)
+
+                    let commented_commands: Array<string> = []
+                    let packages: Array<string> = []
+
+                    _.each(found, function (match, key) {
+                      commented_commands.push(match)
+                      const package_matched = match.split(" ")[2]
+                      console.log(package_matched)
+                      packages.push(package_matched)
+                    })
+
+                    var new_text = "#" + commented_commands.join("\n#") + "\n" + "%horus requirements --add " + packages.join(" ")
+
+                  }
+
+                  console.log("new cell text", new_text)
+
+                  // Instantiate a new empty cell
+                  const new_cell = nbPanel.model.contentFactory.createCell(
+                    cell.type,
+                    {}
+                  );
+
+                  new_cell.value.text = new_text;
+                  cells.remove(cell_number)
+                  cells.insert(cell_number, new_cell)
+              }
+
+            });
+
+            INotification.info('Notebook was cleaned from !pip install cells to guarantee reproducibility.');
+
+          }
+
         });
 
         session.kernelChanged.connect((sender) => {
