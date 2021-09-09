@@ -111,14 +111,14 @@ async function activate(
           var track_change: boolean = false
           notebookTracker.activeCell.editor.model.value.changed.connect(() => {
             // user is typing
-            if ( notebookTracker.activeCell.editor.model.value.text.startsWith( "!pip" )) {
+            if (( notebookTracker.activeCell.editor.model.value.text == "!pip" ) || ( notebookTracker.activeCell.editor.model.value.text == "%pip" )) {
               track_change = true
-              INotification.error("Do not use !pip install to handle dependencies, you cannot guarantee reproducibility. Use %horus magic commands!");
+              INotification.error("Manage dependencies: please do not use direct pip commands. Use horus and/or the UI plugin instead.");
             }
           })
 
-          if ( (notebookTracker.activeCell.editor.model.value.text.startsWith( "!pip install" )) && ( track_change == false) ) {
-            INotification.error("Do not use !pip install to handle dependencies, you cannot guarantee reproducibility. Use `%horus clean` magic command to convert your cells.");
+          if ( (notebookTracker.activeCell.editor.model.value.text.startsWith( "!pip" ) || notebookTracker.activeCell.editor.model.value.text.startsWith( "%pip" ) ) && ( track_change == false) ) {
+            INotification.error("Manage dependencies: please do not use direct pip commands. Use `%horus clean` to convert your cells.");
           }
 
         });
@@ -129,9 +129,9 @@ async function activate(
           const { cell } = args;
 
           // Do not allow users to run pip from notebook cells
-          if ( cell.editor.model.value.text.startsWith( "!pip" ) ) {
-            nbPanel.sessionContext.session.kernel.interrupt().then(message => {
-              INotification.error("Do not use !pip install to handle dependencies, you cannot guarantee reproducibility. Use %horus clean magic command to convert your cells.");
+          if ( cell.editor.model.value.text.startsWith( "!pip" ) || cell.editor.model.value.text.startsWith( "%pip" ) ) {
+            nbPanel.sessionContext.session.kernel.interrupt().then( _ => {
+              INotification.error("Manage dependencies: please do not use direct pip commands. Use `%horus clean` to convert your cells.");
             })
           }
         })
@@ -282,40 +282,55 @@ async function activate(
 
             _.each(array, function (cell_number, key) {
               let cell = notebook.model.cells.get(cell_number)
-              console.log(cell)
+              console.debug(cell)
 
-              if ( (cell.type === "code") && ( cell.value.text.startsWith( "!pip" )) ) {
+              if ( (cell.type === "code") && ( cell.value.text.startsWith( "!pip" ) || cell.value.text.startsWith( "%pip" )) ) {
                   const cell_text = cell.value.text
 
-                  console.log("cell n.", cell_number, cell_text);
+                  console.debug("cell n.", cell_number, cell_text);
 
-                  // Handle case with !pip install -r requirements.txt
-                  if ( cell.value.text == "!pip install -r requirements.txt" ) {
+                  // Handle case with !pip | %pip install -r requirements.txt
+                  // Handle case with !pip | %pip install -r /folder/requirements.txt
+                  // Handle case with !pip | %pip install /path/to/my_package.whl
+                  // Handle case with !pip | %pip install git+https://github.com/...
+                  if ( cell.value.text.includes(".txt") || cell.value.text.includes(".git+https") || cell.value.text.includes(".whl") ) {
                     var new_text = "#" + cell.value.text
                   }
+                  else if ( cell.value.text.startsWith( "!pip install" ) || cell.value.text.startsWith( "%pip install" ) ) {
 
-                  else {
+                    // Handle case with !pip | %pip install <package name>
+                    // Handle case with !pip | %pip install <package name> <package name>
+                    // Handle case with !pip | %pip install <package name> <package name> <package name>
 
-                    // Handle case with !pip install <package name>
-                    const regex = /!pip install ([a-zA-Z0-9_.-]*)/g;
+                    const regex = /[!%]pip install ([a-zA-Z0-9_.-]*) ?([a-zA-Z0-9_.-]*) ?([a-zA-Z0-9_.-]*)/g;
                     const found = cell_text.match(regex);
-                    console.log(found)
+                    console.debug(found)
 
                     let commented_commands: Array<string> = []
                     let packages: Array<string> = []
 
                     _.each(found, function (match, key) {
                       commented_commands.push(match)
-                      const package_matched = match.split(" ")[2]
-                      console.log(package_matched)
-                      packages.push(package_matched)
+                      _.each(_.range(2, match.length), function (package_number, key) {
+
+                        const package_matched = match.split(" ")[package_number]
+                        console.debug(package_matched)
+                        packages.push(package_matched)
+                      })
+
                     })
 
+                    // Remove ALL empty values ("", null, undefined and 0)
+                    packages = packages.filter(function(e){return e});
                     var new_text = "#" + commented_commands.join("\n#") + "\n" + "%horus requirements --add " + packages.join(" ")
 
                   }
+                  else {
+                    // Handle other cases with !pip | %pip (e.g. !pip freeze)
+                    var new_text = "#" + cell.value.text
+                  }
 
-                  console.log("new cell text", new_text)
+                  console.debug("new cell text", new_text)
 
                   // Instantiate a new empty cell
                   const new_cell = nbPanel.model.contentFactory.createCell(
@@ -330,7 +345,7 @@ async function activate(
 
             });
 
-            INotification.info('Notebook was cleaned from !pip install cells to guarantee reproducibility.');
+            INotification.info("Manage dependencies: Notebook cells using pip have been converted to cells with %horus commands.");
 
           }
 
