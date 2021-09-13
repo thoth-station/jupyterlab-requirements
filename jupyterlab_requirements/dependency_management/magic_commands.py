@@ -144,9 +144,10 @@ class HorusMagics(Magics):
             help="Specify kernel name to be used when creating it.",
         )
 
-        # command: clean
+        # command: convert
         _ = subparsers.add_parser(
-            "clean", description="Clean notebook content from !pip cells that do not allow reproducibility."
+            "convert",
+            description="Convert notebook cells with pip commands to use horus commands.",
         )
 
         # command: discover

@@ -188,6 +188,14 @@ Usign `Pipenv` resolution engine:
 
 Once dependencies are locked, they will be automatically installed in the kernel and saved in the notebook metadata.
 
+## Convert notebook cells with pip commands to use horus commands in order to allow reproducibility
+
+```
+%horus convert
+```
+
+
+
 ## Discover notebook content about dependencies
 
 This command is used to discover dependencies used in the notebook and create a Pipfile (empty if packages are not identified).
