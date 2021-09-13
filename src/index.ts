@@ -118,7 +118,7 @@ async function activate(
           })
 
           if ( (notebookTracker.activeCell.editor.model.value.text.startsWith( "!pip" ) || notebookTracker.activeCell.editor.model.value.text.startsWith( "%pip" ) ) && ( track_change == false) ) {
-            INotification.error("Manage dependencies: please do not use direct pip commands. Use `%horus clean` to convert your cells.");
+            INotification.error("Manage dependencies: please do not use direct pip commands. Use `%horus convert` to convert your cells.");
           }
 
         });
@@ -131,7 +131,7 @@ async function activate(
           // Do not allow users to run pip from notebook cells
           if ( cell.editor.model.value.text.startsWith( "!pip" ) || cell.editor.model.value.text.startsWith( "%pip" ) ) {
             nbPanel.sessionContext.session.kernel.interrupt().then( _ => {
-              INotification.error("Manage dependencies: please do not use direct pip commands. Use `%horus clean` to convert your cells.");
+              INotification.error("Manage dependencies: please do not use direct pip commands. Use `%horus convert` to convert your cells.");
             })
           }
         })
@@ -270,8 +270,8 @@ async function activate(
 
           }
 
-          // Handle horus clean calls
-          if ( cell.text == "%horus clean" ) {
+          // Handle horus convert calls
+          if ( cell.text == "%horus convert" ) {
 
             // Clean notebook content from cells that use !pip install
             let number_of_cells = nbPanel.model.cells.length
