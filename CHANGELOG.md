@@ -1,5 +1,13 @@
 # Changelog for Thoth's Template GitHub Project
 
+## Release 0.11.0 (2021-09-13T14:33:47)
+### Features
+* Rename clean to convert command
+* Cover also %pip and other edge cases
+* Have plugin to remove pip cells
+* Add feature for handling pip install -ve . --no-cache-dir install cells
+* Move kernel command to Kernel Menu Group
+
 ## Release 0.10.8 (2021-08-25T12:20:26)
 ### Features
 * handle multiple runtimes
