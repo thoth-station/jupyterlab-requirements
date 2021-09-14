@@ -98,6 +98,18 @@ Currently this extension supports only `Python` kernels.
 
 Currently Thoth is used by default and pipenv is backup. In the future user will be able to select specific one.
 
+Using the Thoth resolution engine you can request an optimized software that satisfies your requirements using the Thoth recommender system.
+You can choose the type of recommendation that better fits your needs:
+
+* latest
+* performance
+* security
+* stable
+* testing
+
+You can find more information and updates [here](https://thoth-station.ninja/recommendation-types/).
+
+
 ## Virtual environment for you dependencies
 
 Virtualenv created to run your notebook according to your dependencies requirement is created in:
@@ -194,7 +206,7 @@ Once dependencies are locked, they will be automatically installed in the kernel
 %horus convert
 ```
 
-
+Have a look at this [video](https://www.youtube.com/watch?v=SFui8yrMVjw) to know more about this command.
 
 ## Discover notebook content about dependencies
 
@@ -262,9 +274,9 @@ otherwise it won't be saved (in the future this behaviour will not be necessary 
 <img alt="Add Package" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/AddPackages.png">
 </div>
 
-NOTE: The extra button in action will be removed in the future.
+NOTE: _The extra button in action will be removed in the future._
 
-NOTE: Autocompletion is planned in the future so that user can check which version are available on PyPI.
+NOTE: _Autocompletion is planned in the future so that user can check which version are available on PyPI._
 
 ### Save dependencies added and install them in your customized kernel
 
@@ -275,17 +287,6 @@ After saving the install button will appear so you can check before actually ins
 </div>
 
 NOTE: You can choose the name of the kernel you want for your notebook.
-
-Using the Thoth resolution engine you can request an optimized software that satisfies your requirements using the Thoth recommender system.
-You can choose the type of recommendation that better fits your needs:
-
-* latest
-* performance
-* security
-* stable
-* testing
-
-You can find more information and updates [here](https://thoth-station.ninja/recommendation-types/).
 
 Finally after using the install button:
 
@@ -499,6 +500,8 @@ pip uninstall jupyterlab-requirements
 ```
 
 # Demo development status and new features
+
+* [v0.11.0](https://www.youtube.com/watch?v=SFui8yrMVjw) [Sep 13 2021]
 
 * [v0.10.4](https://www.youtube.com/watch?v=FjVxNTXO70I) [Aug 10 2021]
 
