@@ -696,7 +696,6 @@ def lock(
         click.echo("python3 kernel name, cannot be overwritten, assigning default jupyterlab-requirements")
 
     click.echo(f"Kernel name is: {results['kernel_name']!s}")
-    click.echo(f"runtime environment used: {results['runtime_environment']}")
 
     if lock_results["error"]:
         click.echo({"error_msg": lock_results["error_msg"]})
