@@ -1,5 +1,9 @@
 # Changelog for Thoth's Template GitHub Project
 
+## Release 0.11.1 (2021-10-06T14:30:25)
+### Features
+* Remove comment
+
 ## Release 0.11.0 (2021-09-13T14:33:47)
 ### Features
 * Rename clean to convert command
