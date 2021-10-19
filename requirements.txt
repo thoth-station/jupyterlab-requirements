@@ -5,7 +5,7 @@ invectio
 thoth-python
 thoth-common
 thamos>=1.16.1
-jupyterlab>=3.*
+jupyterlab>=3.1.0
 jupyter-require>=0.4.0
 rich
 pyyaml
