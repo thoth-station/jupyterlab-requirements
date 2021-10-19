@@ -123,8 +123,9 @@ Once lock file is created using any of available resolution engines, the depende
 
 ## Overlays directory
 
-The dependencies stored in the notebook metadata are also stored into `overlays` folder (created automatically) using the kernel name by default.
+The dependencies stored in the notebook metadata can be also stored into `overlays` folder using the kernel name by default.
 If you want to know more about the use of overlays, have a look [here](https://github.com/thoth-station/thamos#support-for-multiple-runtime-environments).
+If you want to see a practical example on the use of overlays and how to create them from your notebook, you can check this [tutorial](https://github.com/AICoE/overlays-for-ai-pipeline-tutorial).
 
 ## Thoth configuration file
 
