@@ -93,6 +93,11 @@ class HorusMagics(Magics):
         )
         lock_command.add_argument("--force", help="Force request to Thoth.", action="store_true")
         lock_command.add_argument(
+            "--debug",
+            help="Debug/Verbose request to Thoth. WARNING: It has impact on the quality of the resolution process.",
+            action="store_true",
+        )
+        lock_command.add_argument(
             "--kernel-name",
             default="jupyterlab-requirements",
             type=str,
@@ -344,6 +349,7 @@ class HorusMagics(Magics):
                 resolution_engine="thoth" if not args.pipenv else "pipenv",
                 timeout=args.timeout,
                 force=args.force,
+                debug=args.debug,
                 recommendation_type=args.recommendation_type,
                 kernel_name=args.kernel_name,
                 os_name=args.os_name,

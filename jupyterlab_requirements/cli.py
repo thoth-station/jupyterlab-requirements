@@ -627,6 +627,11 @@ def requirements(
     help="Force Thoth advise request.",
 )
 @click.option(
+    "--debug",
+    is_flag=True,
+    help="Debug/verbose Thoth advise request. WARNING: It has impact on the quality of the resolution process.",
+)
+@click.option(
     "--recommendation-type",
     is_flag=False,
     type=click.Choice(["latest", "stable", "performance", "security"], case_sensitive=False),
@@ -661,6 +666,7 @@ def lock(
     path: str,
     timeout: int,
     force: bool,
+    debug: bool,
     recommendation_type: str,
     kernel_name: Optional[str] = None,
     pipenv: bool = False,
@@ -685,6 +691,7 @@ def lock(
         resolution_engine=resolution_engine,
         timeout=timeout,
         force=force,
+        debug=debug,
         recommendation_type=recommendation_type,
         kernel_name=kernel_name,
         os_name=os_name,

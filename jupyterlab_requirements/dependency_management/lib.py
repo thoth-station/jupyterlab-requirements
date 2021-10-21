@@ -463,6 +463,7 @@ def lock_dependencies_with_thoth(
     config: str,
     timeout: int,
     force: bool,
+    debug: bool,
     notebook_content: str,
     kernels_path: Path = Path.home().joinpath(".local/share/thoth/kernels"),
 ) -> typing.Tuple[int, dict]:
@@ -506,6 +507,7 @@ def lock_dependencies_with_thoth(
             no_static_analysis=False,
             timeout=timeout,
             src_path=temp.name,
+            debug=debug,
         )
 
         _LOGGER.info(f"Response: {response}")
@@ -875,6 +877,7 @@ def horus_lock_command(
     resolution_engine: str,
     timeout: int,
     force: bool,
+    debug: bool,
     recommendation_type: str,
     kernel_name: typing.Optional[str] = None,
     os_name: typing.Optional[str] = None,
@@ -972,6 +975,7 @@ def horus_lock_command(
             config=json.dumps(thoth_config.content),
             timeout=timeout,
             force=force,
+            debug=debug,
             notebook_content=notebook_content_py,
         )
 

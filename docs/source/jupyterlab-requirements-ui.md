@@ -1,10 +1,5 @@
 # Jupyerlab requirements UI
 
-<div style="text-align:center">
-<img alt="JupyterLab Requirements UI" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/JupyterLabRequirementsExtension.jpg">
-</div>
-
-
 This jupyterlab extension provides a button directly in the notebook to manage the dependencies (see image below).
 
 <div style="text-align:center">
