@@ -707,7 +707,7 @@ def horus_requirements_command(
     dev: bool,
     add: typing.Optional[typing.List[str]] = None,
     remove: typing.Optional[typing.List[str]] = None,
-    save: bool = True,
+    save_in_notebook: bool = True,
 ):
     """Horus requirements command."""
     notebook = get_notebook_content(notebook_path=path)
@@ -757,7 +757,7 @@ def horus_requirements_command(
                 )
                 sys.exit(1)
 
-    if save:
+    if save_in_notebook:
         notebook_metadata["requirements"] = json.dumps(pipfile_.to_dict())
 
         notebook["metadata"] = notebook_metadata
@@ -891,8 +891,11 @@ def horus_lock_command(
     notebook = get_notebook_content(notebook_path=path)
     notebook_metadata = notebook.get("metadata")
 
-    kernelspec = notebook_metadata.get("kernelspec")
-    notebook_kernel = kernelspec.get("name")
+    if notebook_metadata.get("kernelspec"):
+        kernelspec = notebook_metadata.get("kernelspec")
+        notebook_kernel = kernelspec.get("name")
+    else:
+        kernel_name = "python3"
 
     if not kernel_name:
         kernel = notebook_kernel
