@@ -101,7 +101,7 @@ Using the Thoth resolution engine you can request an optimized software stack th
 Thoth: recommendation type
 --------------------------
 --------------------------
-   
+
 You can choose the type of recommendation that better fits your needs:
 
 * latest (default)
