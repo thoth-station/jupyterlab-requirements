@@ -63,7 +63,7 @@ cmdclass["jsdeps"] = combine_commands(
     ensure_targets(jstargets),
 )
 
-README: str = Path(HERE, "README.md").read_text(encoding="utf-8")
+README: str = Path(HERE, "README.rst").read_text()
 
 
 def _get_install_requires():
@@ -81,7 +81,7 @@ setup_args = dict(
     author_email="fmurdaca@redhat.com",
     description="JupyterLab Extension for dependency management and optimization",
     long_description=README,
-    long_description_content_type="text/markdown",
+    long_description_content_type="text/x-rst",
     cmdclass=cmdclass,
     packages=setuptools.find_packages(),
     install_requires=_get_install_requires(),

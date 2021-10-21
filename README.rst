@@ -1,10 +1,26 @@
-# jupyterlab-requirements
+JupyterLab Requirements
+=======================
 
-Dependency management and optimization in JupyterLab.
+.. image:: https://img.shields.io/github/v/tag/thoth-station/jupyterlab-requirements?style=plastic
+  :target: https://github.com/thoth-station/jupyterlab-requirements/releases
+  :alt: GitHub tag (latest by date)
 
-[![Swagger Validator](https://img.shields.io/swagger/valid/3.0?specUrl=https%3A%2F%2Fraw.githubusercontent.com%2Fthoth-station%/jupyterlab-requirements%2Fmaster%jupyterlab_requirements%2Frest_api.yml)](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/jupyterlab_requirements/dependency_management/jupyterlab_requirements.yaml)
+.. image:: https://img.shields.io/pypi/v/jupyterlab-requirements?style=plastic
+  :target: https://pypi.org/project/jupyterlab-requirements
+  :alt: PyPI - Module Version
 
-## About
+.. image:: https://img.shields.io/pypi/l/jupyterlab-requirements?style=plastic
+  :target: https://pypi.org/project/jupyterlab-requirements
+  :alt: PyPI - License
+
+.. image:: https://img.shields.io/pypi/dm/jupyterlab-requirements?style=plastic
+  :target: https://pypi.org/project/jupyterlab-requirements
+  :alt: PyPI - Downloads
+
+This is a JupyterLab extension for dependency management and optimization and to foster reproducibility of Jupyter notebooks.
+
+About
+=====
 
 This extension provides management of dependencies for JupyterLab notebooks.
 
@@ -13,95 +29,74 @@ The main goals of the project are the following:
 * manage notebook requirements without leaving the notebook
 * provide a unique and optimized* environment for each notebook
 
-NOTE: The requirements are optimized using the [Thoth](https://thoth-station.ninja/) resolution engine
+NOTE: *The requirements are optimized using the [Thoth](https://thoth-station.ninja/) resolution engine
 
-## Requirements
+Installation
+============
 
-* JupyterLab >= 3.0
+This extension requires:
 
-## Installation
+* JupyterLab >= 3.1.0
 
-You can install this extension with pip:
+The extension can be installed via pip or Pipenv from `PyPI
+<https://pypi.org/project/jupyterlab-requirements>`__:
 
-```bash
-pip install jupyterlab-requirements
-```
+.. code-block:: console
 
-And start using it immediately on JupyterLab:
+   pip install jupyterlab-requirements
 
-```bash
-jupyter lab
-```
 
-## Troubleshoot
+You can initialize JupyterLab and start using it.
+
+.. code-block:: console
+
+   jupyter lab
+
+
+Troubleshoot
+------------
 
 If you are seeing the frontend extension, but it is not working, check
 that the server extension is enabled:
 
-```bash
-jupyter server extension list
-```
+.. code-block:: console
+
+   jupyter server extension list
+
 
 If the server extension is installed and enabled, but you are not seeing
 the frontend extension, check the frontend extension is installed:
 
-```bash
-jupyter labextension list
-```
+.. code-block:: console
 
-## Usage
-
-You can use this extension for each of your notebook to guarantee they have the correct dependencies and kernel.
-This extension is able to add/remove dependencies, lock them and store them in the notebook metadata.
-In this way all the dependencies information required to repeat the environment are shipped with the notebook.
-
-In particular, in the notebook metadata you can find:
-
-- requirements (Pipfile)
-
-- requirements locked with all hashes (Pipfile.lock)
-
-- dependency resolution engine used (thoth or pipenv)
-
-- configuration file for runtiment environment (.thoth.yaml if you are using thoth resolution engine)
-
-All this information can allow reproducibility of the notebook.
-
-There are 3 ways to interact with this extension:
-
-- using `%horus` magic commands directly in your notebook's cells. To learn more about how to use the `%horus` magic commands check out the guide [here](https://github.com/thoth-station/jupyterlab-requirements#horus-magic-command) or the video [here](https://www.youtube.com/watch?v=FjVxNTXO70I)
-
-<div style="text-align:center">
-<img alt="JupyterLab Requirements Horus magic commands" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/JupyterLabRequirementsExtensionMC.png">
-</div>
-
-- using the `horus` CLI directly from terminal or integrated in pipelines ([check video](https://www.youtube.com/watch?v=fW0YKugL26g&t)).
-
-<div style="text-align:center">
-<img alt="JupyterLab Requirements Horus CLI" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/JupyterLabRequirementsExtensionCLI.png">
-</div>
-
-- using the `Manage Dependencies` button that appears in the notebook when it is opened:
-
-<div style="text-align:center">
-<img alt="JupyterLab Requirements UI" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/JupyterLabRequirementsExtension.jpg">
-</div>
-
-Currently this extension supports only `Python` kernels.
+   jupyter labextension list
 
 
-## Resolution engines
+Resolution engines
+==================
+
+There are currently two resolution engines available in the extension:
 
 * [Thoth](https://thoth-station.ninja/)
 
-* [pipenv](https://github.com/pypa/pipenv)
+* [Pipenv](https://github.com/pypa/pipenv)
 
-Currently Thoth is used by default and pipenv is backup. In the future user will be able to select specific one.
+NOTE: _Thoth is used by default and Pipenv can be triggered with flags or run as backup automatically._
 
-Using the Thoth resolution engine you can request an optimized software that satisfies your requirements using the Thoth recommender system.
+NOTE: _Currently this extension supports only `Python` kernels._
+
+Thoth
+-----
+
+Using the Thoth resolution engine you can request an optimized software stack that satisfies your requirements.
+
+Thoth: recommendation type
+--------------------------
+--------------------------
+   
 You can choose the type of recommendation that better fits your needs:
 
-* latest
+* latest (default)
 * performance
 * security
 * stable
@@ -109,141 +104,98 @@ You can choose the type of recommendation that better fits your needs:
 
 You can find more information and updates [here](https://thoth-station.ninja/recommendation-types/).
 
-
-## Virtual environment for you dependencies
-
-Virtualenv created to run your notebook according to your dependencies requirement is created in:
-
-`~/.local/share/thoth/kernels/{kernel_name}`
-
-## Dependencies installation
-
-Once lock file is created using any of available resolution engines, the dependencies will be installed in the virtualenv using
-[micropipenv](https://pypi.org/project/micropipenv/).
-
-## Overlays directory
-
-The dependencies stored in the notebook metadata can be also stored into `overlays` folder using the kernel name by default.
-If you want to know more about the use of overlays, have a look [here](https://github.com/thoth-station/thamos#support-for-multiple-runtime-environments).
-If you want to see a practical example on the use of overlays and how to create them from your notebook, you can check this [tutorial](https://github.com/AICoE/overlays-for-ai-pipeline-tutorial).
-
-## Thoth configuration file
+Thoth: runtime environment
+--------------------------
+--------------------------
 
 Thoth resolution engine is able to provide an optimized software stack based on the runtime environment you are using (more inputs are used, if you want to know more, have a look here [here](https://github.com/thoth-station/adviser)).
 
 In general different runtime environment will provide different effect on you application (e.g. more performance), therefore we include these information in the notebook metadata so that other can find out what runtime environment has been used to run a certain notebook.
 
-## Delete kernels
+You can select the runtime environment to be used for the recommendation selecting:
 
-If you have too many kernels, you can handle them directly from the menu.
+*  Operating System Name
 
-![kernel delete handler menu](preview.gif)
+*  Operating System Version
 
+* Python Interpreter Version
 
-# %horus magic command
+NOTE: _Those parameters are autodiscovered by the extension and assigned to your environment, you can customize them if you are interested._
 
-As of `v0.10.0` jupyterlab-requirements supports `%horus` magic command directly in the cells so that the user can speed up all dependency management taks, working in one place. Magic commands are automatically loaded when you start a notebook and they automatically identify the notebook you are using.
+Dependencies installation
+-------------------------
 
-## Check notebook metadata content about dependencies
-
-```
-%horus check
-```
-
-## Create/Modify/Remove requirements in Pipfile in notebook metadata
-
-You can add requirement to Pipfile in your notebook, using the following command:
-
-```bash
-%horus requirements --add tensorflow
-```
-
-If you want to remove a requirement instead, you can use the following command:
-
-```bash
-%horus requirements --remove tensorflow
-```
-
-## Lock requirements in notebook metadata and installed in the kernel
-
-Adding `--kernel-name` can use a certain kernel name (default to `jupyterlab-requirements`).
-
-Using `Thoth` resolution engine:
-
-```bash
-%horus lock
-```
-
-Thoth only can be combined with the commands below:
-
-Adding `--set-timeout` will set timeout for request to thoth.
-
-Adding `--force` will force request to thoth if one analysis result already exists.
-
-Adding `--recommendation-type` the user can select the type of reccomendation:
-
-- latest [default]
-- stable
-- performance
-- security
-
-Adding `--os-name` will use OS name in request to Thoth.
-
-Adding `--os-version` will use OS version in request to Thoth.
-
-Adding `--python-version` will use python version in request to Thoth.
-
-Usign `Pipenv` resolution engine:
-
-```bash
-%horus lock --pipenv
-```
-
-Once dependencies are locked, they will be automatically installed in the kernel and saved in the notebook metadata.
-
-## Convert notebook cells with pip commands to use horus commands in order to allow reproducibility
-
-```
-%horus convert
-```
-
-Have a look at this [video](https://www.youtube.com/watch?v=SFui8yrMVjw) to know more about this command.
-
-## Discover notebook content about dependencies
-
-This command is used to discover dependencies used in the notebook and create a Pipfile (empty if packages are not identified).
-NOTE: Please keep in mind this feature is under development and the packages identified need to be checked by humans.
-
-```bash
-%horus discover
-```
-
-Adding `--force` will store file at the desired/default path even if one exists. If no `--force` is provided the CLI will simply fail.
+Once lock file is created using any of available resolution engines, the dependencies will be installed in the virtualenv using
+[micropipenv](https://pypi.org/project/micropipenv/).
 
 
-## Extract notebook metadata content about dependencies
+Virtual environment for you dependencies
+----------------------------------------
 
-This command is used to extract dependencies content from notebook metadata and store it locally.
+The virtual environment created and assigned to the kernel to be used for your notebook according to your dependencies requirements can be checked using the following command from a terminal:
 
-```
-%horus extract
-```
+.. code-block:: console
 
-It can be combined with the commands below:
+   cat ~/.local/share/thoth/kernels/{kernel_name}
 
-Adding `--store-files-path` will store file at the desired path.
 
-Adding `--force` will store file at the desired/default path even if one exists. If no `--force` is provided the CLI will simply fail.
+Overlays directory
+------------------
 
-NOTE: Please keep in mind the `.thoth.yaml` will be stored at the root of the repo.
+The dependencies stored in the notebook metadata can be also stored into `overlays` folder using the kernel name by default.
+If you want to know more about the use of overlays, have a look [here](https://github.com/thoth-station/thamos#support-for-multiple-runtime-environments).
+If you want to see a practical example on the use of overlays and how to create them from your notebook, you can check this [tutorial](https://github.com/AICoE/overlays-for-ai-pipeline-tutorial).
 
-If you want to extract only a specific paramater, you can consider the following options:
 
-```bash
-%horus extract --pipfile
-%horus extract --pipfile-lock
-%horus extract --thoth-config
-```
+Delete kernels
+--------------
+
+If you have too many kernels, you can remove them directly from the JupyterLab menu under Kernel Section.
+This plugin is provided from this extension.
+
+
+Reproducibility
+===============
+
+You can use this extension for each of your notebook to guarantee they have the correct dependencies files required for reproducibility and shareability. In this way, all the dependencies information required to repeat the environment are shipped with the notebook.
+In the notebook metadata you will find:
+
+.. list-table::
+   :widths: 25 40
+   :header-rows: 1
+
+   * - key
+     - notes
+   * - ``requirements``
+     - All packages required (direct dependencies)
+   * - ``requirements``
+     - All packages (direct and transitive dependencies) locked with all hashes (Pipfile.lock)
+   * - ``dependency resolution engine``
+     - Currently two resolution engine are enabled: [Thoth](https://thoth-station.ninja/) and [Pipenv](https://github.com/pypa/pipenv)
+   * - ``configuration file``
+     - Only for Thoth resolution engine.
+
+All this information can allow reproducibility of the notebook.
+
+
+Usage
+=====
+
+There are 3 ways to interact with this extension:
+
+- [%horus magic commands](./docs/source/horus-magic-commands.md) directly in your notebook's cells. 
+
+- `horus CLI` directly from terminal or integrated in pipelines ([check video](https://www.youtube.com/watch?v=fW0YKugL26g&t)).
+
+<div style="text-align:center">
+<img alt="JupyterLab Requirements Horus CLI" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/JupyterLabRequirementsExtensionCLI.png">
+</div>
+
+- `jupyterlab-requirements UI` accessible through `Manage Dependencies` button that appears in the notebook when it is opened:
+
+<div style="text-align:center">
+<img alt="JupyterLab Requirements UI" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/JupyterLabRequirementsExtension.jpg">
+</div>
 
 
 # Extension Button
@@ -452,6 +404,10 @@ Usign Pipenv resolution engine:
 ```bash
 horus lock [YOUR_NOTEBOOK].ipynb  --pipenv
 ```
+
+# jupyterlab-requirements API
+
+[![Swagger Validator](https://img.shields.io/swagger/valid/3.0?specUrl=https%3A%2F%2Fraw.githubusercontent.com%2Fthoth-station%/jupyterlab-requirements%2Fmaster%jupyterlab_requirements%2Frest_api.yml)](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/jupyterlab_requirements/dependency_management/jupyterlab_requirements.yaml)
 
 
 # Contributing
