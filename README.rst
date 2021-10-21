@@ -77,9 +77,9 @@ Resolution engines
 
 There are currently two resolution engines available in the extension:
 
-* [Thoth](https://thoth-station.ninja/)
+* `Thoth <https://thoth-station.ninja/>`__
 
-* [Pipenv](https://github.com/pypa/pipenv)
+* `Pipenv <https://github.com/pypa/pipenv>`__
 
 NOTE: _Thoth is used by default and Pipenv can be triggered with flags or run as backup automatically._
 
@@ -102,13 +102,13 @@ You can choose the type of recommendation that better fits your needs:
 * stable
 * testing
 
-You can find more information and updates [here](https://thoth-station.ninja/recommendation-types/).
+You can find more information and updates `here <https://thoth-station.ninja/recommendation-types/>`__.
 
 Thoth: runtime environment
 --------------------------
 --------------------------
 
-Thoth resolution engine is able to provide an optimized software stack based on the runtime environment you are using (more inputs are used, if you want to know more, have a look here [here](https://github.com/thoth-station/adviser)).
+Thoth resolution engine is able to provide an optimized software stack based on the runtime environment you are using (several inputs are used, if you want to know more, have a look here `here <https://github.com/thoth-station/adviser>`__).
 
 In general different runtime environment will provide different effect on you application (e.g. more performance), therefore we include these information in the notebook metadata so that other can find out what runtime environment has been used to run a certain notebook.
 
@@ -126,7 +126,7 @@ Dependencies installation
 -------------------------
 
 Once lock file is created using any of available resolution engines, the dependencies will be installed in the virtualenv using
-[micropipenv](https://pypi.org/project/micropipenv/).
+`micropipenv <https://pypi.org/project/micropipenv/>`__.
 
 
 Virtual environment for you dependencies
@@ -143,8 +143,8 @@ Overlays directory
 ------------------
 
 The dependencies stored in the notebook metadata can be also stored into `overlays` folder using the kernel name by default.
-If you want to know more about the use of overlays, have a look [here](https://github.com/thoth-station/thamos#support-for-multiple-runtime-environments).
-If you want to see a practical example on the use of overlays and how to create them from your notebook, you can check this [tutorial](https://github.com/AICoE/overlays-for-ai-pipeline-tutorial).
+If you want to know more about the use of overlays, have a look `micropipenv <https://github.com/thoth-station/thamos#support-for-multiple-runtime-environments>`__.
+If you want to see a practical example on the use of overlays and how to create them from your notebook, you can check this `tutorial <https://github.com/AICoE/overlays-for-ai-pipeline-tutorial>`__.
 
 
 Delete kernels
@@ -167,11 +167,11 @@ In the notebook metadata you will find:
    * - key
      - notes
    * - ``requirements``
-     - All packages required (direct dependencies)
+     - All packages required (direct dependencies).
    * - ``requirements``
-     - All packages (direct and transitive dependencies) locked with all hashes (Pipfile.lock)
+     - All packages (direct and transitive dependencies) locked with all hashes (Pipfile.lock).
    * - ``dependency resolution engine``
-     - Currently two resolution engine are enabled: [Thoth](https://thoth-station.ninja/) and [Pipenv](https://github.com/pypa/pipenv)
+     - Currently two resolution engine are enabled.
    * - ``configuration file``
      - Only for Thoth resolution engine.
 
@@ -183,7 +183,7 @@ Usage
 
 There are 3 ways to interact with this extension:
 
-- [%horus magic commands](./docs/source/horus-magic-commands.md) directly in your notebook's cells. 
+- `%horus magic commands <./docs/source/horus-magic-commands.md>`__ directly in your notebook's cells. 
 
 - [horus CLI](./docs/source/horus-cli.md) directly from terminal or integrated in pipelines ([check video](https://www.youtube.com/watch?v=fW0YKugL26g&t)).
 
