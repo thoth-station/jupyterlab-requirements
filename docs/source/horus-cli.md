@@ -125,6 +125,8 @@ Adding `--set-timeout` will set timeout for request to thoth.
 
 Adding `--force` will force request to thoth if one analysis result already exists.
 
+Adding `--debug` will enable debug/verbose request to thoth. NOTE: It has an impact on the quality of the resolution process.
+
 Adding `--os-name` will use OS name in request to Thoth.
 
 Adding `--os-version` will use OS version in request to Thoth.

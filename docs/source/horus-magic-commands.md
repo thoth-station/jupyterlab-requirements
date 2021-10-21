@@ -9,36 +9,10 @@ To learn more about how to use the `%horus` magic commands check out the documen
 
 Here you can find a list of magic commands available and a description for each of them.
 
-### help
-| magic command | options | description |
-| ------------- | ------------------ | ------------------ |
-| %horus help | | See all commands available in horus. |
-
 ### check
 | magic command | options | description |
 | ------------- | ------------------ | ------------------ |
 | %horus check |  | Check notebook metadata content about dependencies: `requirements`, `requirements_lock`, `dependency_resolution_engine`, `thoth_configuration_file` (only for Thoth resolution engine). |
-
-### requirements
-| magic command | options | description |
-| ------------- | ------------------ | ------------------ |
-| %horus requirements | --add {REQUIREMENT} | Add requirement to Pipfile in your notebook: `tensorflow`, `tensorflow==2.6.0`, `'importlib-metadata; python_version < "3.8"'`. NOTE: _If the Pipfile does not exists it is created automatically._ |
-|  | --add --dev {REQUIREMENT} | Add development requirement to Pipfile in your notebook: `--dev 'pytest~=6.2.0'`. |
-|  | --remove {REQUIREMENT} | Remove requirementfrom Pipfile in your notebook: `tensorflow` |
-
-### lock
-| magic command | options | description |
-| ------------- | ------------------ | ------------------ |
-| %horus lock |  | Resolve dependencies using Thoth resolution engine, install them in the kernel (default to `jupyterlab-requirements`) and save them in the notebook metadata. |
-|  | --set-timeout {TIMEOUT_INT} | Set the timeout [seconds] for the recommendation to be provied (only for Thoth resolution engine). |
-|  | --force | Force request if one analysis result already exists (only for Thoth resolution engine). |
-|  | --set-timeout {TIMEOUT_INT} | Set the timeout {TIMEOUT_INT} seconds for the recommendation to be provied (only for Thoth resolution engine). |
-|  | --recommendation-type {RECOMMENDATION_TYPE} | Recommendation type used in the request: `latest` (default), `stable`, `performance`, `security` (only for Thoth resolution engine). |
-|  | --os-name {OS_NAME} | Operating System name used in request (only for Thoth resolution engine). |
-|  | --os-version {OS_NAME} | Operating System version used in request (only for Thoth resolution engine). |
-|  | --python-version {OS_NAME} | Python Interpreter version used in request (only for Thoth resolution engine). |
-|  | --kernel-name {KERNEL_NAME} | You can select the {KERNEL_NAME} where the dependencies will be installed |
-|  | --pipenv | Resolve dependencies using Pipenv resolution engine |
 
 ### convert
 | magic command | options | description |
@@ -55,11 +29,42 @@ Here you can find a list of magic commands available and a description for each 
 | magic command | options | description |
 | ------------- | ------------------ | ------------------ |
 | %horus extract |  | Extract dependencies content from notebook metadata (if they exist) and store it locally. By default it will try to extract all content. It will fail if the content already exist locally. NOTE: _Please keep in mind the `.thoth.yaml` will be stored at the root of the repo._ |
-|  | --force | Force saving notebook metadata locally. This can be used if a the content already exist locally. |
+|  | --force | Force saving notebook metadata locally. This can be used if the content already exist locally. |
 |  | --store-files-path {PATH} | You can provide a specific path where to store the content. |
-|  | --pipfile | It will extract and save locally only the Pipfile. It will fail if the Pipfile exist at that path. |
-|  | --pipfile-lock | It will extract and save locally only the Pipfile.lock. It will fail if the Pipfile exist at that path. |
-|  | --thoth-config | It will extract and save locally only the .thoth.yaml. It will fail if the Pipfile exist at that path. |
+|  | --pipfile | It will extract and save locally only the Pipfile. It will fail if the Pipfile exists at that path. |
+|  | --pipfile-lock | It will extract and save locally only the Pipfile.lock. It will fail if the Pipfile.lock exists at that path. |
+|  | --thoth-config | It will extract and save locally only the .thoth.yaml. It will fail if the .thoth.yaml exists at that path. |
+
+### help
+| magic command | options | description |
+| ------------- | ------------------ | ------------------ |
+| %horus help | | See all commands available in horus. |
+
+### lock with Thoth
+| magic command | options | description |
+| ------------- | ------------------ | ------------------ |
+| %horus lock |  | Resolve dependencies using Thoth resolution engine, install them in the kernel (default to `jupyterlab-requirements`) and save them in the notebook metadata. |
+|  | --force | Force request if one analysis result already exists. |
+|  | --debug | Enable debug/verbose request. NOTE: It has an impact on the quality of the resolution process. |
+|  | --set-timeout {TIMEOUT_INT} | Set the timeout [seconds] for the recommendation to be provied. |
+|  | --recommendation-type {RECOMMENDATION_TYPE} | Recommendation type used in the request: `latest` (default), `stable`, `performance`, `security`. |
+|  | --os-name {OS_NAME} | Operating System name used in request. |
+|  | --os-version {OS_NAME} | Operating System version used in request. |
+|  | --python-version {OS_NAME} | Python Interpreter version used in request. |
+|  | --kernel-name {KERNEL_NAME} | You can select the {KERNEL_NAME} where the dependencies will be installed |
+
+### lock with Pipenv
+| magic command | options | description |
+| ------------- | ------------------ | ------------------ |
+| %horus lock | --pipenv | Resolve dependencies using Pipenv resolution engine, install them in the kernel (default to `jupyterlab-requirements`) and save them in the notebook metadata. |
+|  | --kernel-name {KERNEL_NAME} | You can select the {KERNEL_NAME} where the dependencies will be installed |
+
+### requirements
+| magic command | options | description |
+| ------------- | ------------------ | ------------------ |
+| %horus requirements | --add {REQUIREMENT} | Add requirement to Pipfile in your notebook: `tensorflow`, `tensorflow==2.6.0`, `'importlib-metadata; python_version < "3.8"'`. NOTE: _If the Pipfile does not exists it is created automatically._ |
+|  | --add --dev {REQUIREMENT} | Add development requirement to Pipfile in your notebook: `--dev 'pytest~=6.2.0'`. |
+|  | --remove {REQUIREMENT} | Remove requirementfrom Pipfile in your notebook: `tensorflow` |
 
 ### show
 | magic command | options | description |
