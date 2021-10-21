@@ -27,9 +27,9 @@ This extension provides management of dependencies for JupyterLab notebooks.
 The main goals of the project are the following:
 
 * manage notebook requirements without leaving the notebook
-* provide a unique and optimized* environment for each notebook
+* provide a unique and optimized environment for each notebook
 
-NOTE: *The requirements are optimized using the [Thoth](https://thoth-station.ninja/) resolution engine
+NOTE: The requirements are optimized using the `Thoth <https://thoth-station.ninja/>`__ resolution engine.
 
 Installation
 ============
@@ -72,6 +72,14 @@ the frontend extension, check the frontend extension is installed:
    jupyter labextension list
 
 
+Uninstall
+---------
+
+.. code-block:: console
+
+   pip uninstall jupyterlab-requirements
+
+
 Resolution engines
 ==================
 
@@ -81,9 +89,9 @@ There are currently two resolution engines available in the extension:
 
 * `Pipenv <https://github.com/pypa/pipenv>`__
 
-NOTE: _Thoth is used by default and Pipenv can be triggered with flags or run as backup automatically._
+NOTE: Thoth is used by default and Pipenv can be triggered with flags or run as backup automatically.
 
-NOTE: _Currently this extension supports only `Python` kernels._
+NOTE: Currently this extension supports only `Python` kernels.
 
 Thoth
 -----
@@ -120,7 +128,7 @@ You can select the runtime environment to be used for the recommendation selecti
 
 * Python Interpreter Version
 
-NOTE: _Those parameters are autodiscovered by the extension and assigned to your environment, you can customize them if you are interested._
+NOTE: Those parameters are autodiscovered by the extension and assigned to your environment, you can customize them if you are interested.
 
 Dependencies installation
 -------------------------
@@ -183,104 +191,22 @@ Usage
 
 There are 3 ways to interact with this extension:
 
-- `%horus magic commands <./docs/source/horus-magic-commands.md>`__ directly in your notebook's cells. 
+- `%horus magic commands <./docs/source/horus-magic-commands.md>`__ directly in your notebook's cells.
 
-- [horus CLI](./docs/source/horus-cli.md) directly from terminal or integrated in pipelines ([check video](https://www.youtube.com/watch?v=fW0YKugL26g&t)).
+- `horus CLI <./docs/source/horus-cli.md>`__ directly from terminal or integrated in pipelines.
 
-- `jupyterlab-requirements UI` accessible through `Manage Dependencies` button that appears in the notebook when it is opened:
+- `jupyterlab-requirements UI <./docs/source/jupyterlab-requirements-ui.md>`__ accessible through `Manage Dependencies` button that appears in the notebook when it is opened.
 
-<div style="text-align:center">
-<img alt="JupyterLab Requirements UI" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/JupyterLabRequirementsExtension.jpg">
-</div>
+Contributing
+============
 
+Development install
+-------------------
 
-# Extension Button
-
-This jupyterlab extension provides a button directly in the notebook to manage the dependencies (see image below).
-
-<div style="text-align:center">
-<img alt="JupyterLab Requirements Extension" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/JupyterLabRequirementsExtension.jpg">
-</div>
-
-## How to use it
-
-### Start adding dependencies from empty notebook
-
-Clicking the above button you will receive the following dialog form initially:
-
-<div style="text-align:center">
-<img alt="Initial Dialog Form" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/InitialDialogForm.png">
-</div>
-
-Initially, no dependencies are identified if you start a new notebook as metadata related are not existing.
-The extension checks in the notebook metadata in order to identify them every time you restart a notebook.
-Moreover it verifies that the kernel you are using is matching your dependencies. If not it warns to use install button again to avoid weird behaviours.
-
-You can start adding your packages using the central add button and once you select package name and version, remember to add your package using add button in action,
-otherwise it won't be saved (in the future this behaviour will not be necessary due to the autocompletion feature):
-
-<div style="text-align:center">
-<img alt="Add Package" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/AddPackages.png">
-</div>
-
-NOTE: _The extra button in action will be removed in the future._
-
-NOTE: _Autocompletion is planned in the future so that user can check which version are available on PyPI._
-
-### Save dependencies added and install them in your customized kernel
-
-After saving the install button will appear so you can check before actually installing the dependencies:
-
-<div style="text-align:center">
-<img alt="Install" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/Install.png">
-</div>
-
-NOTE: You can choose the name of the kernel you want for your notebook.
-
-Finally after using the install button:
-
-<div style="text-align:center">
-<img alt="Ready to Work" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/ReadyToWork.png">
-</div>
-
-Now all dependencies will be locked (direct and transitive), saved in the notebook metadata, and installed. Moreover, the kernel will be automatically created and set for your notebook without human intervention required.
-
-**Now you are ready to work on your project!**
-
-### Restart notebook
-
-If you restart notebook and check dependencies with button you will see that they are all installed and ready:
-
-<div style="text-align:center">
-<img alt="Restarting Notebook" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/RestartingNotebook.png">
-</div>
-
-### Start notebook without information about dependencies in metadata
-
-If you have notebooks with code and you want to start using this extension, there is a nice feature that can be interesting.
-
-Thoth relies on a library called [invectio](https://github.com/thoth-station/invectio). This library statically analyzes sources and extract information about called or exported library functions in Python applications.
-
-jupyterlab-requirements extension uses this information to provide users with list of packages to be installed if they have never used the extension before.
-
-<div style="text-align:center">
-<img alt="User with code" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/UserwithCode.png">
-</div>
-
-
-# jupyterlab-requirements API
-
-[![Swagger Validator](https://img.shields.io/swagger/valid/3.0?specUrl=https%3A%2F%2Fraw.githubusercontent.com%2Fthoth-station%/jupyterlab-requirements%2Fmaster%jupyterlab_requirements%2Frest_api.yml)](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/jupyterlab_requirements/dependency_management/jupyterlab_requirements.yaml)
-
-
-# Contributing
-
-## Development install
-
-Note: You will need NodeJS to build the extension package.
+NOTE: You will need NodeJS to build the extension package.
 
 The `jlpm` command is JupyterLab's pinned version of
-[yarn](https://yarnpkg.com/) that is installed with JupyterLab. You may use
+`yarn <https://yarnpkg.com/>`__ that is installed with JupyterLab. You may use
 `yarn` or `npm` in lieu of `jlpm` below.
 
 ```bash
@@ -298,38 +224,39 @@ jlpm run build
 
 You can watch the source directory and run JupyterLab at the same time in different terminals to watch for changes in the extension's source and automatically rebuild the extension.
 
-```bash
-# Watch the source directory in one terminal, automatically rebuilding when needed
-jlpm run watch
-# Run JupyterLab in another terminal
-jupyter lab
-```
+The following command watch the source directory in one terminal, automatically rebuilding when needed.
+
+.. code-block:: console
+
+   jlpm run watch
+
+The following command run JupyterLab in another terminal.
+
+.. code-block:: console
+
+   jupyter lab
+
 
 With the watch command running, every saved change will immediately be built locally and available in your running JupyterLab. Refresh JupyterLab to load the change in your browser (you may need to wait several seconds for the extension to be rebuilt).
 
 By default, the `jlpm run build` command generates the source maps for this extension to make it easier to debug using the browser dev tools. To also generate source maps for the JupyterLab core extensions, you can run the following command:
 
-```bash
-jupyter lab build --minimize=False
-```
+.. code-block:: console
 
-# Uninstall
+   jupyter lab build --minimize=False
 
-```bash
-pip uninstall jupyterlab-requirements
-```
 
 # Demo development status and new features
 
-* [v0.11.0](https://www.youtube.com/watch?v=SFui8yrMVjw) [Sep 13 2021]
+* `v0.11.0 <https://www.youtube.com/watch?v=SFui8yrMVjw>`__ [Sep 13 2021]
 
-* [v0.10.4](https://www.youtube.com/watch?v=FjVxNTXO70I) [Aug 10 2021]
+* `v0.10.4 <https://www.youtube.com/watch?v=FjVxNTXO70I>`__ [Aug 10 2021]
 
-* [v0.9.2](https://www.youtube.com/watch?v=fW0YKugL26g&t) [Jul 19 2021]
+* `v0.9.2 <https://www.youtube.com/watch?v=fW0YKugL26g&t>`__ [Jul 19 2021]
 
-* [v0.8.0](https://www.youtube.com/watch?v=DubjY5Ib4fA) [Jul 9 2021]
+* `v0.8.0 <https://www.youtube.com/watch?v=DubjY5Ib4fA>`__ [Jul 9 2021]
 
-* [v0.7.4](https://www.youtube.com/watch?v=YQIhuB16DuM) [Jun 22 2021]
+* `v0.7.4 <https://www.youtube.com/watch?v=YQIhuB16DuM>`__ [Jun 22 2021]
 
 * [v0.5.0](https://www.youtube.com/watch?v=A3W48aHubkE) [Mar 15 2021]
 
