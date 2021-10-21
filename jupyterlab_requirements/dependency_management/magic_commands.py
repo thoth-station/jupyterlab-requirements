@@ -276,7 +276,12 @@ class HorusMagics(Magics):
             _LOGGER.info("Managing requirements in notebook content.")
 
             pipfile_ = horus_requirements_command(
-                path=nb_path, index_url=args.index_url, dev=args.dev, add=args.add, remove=args.remove, save=False
+                path=nb_path,
+                index_url=args.index_url,
+                dev=args.dev,
+                add=args.add,
+                remove=args.remove,
+                save_in_notebook=False,
             )
 
             return json.dumps(pipfile_.to_dict())
