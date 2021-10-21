@@ -200,18 +200,53 @@ The `jlpm` command is JupyterLab's pinned version of
 `yarn <https://yarnpkg.com/>`__ that is installed with JupyterLab. You may use
 `yarn` or `npm` in lieu of `jlpm` below.
 
-```bash
-# Clone the repo to your local environment
-# Change directory to the jupyterlab-requirements directory
-# Install package in development mode
-pip install -ve .
-# Link your development version of the extension with JupyterLab
-jupyter labextension develop . --overwrite
+1. Fork this repository
 
-jupyter serverextension enable --py jupyterlab-requirements --sys-prefix
-# Rebuild extension Typescript source after making changes
-jlpm run build
-```
+2. Clone the origin repo to your local environment
+
+.. code-block:: console
+
+   git clone git@github.com:thoth-station/jupyterlab-requirements.git
+
+3. Change directory to the jupyterlab-requirements directory
+
+4. Create new virtualenv
+
+.. code-block:: console
+
+   pipenv install
+
+5. Enter environment.
+
+.. code-block:: console
+
+   pipenv shell
+
+
+6. Install package in development mode
+
+.. code-block:: console
+
+   pip install -ve .
+
+
+7. Link your development version of the extension with JupyterLab
+
+.. code-block:: console
+
+   jupyter labextension develop . --overwrite
+
+.. code-block:: console
+
+   jupyter serverextension enable --py jupyterlab-requirements --sys-prefix
+
+
+8. Rebuild extension Typescript source after making changes
+
+.. code-block:: console
+
+   jlpm run build
+
 
 You can watch the source directory and run JupyterLab at the same time in different terminals to watch for changes in the extension's source and automatically rebuild the extension.
 
@@ -237,6 +272,9 @@ By default, the `jlpm run build` command generates the source maps for this exte
    jupyter lab build --minimize=False
 
 
+When you are ready with a new contribution open a Pull Request!! We are very happy to receive contributions from the community!
+
+
 Demo development status and new features
 ========================================
 
@@ -250,11 +288,11 @@ Demo development status and new features
 
 * `v0.7.4 <https://www.youtube.com/watch?v=YQIhuB16DuM>`__ [Jun 22 2021]
 
-* `v0.5.0 <https://www.youtube.com/watch?v=A3W48aHubkE`__ [Mar 15 2021]
+* `v0.5.0 <https://www.youtube.com/watch?v=A3W48aHubkE>`__ [Mar 15 2021]
 
-* `v0.3.7 <https://www.youtube.com/watch?v=-_dtDAAyMlU&t`__ [Feb 10 2021]
+* `v0.3.7 <https://www.youtube.com/watch?v=-_dtDAAyMlU&t>`__ [Feb 10 2021]
 
-* `v0.1.0 <https://www.youtube.com/watch?v=IBzTOP4TCdA`__ [Dec 8 2020]
+* `v0.1.0 <https://www.youtube.com/watch?v=IBzTOP4TCdA>`__ [Dec 8 2020]
 
 
 Uninstall
