@@ -2,109 +2,69 @@
 
 As of `v0.10.0` jupyterlab-requirements supports `%horus` magic command directly in the cells so that the user can speed up all dependency management taks, working in one place. Magic commands are automatically loaded when you start a notebook and they automatically identify the notebook you are using.
 
-To learn more about how to use the `%horus` magic commands check out the guide [here](https://github.com/thoth-station/jupyterlab-requirements#horus-magic-command) or the video [here](https://www.youtube.com/watch?v=FjVxNTXO70I)
-
-<div style="text-align:center">
-<img alt="JupyterLab Requirements Horus magic commands" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/JupyterLabRequirementsExtensionMC.png">
-</div>
-
-| magic-command | description |
-| ------------- | ------------------ |
-| %horus check | Check notebook metadata content about dependencies: `requirements`, `requirements_lock`, `dependency_resolution_engine`, `thoth_configuration_file` (only for Thoth resolution engine) |
+To learn more about how to use the `%horus` magic commands check out the documentation below or the video [here](https://www.youtube.com/watch?v=FjVxNTXO70I).
 
 
+## Magic commands
 
-## Create/Modify/Remove requirements in Pipfile in notebook metadata
+Here you can find a list of magic commands available and a description for each of them.
 
-You can add requirement to Pipfile in your notebook, using the following command:
+### help
+| magic command | options | description |
+| ------------- | ------------------ | ------------------ |
+| %horus help | | See all commands available in horus. |
 
-```bash
-%horus requirements --add tensorflow
-```
+### check
+| magic command | options | description |
+| ------------- | ------------------ | ------------------ |
+| %horus check |  | Check notebook metadata content about dependencies: `requirements`, `requirements_lock`, `dependency_resolution_engine`, `thoth_configuration_file` (only for Thoth resolution engine). |
 
-If you want to remove a requirement instead, you can use the following command:
+### requirements
+| magic command | options | description |
+| ------------- | ------------------ | ------------------ |
+| %horus requirements | --add {REQUIREMENT} | Add requirement to Pipfile in your notebook: `tensorflow`, `tensorflow==2.6.0`, `'importlib-metadata; python_version < "3.8"'`. NOTE: _If the Pipfile does not exists it is created automatically._ |
+|  | --add --dev {REQUIREMENT} | Add development requirement to Pipfile in your notebook: `--dev 'pytest~=6.2.0'`. |
+|  | --remove {REQUIREMENT} | Remove requirementfrom Pipfile in your notebook: `tensorflow` |
 
-```bash
-%horus requirements --remove tensorflow
-```
+### lock
+| magic command | options | description |
+| ------------- | ------------------ | ------------------ |
+| %horus lock |  | Resolve dependencies using Thoth resolution engine, install them in the kernel (default to `jupyterlab-requirements`) and save them in the notebook metadata. |
+|  | --set-timeout {TIMEOUT_INT} | Set the timeout [seconds] for the recommendation to be provied (only for Thoth resolution engine). |
+|  | --force | Force request if one analysis result already exists (only for Thoth resolution engine). |
+|  | --set-timeout {TIMEOUT_INT} | Set the timeout {TIMEOUT_INT} seconds for the recommendation to be provied (only for Thoth resolution engine). |
+|  | --recommendation-type {RECOMMENDATION_TYPE} | Recommendation type used in the request: `latest` (default), `stable`, `performance`, `security` (only for Thoth resolution engine). |
+|  | --os-name {OS_NAME} | Operating System name used in request (only for Thoth resolution engine). |
+|  | --os-version {OS_NAME} | Operating System version used in request (only for Thoth resolution engine). |
+|  | --python-version {OS_NAME} | Python Interpreter version used in request (only for Thoth resolution engine). |
+|  | --kernel-name {KERNEL_NAME} | You can select the {KERNEL_NAME} where the dependencies will be installed |
+|  | --pipenv | Resolve dependencies using Pipenv resolution engine |
 
-## Lock requirements in notebook metadata and installed in the kernel
+### convert
+| magic command | options | description |
+| ------------- | ------------------ | ------------------ |
+| %horus convert |  | Convert notebook cells with pip commands to use horus commands in order to allow reproducibility. Have a look at this [video](https://www.youtube.com/watch?v=SFui8yrMVjw) to know more about this command. |
 
-Adding `--kernel-name` can use a certain kernel name (default to `jupyterlab-requirements`).
+### discover
+| magic command | options | description |
+| ------------- | ------------------ | ------------------ |
+| %horus discover |  | Discover dependencies used from notebook content, create a Pipfile (empty if packages are not identified) and stores it in notebook metadata NOTE: _Please keep in mind this feature is under development and the packages identified need to be checked by humans._ |
+|  | --force | Force saving Pipfile in notebook metadata. This can be used if a Pipfile already exists for the notebook created. |
 
-Using `Thoth` resolution engine:
+### extract
+| magic command | options | description |
+| ------------- | ------------------ | ------------------ |
+| %horus extract |  | Extract dependencies content from notebook metadata (if they exist) and store it locally. By default it will try to extract all content. It will fail if the content already exist locally. NOTE: _Please keep in mind the `.thoth.yaml` will be stored at the root of the repo._ |
+|  | --force | Force saving notebook metadata locally. This can be used if a the content already exist locally. |
+|  | --store-files-path {PATH} | You can provide a specific path where to store the content. |
+|  | --pipfile | It will extract and save locally only the Pipfile. It will fail if the Pipfile exist at that path. |
+|  | --pipfile-lock | It will extract and save locally only the Pipfile.lock. It will fail if the Pipfile exist at that path. |
+|  | --thoth-config | It will extract and save locally only the .thoth.yaml. It will fail if the Pipfile exist at that path. |
 
-```bash
-%horus lock
-```
-
-Thoth only can be combined with the commands below:
-
-Adding `--set-timeout` will set timeout for request to thoth.
-
-Adding `--force` will force request to thoth if one analysis result already exists.
-
-Adding `--recommendation-type` the user can select the type of reccomendation:
-
-- latest [default]
-- stable
-- performance
-- security
-
-Adding `--os-name` will use OS name in request to Thoth.
-
-Adding `--os-version` will use OS version in request to Thoth.
-
-Adding `--python-version` will use python version in request to Thoth.
-
-Usign `Pipenv` resolution engine:
-
-```bash
-%horus lock --pipenv
-```
-
-Once dependencies are locked, they will be automatically installed in the kernel and saved in the notebook metadata.
-
-## Convert notebook cells with pip commands to use horus commands in order to allow reproducibility
-
-```
-%horus convert
-```
-
-Have a look at this [video](https://www.youtube.com/watch?v=SFui8yrMVjw) to know more about this command.
-
-## Discover notebook content about dependencies
-
-This command is used to discover dependencies used in the notebook and create a Pipfile (empty if packages are not identified).
-NOTE: Please keep in mind this feature is under development and the packages identified need to be checked by humans.
-
-```bash
-%horus discover
-```
-
-Adding `--force` will store file at the desired/default path even if one exists. If no `--force` is provided the CLI will simply fail.
-
-
-## Extract notebook metadata content about dependencies
-
-This command is used to extract dependencies content from notebook metadata and store it locally.
-
-```
-%horus extract
-```
-
-It can be combined with the commands below:
-
-Adding `--store-files-path` will store file at the desired path.
-
-Adding `--force` will store file at the desired/default path even if one exists. If no `--force` is provided the CLI will simply fail.
-
-NOTE: Please keep in mind the `.thoth.yaml` will be stored at the root of the repo.
-
-If you want to extract only a specific paramater, you can consider the following options:
-
-```bash
-%horus extract --pipfile
-%horus extract --pipfile-lock
-%horus extract --thoth-config
-```
+### show
+| magic command | options | description |
+| ------------- | ------------------ | ------------------ |
+| %horus show |  | Show dependencies content from notebook metadata (if they exist) |
+|  | --pipfile | It will show only the Pipfile. |
+|  | --pipfile-lock | It will show only the Pipfile.lock. |
+|  | --thoth-config | It will show only the .thoth.yaml. |
