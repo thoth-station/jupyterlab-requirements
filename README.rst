@@ -17,7 +17,7 @@ JupyterLab Requirements
   :target: https://pypi.org/project/jupyterlab-requirements
   :alt: PyPI - Downloads
 
-This is a JupyterLab extension for dependency management and optimization and to foster reproducibility of Jupyter notebooks.
+This is a JupyterLab extension for dependency management and optimization created to guarantee reproducibility of Jupyter notebooks.
 
 About
 =====
@@ -71,13 +71,16 @@ the frontend extension, check the frontend extension is installed:
 
    jupyter labextension list
 
+Usage
+=====
 
-Uninstall
----------
+There are 3 ways to interact with this extension:
 
-.. code-block:: console
+- `%horus magic commands <./docs/source/horus-magic-commands.md>`__ directly in your notebook's cells.
 
-   pip uninstall jupyterlab-requirements
+- `horus CLI <./docs/source/horus-cli.md>`__ from terminal or integrated in pipelines.
+
+- `jupyterlab-requirements UI <./docs/source/jupyterlab-requirements-ui.md>`__ accessible through `Manage Dependencies` button that appears in the notebook when it is opened in JupyteLab.
 
 
 Resolution engines
@@ -131,14 +134,14 @@ You can select the runtime environment to be used for the recommendation selecti
 NOTE: Those parameters are autodiscovered by the extension and assigned to your environment, you can customize them if you are interested.
 
 Dependencies installation
--------------------------
+=========================
 
 Once lock file is created using any of available resolution engines, the dependencies will be installed in the virtualenv using
 `micropipenv <https://pypi.org/project/micropipenv/>`__.
 
 
 Virtual environment for you dependencies
-----------------------------------------
+========================================
 
 The virtual environment created and assigned to the kernel to be used for your notebook according to your dependencies requirements can be checked using the following command from a terminal:
 
@@ -148,7 +151,7 @@ The virtual environment created and assigned to the kernel to be used for your n
 
 
 Overlays directory
-------------------
+==================
 
 The dependencies stored in the notebook metadata can be also stored into `overlays` folder using the kernel name by default.
 If you want to know more about the use of overlays, have a look `micropipenv <https://github.com/thoth-station/thamos#support-for-multiple-runtime-environments>`__.
@@ -156,7 +159,7 @@ If you want to see a practical example on the use of overlays and how to create 
 
 
 Delete kernels
---------------
+==============
 
 If you have too many kernels, you can remove them directly from the JupyterLab menu under Kernel Section.
 This plugin is provided from this extension.
@@ -184,18 +187,6 @@ In the notebook metadata you will find:
      - Only for Thoth resolution engine.
 
 All this information can allow reproducibility of the notebook.
-
-
-Usage
-=====
-
-There are 3 ways to interact with this extension:
-
-- `%horus magic commands <./docs/source/horus-magic-commands.md>`__ directly in your notebook's cells.
-
-- `horus CLI <./docs/source/horus-cli.md>`__ directly from terminal or integrated in pipelines.
-
-- `jupyterlab-requirements UI <./docs/source/jupyterlab-requirements-ui.md>`__ accessible through `Manage Dependencies` button that appears in the notebook when it is opened.
 
 Contributing
 ============
@@ -246,7 +237,8 @@ By default, the `jlpm run build` command generates the source maps for this exte
    jupyter lab build --minimize=False
 
 
-# Demo development status and new features
+Demo development status and new features
+========================================
 
 * `v0.11.0 <https://www.youtube.com/watch?v=SFui8yrMVjw>`__ [Sep 13 2021]
 
@@ -258,8 +250,16 @@ By default, the `jlpm run build` command generates the source maps for this exte
 
 * `v0.7.4 <https://www.youtube.com/watch?v=YQIhuB16DuM>`__ [Jun 22 2021]
 
-* [v0.5.0](https://www.youtube.com/watch?v=A3W48aHubkE) [Mar 15 2021]
+* `v0.5.0 <https://www.youtube.com/watch?v=A3W48aHubkE`__ [Mar 15 2021]
 
-* [v0.3.7](https://www.youtube.com/watch?v=-_dtDAAyMlU&t) [Feb 10 2021]
+* `v0.3.7 <https://www.youtube.com/watch?v=-_dtDAAyMlU&t`__ [Feb 10 2021]
 
-* [v0.1.0](https://www.youtube.com/watch?v=IBzTOP4TCdA) [Dec 8 2020]
+* `v0.1.0 <https://www.youtube.com/watch?v=IBzTOP4TCdA`__ [Dec 8 2020]
+
+
+Uninstall
+=========
+
+.. code-block:: console
+
+   pip uninstall jupyterlab-requirements
