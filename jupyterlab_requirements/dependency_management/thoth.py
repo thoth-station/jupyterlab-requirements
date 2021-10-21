@@ -46,6 +46,7 @@ class ThothAdviseHandler(DependencyManagementBaseHandler):
         kernel_name: str = input_data["kernel_name"]
         timeout: int = input_data["thoth_timeout"]
         force: bool = input_data["thoth_force"]
+        debug: bool = input_data["thoth_debug"]
         notebook_content: str = input_data["notebook_content"]
         requirements: dict = json.loads(input_data["requirements"])
 
@@ -56,6 +57,7 @@ class ThothAdviseHandler(DependencyManagementBaseHandler):
             kernel_name=kernel_name,
             timeout=timeout,
             force=force,
+            debug=debug,
             notebook_content=notebook_content,
             pipfile_string=pipfile_string,
         )

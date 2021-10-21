@@ -95,6 +95,7 @@ export interface IDependencyManagementUIState {
   resolution_engine: string,
   thoth_timeout: number,
   thoth_force: boolean,
+  thoth_debug: boolean,
   root_directory: string,
   thoth_resolution_error_msg: string,
   pipenv_resolution_error_msg: string
@@ -145,6 +146,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         resolution_engine: "thoth",
         thoth_timeout: 180,
         thoth_force: false,
+        thoth_debug: true,
         root_directory: "",
         thoth_resolution_error_msg: undefined,
         pipenv_resolution_error_msg: undefined
@@ -275,6 +277,27 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
           }
         );
      }
+
+
+    /**
+     * Function: Set debug for thamos advise
+     */
+
+     setDebugParameter(thoth_debug: string) {
+      if (thoth_debug == "true") {
+        var debug = true
+      }
+      else {
+        var debug = false
+      }
+
+      this.setState(
+        {
+          thoth_debug: debug
+        }
+      );
+   }
+
 
     /**
      * Function: Set root directory where to place overlays and where to find .thoth.yaml
@@ -645,6 +668,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
           this.state.kernel_name,
           this.state.thoth_timeout,
           this.state.thoth_force,
+          this.state.thoth_debug,
           notebook_content,
           JSON.stringify(thoth_config),
           JSON.stringify(this.state.requirements)
@@ -933,6 +957,17 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                                 title="Thoth force parameter"
                                 name="thoth_force"
                                 value={this.state.thoth_force}
+                                <option value="false">False</option>
+                                <option value="true">True</option>
+                              </select>
+                            </label>
+                            <br />
+                            <label>
+                              Thoth --debug:
+                              <select onChange={() => this.setForceParameter}>
+                                title="Thoth debug parameter"
+                                name="thoth_debug"
+                                value={this.state.thoth_debug}
                                 <option value="false">False</option>
                                 <option value="true">True</option>
                               </select>
