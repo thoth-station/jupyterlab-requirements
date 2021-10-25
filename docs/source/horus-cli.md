@@ -16,13 +16,32 @@ This command can be used in CI to verify notebooks have dependencies.
 horus check [YOUR_NOTEBOOK].ipynb
 ```
 
-## Show notebook metadata content about dependencies
+## Create/Modify/Remove requirements in Pipfile in notebook metadata
 
-This command is used to show dependencies content from notebook metadata.
+You can add requirement to Pipfile in your notebook, using the following command:
 
+```bash
+horus requirements [YOUR_NOTEBOOK].ipynb  --add tensorflow
 ```
-horus show [YOUR_NOTEBOOK].ipynb
+
+If you want to remove a requirement instead, you can use the following command:
+
+```bash
+horus requirements [YOUR_NOTEBOOK].ipynb  --remove tensorflow
 ```
+
+## Discover notebook content about dependencies
+
+This command is used to discover dependencies used in the notebook and create a Pipfile (empty if packages are not identified).
+NOTE: Please keep in mind this feature is under development and the packages identified need to be checked by humans.
+
+```bash
+horus discover [YOUR_NOTEBOOK].ipynb
+```
+
+Adding `--show-only` won't store file locally, but only show it to stdout.
+
+Adding `--force` will store file at the desired/default path even if one exists. If no `--force` is provided the CLI will simply fail.
 
 ## Extract notebook metadata content about dependencies
 
@@ -56,58 +75,6 @@ This commands is used to prepare environment for the notebook to run, just point
 horus set-kernel [YOUR_NOTEBOOK].ipynb
 ```
 
-## Discover notebook content about dependencies
-
-This command is used to discover dependencies used in the notebook and create a Pipfile (empty if packages are not identified).
-NOTE: Please keep in mind this feature is under development and the packages identified need to be checked by humans.
-
-```bash
-horus discover [YOUR_NOTEBOOK].ipynb
-```
-
-Adding `--show-only` won't store file locally, but only show it to stdout.
-
-Adding `--force` will store file at the desired/default path even if one exists. If no `--force` is provided the CLI will simply fail.
-
-## Save content about dependencies in notebook metadata
-
-This command is used to save content in notebook metadata.
-
-```
-horus save [YOUR_NOTEBOOK].ipynb --resolution-engine [RESOLUTION_ENGINE]
-```
-
-RESOLUTION_ENGINE can be `thoth` or `pipenv` currently.
-
-It can be combined with the commands below:
-
-Adding `--save-files-path` will consider files to save from the desired path.
-
-Adding `--force` will store file at the desired/default path even if one exists. If no `--force` is provided the CLI will simply fail.
-
-Adding `--kernel-name` can set a certain kernel name (default to `jupyterlab-requirements`).
-
-If you want to save only a specific paramater, you can consider the following options:
-
-```bash
-horus save [YOUR_NOTEBOOK].ipynb  --pipfile
-horus save [YOUR_NOTEBOOK].ipynb  --pipfile-lock
-horus save [YOUR_NOTEBOOK].ipynb  --thoth-config
-```
-
-## Create/Modify/Remove requirements in Pipfile in notebook metadata
-
-You can add requirement to Pipfile in your notebook, using the following command:
-
-```bash
-horus requirements [YOUR_NOTEBOOK].ipynb  --add tensorflow
-```
-
-If you want to remove a requirement instead, you can use the following command:
-
-```bash
-horus requirements [YOUR_NOTEBOOK].ipynb  --remove tensorflow
-```
 
 ## Lock requirements in notebook metadata
 
@@ -137,4 +104,38 @@ Usign Pipenv resolution engine:
 
 ```bash
 horus lock [YOUR_NOTEBOOK].ipynb  --pipenv
+```
+
+## Save content about dependencies in notebook metadata
+
+This command is used to save content in notebook metadata.
+
+```
+horus save [YOUR_NOTEBOOK].ipynb --resolution-engine [RESOLUTION_ENGINE]
+```
+
+RESOLUTION_ENGINE can be `thoth` or `pipenv` currently.
+
+It can be combined with the commands below:
+
+Adding `--save-files-path` will consider files to save from the desired path.
+
+Adding `--force` will store file at the desired/default path even if one exists. If no `--force` is provided the CLI will simply fail.
+
+Adding `--kernel-name` can set a certain kernel name (default to `jupyterlab-requirements`).
+
+If you want to save only a specific paramater, you can consider the following options:
+
+```bash
+horus save [YOUR_NOTEBOOK].ipynb  --pipfile
+horus save [YOUR_NOTEBOOK].ipynb  --pipfile-lock
+horus save [YOUR_NOTEBOOK].ipynb  --thoth-config
+```
+
+## Show notebook metadata content about dependencies
+
+This command is used to show dependencies content from notebook metadata.
+
+```
+horus show [YOUR_NOTEBOOK].ipynb
 ```
