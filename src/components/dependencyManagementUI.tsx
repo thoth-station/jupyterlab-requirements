@@ -928,7 +928,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                             </label>
                             <br />
                             <label>
-                              Recommendation type:
+                              Thoth Recommendation type:
                               <select onChange={() => this.changeRecommendationType}>
                                 title="Recommendation Type"
                                 name="recommendation_type"
@@ -952,7 +952,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                             </label>
                             <br />
                             <label>
-                              Thoth --force:
+                              Thoth force:
                               <select onChange={() => this.setForceParameter}>
                                 title="Thoth force parameter"
                                 name="thoth_force"
@@ -963,7 +963,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                             </label>
                             <br />
                             <label>
-                              Thoth --debug:
+                              Thoth debug:
                               <select onChange={() => this.setForceParameter}>
                                 title="Thoth debug parameter"
                                 name="thoth_debug"
