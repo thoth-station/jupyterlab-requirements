@@ -338,7 +338,7 @@ class HorusMagics(Magics):
 
             return console.print(table, justify="center")
 
-        if args.command == "clean":
+        if args.command == "convert":
             _LOGGER.info("Cleaning notebook content to allow reproducibility...")
 
         if args.command == "lock":
