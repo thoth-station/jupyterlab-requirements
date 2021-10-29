@@ -91,12 +91,6 @@ class HorusMagics(Magics):
         lock_command = subparsers.add_parser(
             "lock", description="Lock requirements in notebook metadata [default Thoth]."
         )
-        lock_command.add_argument("--force", help="Force request to Thoth.", action="store_true")
-        lock_command.add_argument(
-            "--debug",
-            help="Debug/Verbose request to Thoth. WARNING: It has impact on the quality of the resolution process.",
-            action="store_true",
-        )
         lock_command.add_argument(
             "--kernel-name",
             default="jupyterlab-requirements",
@@ -105,6 +99,12 @@ class HorusMagics(Magics):
         )
 
         # Only Thoth
+        lock_command.add_argument("--force", help="Force request to Thoth.", action="store_true")
+        lock_command.add_argument(
+            "--debug",
+            help="Debug/Verbose request to Thoth. WARNING: It has impact on the quality of the resolution process.",
+            action="store_true",
+        )
         lock_command.add_argument(
             "--recommendation-type",
             choices=["latest", "stable", "performance", "security"],

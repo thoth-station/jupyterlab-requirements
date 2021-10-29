@@ -139,7 +139,8 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
               version: "8",
             },
             python_version: "3.8",
-            recommendation_type: "latest"
+            recommendation_type: "latest",
+            base_image: ""
           }]
         },
         error_msg: undefined,
@@ -297,6 +298,82 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         }
       );
    }
+
+    /**
+     * Function: Set base image
+     */
+
+    setBaseImage(event: React.ChangeEvent<HTMLInputElement>) {
+
+      var thoth_base_image = event.target.value
+
+      var initial_thoth_config = this.state.thoth_config
+
+      _.set(initial_thoth_config, initial_thoth_config.runtime_environments[0].base_image, thoth_base_image)
+
+      this.setState(
+        {
+          thoth_config: initial_thoth_config
+        }
+      );
+    }
+
+    /**
+     * Function: Set Python Version
+     */
+
+     setPythonVersion(event: React.ChangeEvent<HTMLInputElement>) {
+
+      var thoth_python_version = event.target.value
+
+      var initial_thoth_config = this.state.thoth_config
+
+      _.set(initial_thoth_config, initial_thoth_config.runtime_environments[0].python_version, thoth_python_version)
+
+      this.setState(
+        {
+          thoth_config: initial_thoth_config
+        }
+      );
+    }
+
+    /**
+     * Function: Set OS name
+     */
+
+     setOSName(event: React.ChangeEvent<HTMLInputElement>) {
+
+      var thoth_os_name = event.target.value
+
+      var initial_thoth_config = this.state.thoth_config
+
+      _.set(initial_thoth_config, initial_thoth_config.runtime_environments[0].operating_system.name, thoth_os_name)
+
+      this.setState(
+        {
+          thoth_config: initial_thoth_config
+        }
+      );
+    }
+
+    /**
+     * Function: Set OS version
+     */
+
+    setOSVersion(event: React.ChangeEvent<HTMLInputElement>) {
+
+      var thoth_os_version = event.target.value
+
+      var initial_thoth_config = this.state.thoth_config
+
+      _.set(initial_thoth_config, initial_thoth_config.runtime_environments[0].operating_system.version, thoth_os_version)
+
+      this.setState(
+        {
+          thoth_config: initial_thoth_config
+        }
+      );
+    }
 
 
     /**
@@ -899,47 +976,72 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                                       </div>
                                     </div>
 
-      let optionsForm = <div>
-                          <section>
-                            <h2>OPTIONS</h2>
-                          </section>
 
-                          <form>
-                            <label>
-                              Kernel name:
-                              <input
-                                title="Kernel name"
-                                type="text"
-                                name="kernel_name"
-                                value={this.state.kernel_name}
-                                onChange={this.setKernelName}
-                              />
-                            </label>
-                            <br />
-                            <label>
-                              Path root project:
-                              <input
-                                title="Path root project"
-                                type="text"
-                                name="root_directory"
-                                value={this.state.root_directory}
-                                onChange={this.setRootDirectoryPath}
-                              />
-                            </label>
-                            <br />
-                            <label>
-                              Thoth Recommendation type:
-                              <select onChange={() => this.changeRecommendationType}>
-                                title="Recommendation Type"
-                                name="recommendation_type"
-                                value={this.state.recommendation_type}
-                                <option value="latest">latest</option>
-                                <option value="performance">performance</option>
-                                <option value="security">security</option>
-                                <option value="stable">stable</option>
-                              </select>
-                            </label>
-                            <br />
+      let kernelNameInput = <div>
+                              <label>
+                                Kernel name:
+                                <input
+                                  title="Kernel name"
+                                  type="text"
+                                  name="kernel_name"
+                                  value={this.state.kernel_name}
+                                  onChange={this.setKernelName}
+                                />
+                              </label>
+                              <br />
+                            </div>
+
+      let pathRootProjectInput =  <div>
+                                    <label>
+                                      Path root project:
+                                      <input
+                                        title="Path root project"
+                                        type="text"
+                                        name="root_directory"
+                                        value={this.state.root_directory}
+                                        onChange={this.setRootDirectoryPath}
+                                      />
+                                    </label>
+                                    <br />
+                                  </div>
+
+      let recommendationTypeInput = <div>
+                                      <label>
+                                        Thoth Recommendation type:
+                                        <select onChange={() => this.changeRecommendationType}>
+                                          title="Recommendation Type"
+                                          name="recommendation_type"
+                                          value={this.state.recommendation_type}
+                                          <option value="latest">latest</option>
+                                          <option value="performance">performance</option>
+                                          <option value="security">security</option>
+                                          <option value="stable">stable</option>
+                                        </select>
+                                      </label>
+                                      <br />
+                                    </div>
+
+      if ( this.state.thoth_config.runtime_environments[0].base_image ) {
+        var baseImageInput = <div>
+                              <label>
+                                Thoth base image:
+                                <input
+                                  title="Thoth base image"
+                                  type="text"
+                                  name="thoth_base_image"
+                                  value={this.state.thoth_config.runtime_environments[0].base_image}
+                                  onChange={this.setBaseImage}
+                                />
+                              </label>
+                              <br />
+                            </div>
+      }
+
+      else {
+        var baseImageInput = <div></div>
+      }
+
+      let timeoutInput = <div>
                             <label>
                               Thoth timeout [s]:
                               <input
@@ -951,27 +1053,94 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                               />
                             </label>
                             <br />
-                            <label>
-                              Thoth force:
-                              <select onChange={() => this.setForceParameter}>
-                                title="Thoth force parameter"
-                                name="thoth_force"
-                                value={this.state.thoth_force}
-                                <option value="false">False</option>
-                                <option value="true">True</option>
-                              </select>
-                            </label>
-                            <br />
-                            <label>
-                              Thoth debug:
-                              <select onChange={() => this.setForceParameter}>
-                                title="Thoth debug parameter"
-                                name="thoth_debug"
-                                value={this.state.thoth_debug}
-                                <option value="false">False</option>
-                                <option value="true">True</option>
-                              </select>
-                            </label>
+                          </div>
+
+      let pythonVersionInput = <div>
+                                <label>
+                                  Thoth Python Version:
+                                  <input
+                                    title="Thoth OS name"
+                                    type="text"
+                                    name="thoth_python_version"
+                                    value={this.state.thoth_config.runtime_environments[0].python_version}
+                                    onChange={this.setPythonVersion}
+                                  />
+                                </label>
+                                <br />
+                              </div>
+
+      let OSNameInput = <div>
+                          <label>
+                            Thoth OS name:
+                            <input
+                              title="Thoth OS name"
+                              type="text"
+                              name="thoth_os_name"
+                              value={this.state.thoth_config.runtime_environments[0].operating_system.name}
+                              onChange={this.setOSName}
+                            />
+                          </label>
+                          <br />
+                        </div>
+
+      let OSVersionInput = <div>
+                          <label>
+                            Thoth OS version:
+                            <input
+                              title="Thoth OS version"
+                              type="text"
+                              name="thoth_os_version"
+                              value={this.state.thoth_config.runtime_environments[0].operating_system.version}
+                              onChange={this.setOSVersion}
+                            />
+                          </label>
+                          <br />
+                          </div>
+
+      let forceInput =  <div>
+                          <label>
+                            Thoth force:
+                            <select onChange={() => this.setForceParameter}>
+                              title="Thoth force parameter"
+                              name="thoth_force"
+                              value={this.state.thoth_force}
+                              <option value="false">False</option>
+                              <option value="true">True</option>
+                            </select>
+                          </label>
+                          <br />
+                        </div>
+
+      let debugInput =  <div>
+                          <label>
+                            Thoth debug:
+                            <select onChange={() => this.setForceParameter}>
+                              title="Thoth debug parameter"
+                              name="thoth_debug"
+                              value={this.state.thoth_debug}
+                              <option value="false">False</option>
+                              <option value="true">True</option>
+                            </select>
+                          </label>
+                        </div>
+
+
+      let optionsForm = <div>
+                          <section>
+                            <h2>OPTIONS</h2>
+                          </section>
+
+                          <form>
+                            {kernelNameInput}
+                            {pathRootProjectInput}
+                            {recommendationTypeInput}
+                            {pythonVersionInput}
+                            {OSNameInput}
+                            {OSVersionInput}
+                            {baseImageInput}
+                            {timeoutInput}
+                            {forceInput}
+                            {debugInput}
                           </form>
                         </div>
 

@@ -36,7 +36,8 @@ export interface RuntimeEnvironment {
     name: string,
     operating_system: OperatingSystem
     python_version: string,
-    recommendation_type: string
+    recommendation_type: string,
+    base_image: string,
 }
 
 export interface ThothConfig {
