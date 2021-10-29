@@ -1,5 +1,28 @@
 # Changelog for Thoth's Template GitHub Project
 
+## Release 0.12.0 (2021-10-29T14:12:01)
+### Features
+* Feature/inputs-runtime-environment
+* Add missing dependency
+* Add table for UI parameters description
+* Fix command name
+* Fix development section
+* Adjust order
+* Make pre-commit happy
+* Add UI doc section
+* Adjust links
+* Add horus cli readme section
+* Add magic commands section
+* Improve README
+* Fix check on kernelspec for command
+* Modified required verison of jupyterlab
+* Add link for overlays tutorial
+### Improvements
+* Add debug to docs for UI, CLI and magic commands
+* Add debug to magic commands
+* Add debug to CLI
+* Add debug to UI
+
 ## Release 0.11.1 (2021-10-06T14:30:25)
 ### Features
 * Remove comment
