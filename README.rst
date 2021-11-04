@@ -103,7 +103,6 @@ Using the Thoth resolution engine you can request an optimized software stack th
 
 Thoth: recommendation type
 --------------------------
---------------------------
 
 You can choose the type of recommendation that better fits your needs:
 
@@ -116,7 +115,6 @@ You can choose the type of recommendation that better fits your needs:
 You can find more information and updates `here <https://thoth-station.ninja/recommendation-types/>`__.
 
 Thoth: runtime environment
---------------------------
 --------------------------
 
 Thoth resolution engine is able to provide an optimized software stack based on the runtime environment you are using (several inputs are used, if you want to know more, have a look here `here <https://github.com/thoth-station/adviser>`__).
