@@ -1049,6 +1049,7 @@ def horus_set_kernel_command(
     save_in_notebook: bool = True,
     resolution_engine: typing.Optional[str] = None,
     is_magic_command: bool = False,
+    force: bool = False,
 ):
     """Create kernel using dependencies in notebook metadata."""
     results = {}
@@ -1093,7 +1094,7 @@ def horus_set_kernel_command(
 
     complete_path: Path = store_path.joinpath(kernel)
 
-    if not is_magic_command:
+    if not is_magic_command or force:
         if complete_path.exists():
             delete_kernel(kernel_name=kernel)
 
@@ -1102,20 +1103,20 @@ def horus_set_kernel_command(
     # 1. Get Pipfile, Pipfile.lock and .thoth.yaml and store them in ./.local/share/kernel/{kernel_name}
 
     # requirements
-    if not is_magic_command:
+    if is_magic_command:
         pipfile_string = notebook_metadata.get("requirements")
         pipfile_ = Pipfile.from_string(pipfile_string)
         pipfile_path = complete_path.joinpath("Pipfile")
         pipfile_.to_file(path=pipfile_path)
 
     # requirements lock
-    if not is_magic_command:
+    if is_magic_command:
         pipfile_lock_string = notebook_metadata.get("requirements_lock")
         pipfile_lock_ = PipfileLock.from_string(pipfile_content=pipfile_lock_string, pipfile=pipfile_)
         pipfile_lock_path = complete_path.joinpath("Pipfile.lock")
         pipfile_lock_.to_file(path=pipfile_lock_path)
 
-    if dependency_resolution_engine == "thoth" and not is_magic_command:
+    if dependency_resolution_engine == "thoth" and is_magic_command:
         # thoth
         thoth_config_string = notebook_metadata.get("thoth_config")
         config = _Configuration()
@@ -1131,7 +1132,7 @@ def horus_set_kernel_command(
         is_magic_command=is_magic_command,
     )
 
-    # 3. Install packages using micropipenv
+    # 3. Assign virtualenv to jupyter kernel
     create_kernel(kernel_name=kernel)
 
     if save_in_notebook:

@@ -139,7 +139,7 @@ class HorusMagics(Magics):
         # Use Pipenv
         lock_command.add_argument("--pipenv", help="Use pipenv resolution engine.", action="store_true")
 
-        # command: set
+        # command: set-kernel
         set_command = subparsers.add_parser(
             "set-kernel", description="Set kernel from dependencies in notebook content."
         )
@@ -148,6 +148,7 @@ class HorusMagics(Magics):
             type=str,
             help="Specify kernel name to be used when creating it.",
         )
+        set_command.add_argument("--force", help="Delete kernel if exists and recreate it.", action="store_true")
 
         # command: convert
         _ = subparsers.add_parser(
@@ -385,7 +386,9 @@ class HorusMagics(Magics):
             kernel_results = horus_set_kernel_command(
                 path=nb_path,
                 kernel_name=args.kernel_name if args.kernel_name else None,
+                is_magic_command=True,
                 save_in_notebook=False,
+                force=args.force,
             )
 
             return json.dumps(

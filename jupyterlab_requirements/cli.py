@@ -505,7 +505,12 @@ def check(ctx: click.Context, path: str, output_format: str) -> None:
     type=str,
     help="Name of kernel.",
 )
-def set_kernel(ctx: click.Context, path: str, kernel_name: Optional[str]) -> None:
+@click.option(
+    "--force",
+    is_flag=True,
+    help="Delete kernel if exists and recreate it.",
+)
+def set_kernel(ctx: click.Context, path: str, kernel_name: Optional[str], force: bool = False) -> None:
     """Create kernel using dependencies in notebook metadata.
 
     Create kernel for your notebook.
@@ -513,7 +518,7 @@ def set_kernel(ctx: click.Context, path: str, kernel_name: Optional[str]) -> Non
     Examples:
         horus set-kernel [YOUR_NOTEBOOK].ipynb
     """
-    results = horus_set_kernel_command(path=path, kernel_name=kernel_name)
+    results = horus_set_kernel_command(path=path, kernel_name=kernel_name, force=force)
 
     if results["kernel_name"] == "python3":
         click.echo("python3 kernel name, cannot be overwritten, assigning default jupyterlab-requirements")
