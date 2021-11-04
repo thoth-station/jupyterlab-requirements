@@ -103,10 +103,6 @@
 
  /* Table */
 
-.thoth-table, thead, tr, th {
-  width: 100%;
-}
-
 .thoth-table, th, tr {
   border-bottom: 1px solid black;
 }
