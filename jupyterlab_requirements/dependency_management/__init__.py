@@ -32,7 +32,7 @@ from .thoth_config_handler import ThothConfigHandler
 from .thoth_invectio import ThothInvectioHandler
 
 from .lib import _EMOJI
-from .lib import check_metadata_content
+from .lib import horus_check_metadata_content
 from .lib import create_pipfile_from_packages
 from .lib import gather_libraries
 from .lib import get_notebook_content
@@ -61,10 +61,10 @@ __all__ = [
     "ThothConfigHandler",
     "ThothInvectioHandler",
     "YamlSpecHandler",
-    "check_metadata_content",
     "create_pipfile_from_packages",
     "gather_libraries",
     "get_notebook_content",
+    "horus_check_metadata_content",
     "horus_extract_command",
     "horus_set_kernel_command",
     "horus_lock_command",
