@@ -66,6 +66,12 @@ Here you can find a list of magic commands available and a description for each 
 |  | --add --dev {REQUIREMENT} | Add development requirement to Pipfile in your notebook: `--dev 'pytest~=6.2.0'`. |
 |  | --remove {REQUIREMENT} | Remove requirementfrom Pipfile in your notebook: `tensorflow` |
 
+### set-kernel
+| magic command | options | description |
+| ------------- | ------------------ | ------------------ |
+| %horus set-kernel |  | Prepare environment for the notebook to run (create kernel (if does not exist) and install dependencies from notebook metadata (if they exist)) |
+|  | --force | This command will delete existint kernel with that name and recreate it. |
+
 ### show
 | magic command | options | description |
 | ------------- | ------------------ | ------------------ |

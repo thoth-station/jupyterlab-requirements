@@ -7,7 +7,7 @@ As of [v0.9.0](https://youtu.be/fW0YKugL26g) jupyterlab-requirements supports a 
 </div>
 
 
-## Check notebook metadata content about dependencies
+## check
 
 This command is used to verify if a certain notebook is reproducible, therefore if it contains all dependencies required for installation and run.
 This command can be used in CI to verify notebooks have dependencies.
@@ -16,21 +16,7 @@ This command can be used in CI to verify notebooks have dependencies.
 horus check [YOUR_NOTEBOOK].ipynb
 ```
 
-## Create/Modify/Remove requirements in Pipfile in notebook metadata
-
-You can add requirement to Pipfile in your notebook, using the following command:
-
-```bash
-horus requirements [YOUR_NOTEBOOK].ipynb  --add tensorflow
-```
-
-If you want to remove a requirement instead, you can use the following command:
-
-```bash
-horus requirements [YOUR_NOTEBOOK].ipynb  --remove tensorflow
-```
-
-## Discover notebook content about dependencies
+## discover
 
 This command is used to discover dependencies used in the notebook and create a Pipfile (empty if packages are not identified).
 NOTE: Please keep in mind this feature is under development and the packages identified need to be checked by humans.
@@ -43,7 +29,7 @@ Adding `--show-only` won't store file locally, but only show it to stdout.
 
 Adding `--force` will store file at the desired/default path even if one exists. If no `--force` is provided the CLI will simply fail.
 
-## Extract notebook metadata content about dependencies
+## extract
 
 This command is used to extract dependencies content from notebook metadata and store it locally.
 
@@ -67,16 +53,9 @@ horus extract [YOUR_NOTEBOOK].ipynb  --pipfile-lock
 horus extract [YOUR_NOTEBOOK].ipynb  --thoth-config
 ```
 
-## Install and create kernel for the notebook dependencies
+## lock
 
-This commands is used to prepare environment for the notebook to run, just pointing to the notebook.
-
-```bash
-horus set-kernel [YOUR_NOTEBOOK].ipynb
-```
-
-
-## Lock requirements in notebook metadata
+This command is used to create kernel, lock requirements, intall them and save them in the notebook metadata.
 
 Adding `--kernel-name` can use a certain kernel name (default to `jupyterlab-requirements`).
 
@@ -106,7 +85,23 @@ Usign Pipenv resolution engine:
 horus lock [YOUR_NOTEBOOK].ipynb  --pipenv
 ```
 
-## Save content about dependencies in notebook metadata
+## requirements
+
+This comand is used to create, update or remove requirements from Pipfile in notebook metadata.
+
+You can add requirement to Pipfile in your notebook, using the following command:
+
+```bash
+horus requirements [YOUR_NOTEBOOK].ipynb  --add tensorflow
+```
+
+If you want to remove a requirement instead, you can use the following command:
+
+```bash
+horus requirements [YOUR_NOTEBOOK].ipynb  --remove tensorflow
+```
+
+## save
 
 This command is used to save content in notebook metadata.
 
@@ -132,10 +127,26 @@ horus save [YOUR_NOTEBOOK].ipynb  --pipfile-lock
 horus save [YOUR_NOTEBOOK].ipynb  --thoth-config
 ```
 
-## Show notebook metadata content about dependencies
+## set-kernel
+
+This commands is used to prepare environment for the notebook to run (create kernel and install dependencies from notebook metadata), just pointing to the notebook.
+
+```bash
+horus set-kernel [YOUR_NOTEBOOK].ipynb
+```
+
+## show
 
 This command is used to show dependencies content from notebook metadata.
 
 ```
 horus show [YOUR_NOTEBOOK].ipynb
+```
+
+If you want to show only a specific paramater, you can consider the following options:
+
+```bash
+horus show [YOUR_NOTEBOOK].ipynb  --pipfile
+horus show [YOUR_NOTEBOOK].ipynb  --pipfile-lock
+horus show [YOUR_NOTEBOOK].ipynb  --thoth-config
 ```
