@@ -82,7 +82,7 @@ def get_notebook_content(notebook_path: str, py_format: bool = False):
         return notebook_content_py
 
 
-def check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -> list:
+def horus_check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -> list:
     """Check the metadata of notebook for dependencies."""
     result = []
 
@@ -179,7 +179,7 @@ def check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -> list
         else:
             result.append(
                 {
-                    "message": f"{mandatory_key} key is present in notebook metadata",
+                    "message": f"{mandatory_key} key is present in notebook metadata.",
                     "type": "INFO",
                 }
             )
@@ -242,7 +242,7 @@ def check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -> list
         if kernel_packages:
             for package in notebook_packages:
                 if str(package.name) in kernel_packages:
-                    if str(package.version) in kernel_packages[str(package.name)]:
+                    if str(package.version).strip("==") in kernel_packages[str(package.name)]:
                         check += 1
                 else:
                     break
@@ -250,8 +250,9 @@ def check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -> list
         if check == len([p for p in notebook_packages]):
             result.append(
                 {
-                    "message": f"kernel {kernel_name} selected has all dependencies installed.",
-                    "type": "INFO",
+                    "message": f"kernel {kernel_name} matches packages(name,version,PyPI index) "
+                    "from requirements lock in your notebook metadata.",
+                    "type": "WARNING",
                 }
             )
         else:

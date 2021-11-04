@@ -38,7 +38,7 @@ from thamos.discover import discover_python_version
 from jupyterlab_requirements import __version__
 
 from jupyterlab_requirements.dependency_management import _EMOJI
-from jupyterlab_requirements.dependency_management import check_metadata_content
+from jupyterlab_requirements.dependency_management import horus_check_metadata_content
 from jupyterlab_requirements.dependency_management import create_pipfile_from_packages
 from jupyterlab_requirements.dependency_management import gather_libraries
 from jupyterlab_requirements.dependency_management import get_notebook_content
@@ -454,7 +454,7 @@ def check(ctx: click.Context, path: str, output_format: str) -> None:
     notebook = get_notebook_content(notebook_path=path)
     notebook_metadata = notebook.get("metadata")
 
-    result = check_metadata_content(notebook_metadata=notebook_metadata)
+    result = horus_check_metadata_content(notebook_metadata=notebook_metadata)
 
     if output_format == "yaml":
         yaml.safe_dump(result, sys.stdout)

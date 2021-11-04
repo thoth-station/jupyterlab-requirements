@@ -35,7 +35,7 @@ from IPython.core.magic import magics_class, Magics
 from thamos.discover import discover_python_version
 
 from .lib import _EMOJI
-from .lib import check_metadata_content
+from .lib import horus_check_metadata_content
 from .lib import create_pipfile_from_packages
 from .lib import gather_libraries
 from .lib import get_notebook_content
@@ -237,7 +237,7 @@ class HorusMagics(Magics):
             notebook = get_notebook_content(notebook_path=nb_path)
             notebook_metadata = notebook.get("metadata")
 
-            result = check_metadata_content(notebook_metadata=notebook_metadata, is_cli=False)
+            result = horus_check_metadata_content(notebook_metadata=notebook_metadata, is_cli=False)
 
             result.insert(
                 0,
