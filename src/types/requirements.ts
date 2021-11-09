@@ -17,7 +17,7 @@ export interface Requires {
 }
 
 export interface Requirements {
-    packages: { [ name: string ]: string }
+    packages: { [ name: string ]: string | { index: string, version: string } }
     requires: Requires
     sources: ( SourcesEntity )[] | null
     "dev-packages"?: any

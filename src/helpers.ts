@@ -210,8 +210,18 @@ export async function _handle_requirements(
     var loaded_requirements: Requirements = initial_loaded_requirements
     console.debug("loaded requirements", loaded_requirements)
 
-    var loaded_packages = loaded_requirements.packages
-    console.debug("loaded requirements packages", loaded_packages)
+    var loaded_packages = {}
+
+    _.forEach(loaded_requirements.packages, function(library, key) {
+        if ( _.isString(library)) {
+            _.set(loaded_packages, key, library)
+        }
+        else {
+            _.set(loaded_packages, key, library.version)
+        }
+    })
+
+    console.log("loaded requirements packages", loaded_packages)
 
     // Check if any package is present in the loaded requirements
     if ( _.size( loaded_packages ) == 0 ) {

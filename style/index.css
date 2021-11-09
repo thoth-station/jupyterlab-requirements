@@ -103,11 +103,11 @@
 
  /* Table */
 
-.thoth-table, th, tr {
+table.thoth-table, th, tr {
   border-bottom: 1px solid black;
 }
 
-.thoth-table th {
+table.thoth-table th {
   padding: 10px 12px;
   font-weight: bold;
   color: rgb(212, 151, 19);

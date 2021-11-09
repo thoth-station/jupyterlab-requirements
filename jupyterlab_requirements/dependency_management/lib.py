@@ -535,7 +535,9 @@ def lock_dependencies_with_thoth(
                 pipfile = result["report"]["products"][0]["project"]["requirements"]
                 pipfile_lock = result["report"]["products"][0]["project"]["requirements_locked"]
 
-                advise = {"requirements": pipfile, "requirement_lock": pipfile_lock, "error": False}
+                advise["requirements"] = pipfile
+                advise["requirement_lock"] = pipfile_lock
+                advise["error"] = False
 
     except Exception as api_error:
         _LOGGER.debug(f"error locking dependencies using Thoth: {api_error}")
@@ -564,7 +566,7 @@ def lock_dependencies_with_thoth(
                 _LOGGER.info("Writing to Pipfile/Pipfile.lock in %r", env_path.as_posix())
                 project.to_files(pipfile_path=pipfile_path, pipfile_lock_path=pipfile_lock_path)
         except Exception as e:
-            _LOGGER.debug("Requirements files have not been stored successfully %r", e)
+            _LOGGER.debug("Requirements files cannot be stored due to: %r", e)
 
     os.chdir(initial_path)
 
@@ -1006,19 +1008,7 @@ def horus_lock_command(
 
         _LOGGER.info("Path used to store dependencies is: %r", complete_path.as_posix())
 
-        requirements_format = "pipenv"
-
-        if resolution_engine == "thoth":
-            project = Project.from_dict(requirements, requirements_lock)
-        else:
-            project = Project.from_dict(pipfile_.to_dict(), requirements_lock)
-
-        pipfile_path = complete_path.joinpath("Pipfile")
-        pipfile_lock_path = complete_path.joinpath("Pipfile.lock")
-
-        if requirements_format == "pipenv":
-            _LOGGER.debug("Writing to Pipfile/Pipfile.lock in %r", complete_path)
-            project.to_files(pipfile_path=pipfile_path, pipfile_lock_path=pipfile_lock_path)
+        # requirements and requirements locked are already stored at this point
 
         if resolution_engine == "thoth":
             # thoth
@@ -1030,8 +1020,8 @@ def horus_lock_command(
 
     if save_in_notebook and not error:
         notebook_metadata["dependency_resolution_engine"] = resolution_engine
-        notebook_metadata["requirements"] = requirements
-        notebook_metadata["requirements_lock"] = requirements_lock
+        notebook_metadata["requirements"] = json.dumps(requirements)
+        notebook_metadata["requirements_lock"] = json.dumps(requirements_lock)
 
         # Assign kernel name to kernelspec.
         kernelspec["name"] = kernel
