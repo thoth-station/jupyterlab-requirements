@@ -345,4 +345,4 @@ export async function take_notebook_content( notebook: NotebookPanel ): Promise<
 
     return notebook_content
 
-  }
+}
