@@ -25,7 +25,7 @@ from tornado import web
 from pathlib import Path
 
 from .lib import create_kernel
-from .lib import delete_kernel
+from .lib import horus_delete_kernel
 
 
 _LOGGER = logging.getLogger("jupyterlab_requirements.kernel_handler")
@@ -80,7 +80,7 @@ class JupyterKernelHandler(APIHandler):
 
         {"message": "", "error": False}
 
-        command_output = delete_kernel(kernel_name=kernel_name)
+        command_output = horus_delete_kernel(kernel_name=kernel_name)
 
         if command_output.returncode == 0:
             self.finish(json.dumps({"message": f"{kernel_name} kernel successfully deleted", "error": False}))

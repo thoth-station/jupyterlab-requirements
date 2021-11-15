@@ -38,15 +38,18 @@ from thamos.discover import discover_python_version
 from jupyterlab_requirements import __version__
 
 from jupyterlab_requirements.dependency_management import _EMOJI
-from jupyterlab_requirements.dependency_management import horus_check_metadata_content
 from jupyterlab_requirements.dependency_management import create_pipfile_from_packages
 from jupyterlab_requirements.dependency_management import gather_libraries
+from jupyterlab_requirements.dependency_management import get_packages
 from jupyterlab_requirements.dependency_management import get_notebook_content
+from jupyterlab_requirements.dependency_management import horus_check_metadata_content
+from jupyterlab_requirements.dependency_management import horus_delete_kernel
 from jupyterlab_requirements.dependency_management import horus_extract_command
 from jupyterlab_requirements.dependency_management import horus_lock_command
 from jupyterlab_requirements.dependency_management import horus_requirements_command
 from jupyterlab_requirements.dependency_management import horus_set_kernel_command
 from jupyterlab_requirements.dependency_management import horus_show_command
+from jupyterlab_requirements.dependency_management import horus_list_kernels
 from jupyterlab_requirements.dependency_management import load_files
 from jupyterlab_requirements.dependency_management import save_notebook_content
 
@@ -73,7 +76,7 @@ def _print_version(ctx: click.Context, _, value: str):
     help="Be verbose about what's going on.",
 )
 def cli(
-    ctx=None,
+    ctx: click.Context = None,
     verbose: bool = False,
     output: Optional[str] = None,
 ):
@@ -88,7 +91,7 @@ def cli(
 @cli.command("version")
 @click.pass_context
 @click.option("--json", "-j", "json_output", is_flag=True, help="Print output in JSON format.")
-def version(ctx, json_output: bool = False):
+def version(ctx: click.Context, json_output: bool = False):
     """Print Horus, Thamos and Thoth version and exit."""
     click.echo(f"Horus (jupyterlab-requirements CLI) version: {__version__}")
 
@@ -526,6 +529,146 @@ def set_kernel(ctx: click.Context, path: str, kernel_name: Optional[str], force:
     click.echo(f"Kernel name is: {results['kernel_name']!s}")
 
     click.echo(f"Resolution engine identified: {results['dependency_resolution_engine']!s}")
+
+    ctx.exit(0)
+
+
+@cli.command("list-kernels")
+@click.pass_context
+def list_kernels(ctx: click.Context) -> None:
+    """List Jupyter kernels.
+
+    Examples:
+        horus list-kernels
+    """
+    kernels = horus_list_kernels()
+    click.echo("Jupyter kernels available are:\n")
+    result = []
+    for k in kernels:
+
+        if k == "python3":
+            result.append(
+                {
+                    "kernel name": f"{k} (default)",
+                }
+            )
+        else:
+            result.append(
+                {
+                    "kernel name": k,
+                }
+            )
+
+    table = Table()
+
+    header = set()
+    for item in result:
+        for key in item.keys():
+            header.add(key)
+
+    header_sorted = sorted(header)
+    for element in header_sorted:
+        table.add_column(
+            element.replace("_", " ").capitalize(),
+            style="cyan",
+            overflow="fold",
+        )
+
+    for item in result:
+        row = []
+        for key in header_sorted:
+            entry = item.get(key)
+            row.append(entry if entry is not None else "-")
+
+        table.add_row(*row)
+
+    console = Console()
+
+    console.print(table, justify="center")
+
+
+@cli.command("delete-kernel")
+@click.pass_context
+@click.argument("kernel-name")
+def delete_kernel(ctx: click.Context, kernel_name: str) -> None:
+    """Delete Jupyter kernel if exists.
+
+    Delete kernel if exists.
+
+    Examples:
+        horus delete-kernel
+    """
+    kernels = horus_list_kernels()
+    if kernel_name not in kernels:
+        click.echo(
+            f"kernel {kernel_name} does not exists. "
+            f"Kernels that can be deleted are: {[k for k in kernels if k != 'python3']}"
+        )
+        ctx.exit(1)
+
+    if kernel_name == "python3":
+        click.echo(f"kernel {kernel_name} is the default Jupyter kernel, it cannot be deleted.")
+        ctx.exit(1)
+
+    command_output = horus_delete_kernel(kernel_name=kernel_name)
+
+    if command_output.returncode == 0:
+        click.echo(f"{kernel_name} kernel successfully deleted")
+    else:
+        click.echo(f"{kernel_name} kernel could not be deleted.")
+        ctx.exit(1)
+
+    ctx.exit(0)
+
+
+@cli.command("check-kernel")
+@click.pass_context
+@click.argument("kernel-name")
+def check_kernel(ctx: click.Context, kernel_name: str) -> None:
+    """Check packages in Jupyter kernel (pip list output).
+
+    Examples:
+        horus check-kernel
+    """
+    kernels = horus_list_kernels()
+    if kernel_name not in kernels:
+        click.echo(f"kernel {kernel_name} does not exists. " f"Kernels available are: {kernels}")
+        ctx.exit(1)
+
+    packages = get_packages(kernel_name=kernel_name)
+
+    result = []
+
+    for package_name in packages:
+
+        result.append({"package name": package_name, "package version": packages[package_name]})
+
+    table = Table()
+
+    header = set()
+    for item in result:
+        for key in item.keys():
+            header.add(key)
+
+    header_sorted = sorted(header)
+    for element in header_sorted:
+        table.add_column(
+            element.replace("_", " ").capitalize(),
+            style="cyan",
+            overflow="fold",
+        )
+
+    for item in result:
+        row = []
+        for key in header_sorted:
+            entry = item.get(key)
+            row.append(entry if entry is not None else "-")
+
+        table.add_row(*row)
+
+    console = Console()
+
+    console.print(table, justify="center")
 
     ctx.exit(0)
 
