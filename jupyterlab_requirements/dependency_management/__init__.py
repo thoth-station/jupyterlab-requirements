@@ -32,15 +32,18 @@ from .thoth_config_handler import ThothConfigHandler
 from .thoth_invectio import ThothInvectioHandler
 
 from .lib import _EMOJI
-from .lib import horus_check_metadata_content
 from .lib import create_pipfile_from_packages
 from .lib import gather_libraries
+from .lib import get_packages
 from .lib import get_notebook_content
+from .lib import horus_check_metadata_content
+from .lib import horus_delete_kernel
 from .lib import horus_extract_command
 from .lib import horus_lock_command
 from .lib import horus_requirements_command
 from .lib import horus_set_kernel_command
 from .lib import horus_show_command
+from .lib import horus_list_kernels
 from .lib import load_files
 from .lib import save_notebook_content
 
@@ -62,14 +65,17 @@ __all__ = [
     "ThothInvectioHandler",
     "YamlSpecHandler",
     "create_pipfile_from_packages",
+    "get_packages",
     "gather_libraries",
     "get_notebook_content",
     "horus_check_metadata_content",
+    "horus_delete_kernel",
     "horus_extract_command",
     "horus_set_kernel_command",
     "horus_lock_command",
     "horus_requirements_command",
     "horus_show_command",
+    "horus_list_kernels",
     "load_files",
     "save_notebook_content",
     "HorusMagics",

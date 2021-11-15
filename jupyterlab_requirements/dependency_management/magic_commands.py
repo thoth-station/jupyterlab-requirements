@@ -39,7 +39,10 @@ from .lib import horus_check_metadata_content
 from .lib import create_pipfile_from_packages
 from .lib import gather_libraries
 from .lib import get_notebook_content
+from .lib import get_packages
+from .lib import horus_delete_kernel
 from .lib import horus_extract_command
+from .lib import horus_list_kernels
 from .lib import horus_requirements_command
 from .lib import horus_set_kernel_command
 from .lib import horus_show_command
@@ -149,6 +152,29 @@ class HorusMagics(Magics):
             help="Specify kernel name to be used when creating it.",
         )
         set_command.add_argument("--force", help="Delete kernel if exists and recreate it.", action="store_true")
+
+        # command: check_kernel
+        check_kernel_command = subparsers.add_parser(
+            "check-kernel", description="Check packages in Jupyter kernel (pip list output)."
+        )
+        check_kernel_command.add_argument(
+            "--kernel-name",
+            required=True,
+            type=str,
+            help="Specify kernel name to be checked.",
+        )
+
+        # command: delete_kernel
+        delete_kernel_command = subparsers.add_parser("delete-kernel", description="Delete Jupyter kernel if exists.")
+        delete_kernel_command.add_argument(
+            "--kernel-name",
+            required=True,
+            type=str,
+            help="Specify kernel name to be deleted.",
+        )
+
+        # command: list_kernels
+        _ = subparsers.add_parser("list-kernels", description="List available kernels.")
 
         # command: convert
         _ = subparsers.add_parser(
@@ -397,18 +423,125 @@ class HorusMagics(Magics):
                 }
             )
 
+        if args.command == "check-kernel":
+            _LOGGER.info("Check kernel packages available (from pip list).")
+
+            kernels = horus_list_kernels()
+            if args.kernel_name not in kernels:
+                raise Exception(f"kernel {args.kernel_name} does not exists. " f"Kernels available are: {kernels}")
+
+            packages = get_packages(kernel_name=args.kernel_name)
+
+            result = []
+
+            for package_name in packages:
+
+                result.append({"package name": package_name, "package version": packages[package_name]})
+
+            table = Table()
+
+            header = set()
+            for item in result:
+                for key in item.keys():
+                    header.add(key)
+
+            header_sorted = sorted(header)
+            for element in header_sorted:
+                table.add_column(
+                    element.replace("_", " ").capitalize(),
+                    style="cyan",
+                    overflow="fold",
+                )
+
+            for item in result:
+                row = []
+                for key in header_sorted:
+                    entry = item.get(key)
+                    row.append(entry if entry is not None else "-")
+
+                table.add_row(*row)
+
+            console = Console()
+
+            return console.print(table, justify="center")
+
+        if args.command == "delete-kernel":
+            _LOGGER.info("Delete kernel (if exists).")
+
+            kernels = horus_list_kernels()
+            if args.kernel_name not in kernels:
+                raise Exception(
+                    f"kernel {args.kernel_name} does not exists. "
+                    f"Kernels that can be deleted are: {[k for k in kernels if k != 'python3']}"
+                )
+
+            if args.kernel_name == "python3":
+                raise Exception(f"kernel {args.kernel_name} is the default Jupyter kernel, it cannot be deleted.")
+
+            command_output = horus_delete_kernel(kernel_name=args.kernel_name)
+
+            if command_output.returncode == 0:
+                return f"{args.kernel_name} kernel successfully deleted"
+            else:
+                raise Exception(f"{args.kernel_name} kernel could not be deleted.")
+
+        if args.command == "list-kernels":
+            kernels = horus_list_kernels()
+            result = []
+            for k in kernels:
+
+                if k == "python3":
+                    result.append(
+                        {
+                            "kernel name": f"{k} (default)",
+                        }
+                    )
+                else:
+                    result.append(
+                        {
+                            "kernel name": k,
+                        }
+                    )
+
+            table = Table()
+
+            header = set()
+            for item in result:
+                for key in item.keys():
+                    header.add(key)
+
+            header_sorted = sorted(header)
+            for element in header_sorted:
+                table.add_column(
+                    element.replace("_", " ").capitalize(),
+                    style="cyan",
+                    overflow="fold",
+                )
+
+            for item in result:
+                row = []
+                for key in header_sorted:
+                    entry = item.get(key)
+                    row.append(entry if entry is not None else "-")
+
+                table.add_row(*row)
+
+            console = Console()
+
+            return console.print(table, justify="center")
+
         if args.command == "discover":
             _LOGGER.info("Discover dependencies from notebook content.")
-            packages = gather_libraries(notebook_path=nb_path)
+            packages_ = gather_libraries(notebook_path=nb_path)
 
-            if packages:
-                _LOGGER.info(f"Thoth invectio libraries gathered: {json.dumps(packages)}")
+            if packages_:
+                _LOGGER.info(f"Thoth invectio libraries gathered: {json.dumps(packages_)}")
             else:
                 _LOGGER.info(f"No libraries discovered from notebook at path: {nb_path}")
 
             python_version = discover_python_version()
             _LOGGER.info(f"Python version discovered from host: {python_version}")
-            pipfile = create_pipfile_from_packages(packages=packages, python_version=python_version)
+            pipfile = create_pipfile_from_packages(packages=packages_, python_version=python_version)
 
             return json.dumps({"requirements": pipfile.to_dict(), "force": args.force})
 

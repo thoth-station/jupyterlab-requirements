@@ -339,6 +339,17 @@ def get_packages(kernel_name: str, kernels_path: Path = Path.home().joinpath(".l
                 package_version = [el for el in processed_package.split(" ") if el != ""]
                 packages[package_version[0]] = package_version[1]
 
+    # default kernel for Jupyter
+    if kernel_name == "python3":
+        process_output = subprocess.run("pip list", shell=True, capture_output=True)
+
+        processed_list = process_output.stdout.decode("utf-8").split("\n")[2:]
+
+        for processed_package in processed_list:
+            if processed_package:
+                package_version = [el for el in processed_package.split(" ") if el != ""]
+                packages[package_version[0]] = package_version[1]
+
     return packages
 
 
@@ -379,7 +390,27 @@ def create_kernel(kernel_name: str, kernels_path: Path = Path.home().joinpath(".
         _LOGGER.error(f"Could not enter environment {e}")
 
 
-def delete_kernel(kernel_name: str, kernels_path: Path = Path.home().joinpath(".local/share/thoth/kernels")):
+def horus_list_kernels(kernels_path: Path = Path.home().joinpath(".local/share/thoth/kernels")) -> typing.List[str]:
+    """List kernels from host."""
+    # List jupyter kernel
+    try:
+        command_output = subprocess.run(
+            "jupyter kernelspec list --json",
+            shell=True,
+            capture_output=True,
+        )
+        _LOGGER.debug(command_output.returncode)
+
+    except Exception as e:
+        _LOGGER.error(f"Kernel list could not be obtained: {e}")
+
+    # Delete folder from host
+    kernels = [k for k in json.loads(command_output.stdout.decode("utf-8"))["kernelspecs"]]
+
+    return kernels
+
+
+def horus_delete_kernel(kernel_name: str, kernels_path: Path = Path.home().joinpath(".local/share/thoth/kernels")):
     """Delete kernel from host."""
     # Delete jupyter kernel
     try:
@@ -405,7 +436,7 @@ def delete_kernel(kernel_name: str, kernels_path: Path = Path.home().joinpath(".
     return command_output
 
 
-def gather_libraries(notebook_path: str):
+def gather_libraries(notebook_path: str) -> typing.List[str]:
     """Gather libraries with invectio."""
     library_gathered = []
     try:
@@ -771,7 +802,7 @@ def horus_requirements_command(
     return pipfile_
 
 
-def create_pipfile_from_packages(packages: list, python_version: str):
+def create_pipfile_from_packages(packages: list, python_version: str) -> Pipfile:
     """Create Pipfile from list of packages."""
     source = Source(url="https://pypi.org/simple", name="pypi", verify_ssl=True)
 
@@ -1086,7 +1117,7 @@ def horus_set_kernel_command(
 
     if not is_magic_command or force:
         if complete_path.exists():
-            delete_kernel(kernel_name=kernel)
+            horus_delete_kernel(kernel_name=kernel)
 
         complete_path.mkdir(parents=True, exist_ok=True)
 
