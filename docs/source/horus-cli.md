@@ -150,3 +150,30 @@ horus show [YOUR_NOTEBOOK].ipynb  --pipfile
 horus show [YOUR_NOTEBOOK].ipynb  --pipfile-lock
 horus show [YOUR_NOTEBOOK].ipynb  --thoth-config
 ```
+
+
+## kernel specific commands
+
+### check-kernel
+
+This command is used to check what packages are available in the kernel (pip list output).
+
+```
+horus check-kernel
+```
+
+### delete-kernel
+
+This command is used to delete kernel created with horus.
+
+```
+horus delete-kernel
+```
+
+### list-kernels
+
+This command is used to list kernels available (jupyter kernelspec list).
+
+```
+horus list-kernels
+```
