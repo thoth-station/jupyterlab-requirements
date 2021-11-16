@@ -33,6 +33,9 @@ from virtualenv import cli_run
 from pathlib import Path
 
 from rich.text import Text
+from rich import box
+from rich.console import Console
+from rich.table import Table
 
 from thoth.python import Project, Pipfile, PipfileLock
 from thoth.python import PipfileMeta
@@ -51,6 +54,50 @@ _EMOJI = {
     "ERROR": Text("\u274c ERROR", style="bold red"),
     "INFO": Text("\u2714\ufe0f INFO", "green"),
 }
+
+
+def _print_report(report: dict, title: typing.Optional[str] = None):
+    """Print reasoning to user."""
+    console = Console()
+    table = Table(
+        show_header=True,
+        header_style="bold green",
+        title=title,
+        box=box.MINIMAL_DOUBLE_HEAD,
+    )
+
+    header = set()  # type: typing.Set[str]
+    to_remove = set()  # type: typing.Set[str]
+    for item in report:
+        header = header.union(set(item.keys()))
+        to_remove = to_remove.union(set(i for i, v in item.items() if isinstance(v, dict)))
+
+    # Remove fields that can be an array - these are addition details that are supressed from the table output.
+    header = header - to_remove
+
+    header_list = sorted(header)
+    for item in header_list:
+        table.add_column(item.replace("_", " ").capitalize(), style="cyan", overflow="fold")
+
+    for item in report:
+        row = []
+        for column in header_list:
+            entry = item.get(column, "-")
+
+            if not bool(int(os.getenv("JUPYTERLAB_REQUIREMENTS_NO_EMOJI", 0))) and isinstance(entry, str):
+                entry = _EMOJI.get(entry, entry)
+
+            if isinstance(entry, list):
+                entry = ", ".join(entry)
+
+            if isinstance(entry, str) and entry.startswith(("https://", "http://")):
+                entry = f"[link {entry}]{entry}"
+
+            row.append(entry)
+
+        table.add_row(*row)
+
+    console.print(table, justify="center")
 
 
 def get_notebook_content(notebook_path: str, py_format: bool = False):
@@ -515,7 +562,7 @@ def lock_dependencies_with_thoth(
     _LOGGER.info("Current path: %r ", env_path.as_posix())
     _LOGGER.info(f"Input Pipfile: \n{pipfile_string}")
 
-    advise = {"requirements": {}, "requirement_lock": {}, "error": False, "error_msg": ""}
+    advise = {"requirements": {}, "requirement_lock": {}, "error": False, "error_msg": "", "stack_info": {}}
     returncode = 0
 
     temp = tempfile.NamedTemporaryFile(prefix="jl_thoth_", mode="w+t")
@@ -569,6 +616,10 @@ def lock_dependencies_with_thoth(
                 advise["requirements"] = pipfile
                 advise["requirement_lock"] = pipfile_lock
                 advise["error"] = False
+                advise["justification"] = result["report"]["products"][0]["justification"]
+
+            if result["report"] and result["report"]["stack_info"]:
+                advise["stack_info"] = result["report"]["stack_info"]
 
     except Exception as api_error:
         _LOGGER.debug(f"error locking dependencies using Thoth: {api_error}")
@@ -1124,20 +1175,20 @@ def horus_set_kernel_command(
     # 1. Get Pipfile, Pipfile.lock and .thoth.yaml and store them in ./.local/share/kernel/{kernel_name}
 
     # requirements
-    if is_magic_command:
+    if not is_magic_command:
         pipfile_string = notebook_metadata.get("requirements")
         pipfile_ = Pipfile.from_string(pipfile_string)
         pipfile_path = complete_path.joinpath("Pipfile")
         pipfile_.to_file(path=pipfile_path)
 
     # requirements lock
-    if is_magic_command:
+    if not is_magic_command:
         pipfile_lock_string = notebook_metadata.get("requirements_lock")
         pipfile_lock_ = PipfileLock.from_string(pipfile_content=pipfile_lock_string, pipfile=pipfile_)
         pipfile_lock_path = complete_path.joinpath("Pipfile.lock")
         pipfile_lock_.to_file(path=pipfile_lock_path)
 
-    if dependency_resolution_engine == "thoth" and is_magic_command:
+    if dependency_resolution_engine == "thoth" and not is_magic_command:
         # thoth
         thoth_config_string = notebook_metadata.get("thoth_config")
         config = _Configuration()
