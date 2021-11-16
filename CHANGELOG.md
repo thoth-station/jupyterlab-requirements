@@ -1,5 +1,17 @@
 # Changelog for Thoth's Template GitHub Project
 
+## Release 0.13.0 (2021-11-16T16:53:28)
+### Features
+* Add adviser report output to horus magic commands
+* Add kernels commands to magic commands
+* Add kernel commands to CLI
+* Extend requirements handling
+* Add force flag for set-kernel command
+* Fix/horus-check
+* Fix CSS table reformatting pandas dataframe output
+### Improvements
+* Fix README to make twine happy
+
 ## Release 0.12.0 (2021-10-29T14:12:01)
 ### Features
 * Feature/inputs-runtime-environment
