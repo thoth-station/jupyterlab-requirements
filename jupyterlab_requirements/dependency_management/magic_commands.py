@@ -35,6 +35,7 @@ from IPython.core.magic import magics_class, Magics
 from thamos.discover import discover_python_version
 
 from .lib import _EMOJI
+from .lib import _print_report
 from .lib import horus_check_metadata_content
 from .lib import create_pipfile_from_packages
 from .lib import gather_libraries
@@ -390,6 +391,20 @@ class HorusMagics(Magics):
                 return Exception(lock_results["error_msg"])
             else:
                 _LOGGER.info("Set kernel for dependencies in notebook metadata.")
+
+                if not args.pipenv:
+                    if lock_results["stack_info"]:
+                        _print_report(
+                            lock_results["stack_info"],
+                            title="Application stack guidance",
+                        )
+
+                    # Print report of the best one - thus index zero.
+                    if lock_results["justification"]:
+                        _print_report(
+                            lock_results["justification"],
+                            title="Recommended stack report",
+                        )
 
                 kernel_results = horus_set_kernel_command(
                     path=nb_path,

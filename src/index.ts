@@ -167,44 +167,51 @@ async function activate(
             const outputs = _.get(cell_response, "outputs")
 
             _.forEach(outputs, function(output) {
-              if ( _.size(output) > 0  && _.has(output, "data") ) {
-                console.debug("general output from cell", output)
-                const results: string = _.get(_.get(output, "data"), "text/plain")
-                const parsed_results = results.substr(1, results.length - 2)
-                let jsonObject: {} = JSON.parse(parsed_results);
-                console.debug("json object of the output", jsonObject)
-                const kernel_name: string = _.get(jsonObject, "kernel_name")
-                console.debug("kernel_name", kernel_name)
-                const resolution_engine: string = _.get(jsonObject, "resolution_engine")
-                console.debug("resolution_engine", resolution_engine)
 
-                let notebook_metadata = notebook.model.metadata
-                notebook_metadata.set('dependency_resolution_engine', resolution_engine)
+              try {
+                  if ( _.size(output) > 0  && _.has(output, "data") ) {
+                    console.debug("general output from cell", output)
+                    const results: string = _.get(_.get(output, "data"), "text/plain")
+                    const parsed_results = results.substr(1, results.length - 2)
+                    let jsonObject: {} = JSON.parse(parsed_results);
+                    console.debug("json object of the output", jsonObject)
+                    const kernel_name: string = _.get(jsonObject, "kernel_name")
+                    console.debug("kernel_name", kernel_name)
+                    const resolution_engine: string = _.get(jsonObject, "resolution_engine")
+                    console.debug("resolution_engine", resolution_engine)
 
-                if ( resolution_engine == "thoth" ) {
-                  retrieve_config_file(kernel_name).then(thoth_config  => {
-                      notebook_metadata.set('thoth_config', JSON.stringify(thoth_config))
-                  })
-                }
+                    let notebook_metadata = notebook.model.metadata
+                    notebook_metadata.set('dependency_resolution_engine', resolution_engine)
 
-                get_dependencies(kernel_name).then(value => {
-                  const requirements: Requirements = _.get(value, "requirements")
-                  console.debug("Pipfile", requirements)
-                  const requirements_lock: RequirementsLock = _.get(value, "requirements_lock")
-                  console.debug("Pipfile.lock", requirements_lock)
-                  notebook_metadata.set('requirements', JSON.stringify(requirements))
-                  notebook_metadata.set('requirements_lock', JSON.stringify(requirements_lock))
-                })
+                    if ( resolution_engine == "thoth" ) {
+                      retrieve_config_file(kernel_name).then(thoth_config  => {
+                          notebook_metadata.set('thoth_config', JSON.stringify(thoth_config))
+                      })
+                    }
 
-                // Check if kernel name is already assigned to notebook and if yes, do nothing
-                const current_kernel = get_kernel_name( nbPanel, true )
-                if ( current_kernel == kernel_name ) {
-                  INotification.info("kernel name to be assigned " + kernel_name + " already set for the current notebook (" + current_kernel + "). Kernel won't be restarted.")
-                }
-                else {
-                  nbPanel.sessionContext.session.changeKernel({"name": kernel_name})
-                }
+                    get_dependencies(kernel_name).then(value => {
+                      const requirements: Requirements = _.get(value, "requirements")
+                      console.debug("Pipfile", requirements)
+                      const requirements_lock: RequirementsLock = _.get(value, "requirements_lock")
+                      console.debug("Pipfile.lock", requirements_lock)
+                      notebook_metadata.set('requirements', JSON.stringify(requirements))
+                      notebook_metadata.set('requirements_lock', JSON.stringify(requirements_lock))
+                    })
+
+                    // Check if kernel name is already assigned to notebook and if yes, do nothing
+                    const current_kernel = get_kernel_name( nbPanel, true )
+                    if ( current_kernel == kernel_name ) {
+                      INotification.info("kernel name to be assigned " + kernel_name + " already set for the current notebook (" + current_kernel + "). Kernel won't be restarted.")
+                    }
+                    else {
+                      nbPanel.sessionContext.session.changeKernel({"name": kernel_name})
+                    }
+                  }
+
+              } catch ( error ) {
+                console.debug("Error parsing output", error)
               }
+
             })
 
           }
