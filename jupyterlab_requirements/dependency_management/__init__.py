@@ -45,6 +45,7 @@ from .lib import horus_set_kernel_command
 from .lib import horus_show_command
 from .lib import horus_list_kernels
 from .lib import load_files
+from .lib import print_report
 from .lib import save_notebook_content
 
 from .magic_commands import HorusMagics
@@ -77,6 +78,7 @@ __all__ = [
     "horus_show_command",
     "horus_list_kernels",
     "load_files",
+    "print_report",
     "save_notebook_content",
     "HorusMagics",
     "_EMOJI",

@@ -51,6 +51,7 @@ from jupyterlab_requirements.dependency_management import horus_set_kernel_comma
 from jupyterlab_requirements.dependency_management import horus_show_command
 from jupyterlab_requirements.dependency_management import horus_list_kernels
 from jupyterlab_requirements.dependency_management import load_files
+from jupyterlab_requirements.dependency_management import print_report
 from jupyterlab_requirements.dependency_management import save_notebook_content
 
 
@@ -857,7 +858,18 @@ def lock(
         ctx.exit(1)
     else:
         if resolution_engine == "thoth":
-            click.echo("Thoth successfully resolved your stack.")
+            if lock_results["stack_info"]:
+                print_report(
+                    lock_results["stack_info"],
+                    title="Application stack guidance",
+                )
+
+            # Print report of the best one - thus index zero.
+            if lock_results["justification"]:
+                print_report(
+                    lock_results["justification"],
+                    title="Recommended stack report",
+                )
         else:
             click.echo("Pipenv successfully resolved your stack.")
 

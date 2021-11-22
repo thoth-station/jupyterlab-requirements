@@ -56,7 +56,7 @@ _EMOJI = {
 }
 
 
-def _print_report(report: dict, title: typing.Optional[str] = None):
+def print_report(report: dict, title: typing.Optional[str] = None):
     """Print reasoning to user."""
     console = Console()
     table = Table(
@@ -294,10 +294,10 @@ def horus_check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -
                 else:
                     break
 
-        if check == len([p for p in notebook_packages]):
+        if check == len([p.name for p in notebook_packages]):
             result.append(
                 {
-                    "message": f"kernel {kernel_name} matches packages(name,version,PyPI index) "
+                    "message": f"kernel {kernel_name} matches packages (name,version,PyPI index) "
                     "from requirements lock in your notebook metadata.",
                     "type": "WARNING",
                 }
