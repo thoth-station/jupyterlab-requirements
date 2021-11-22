@@ -35,7 +35,7 @@ from IPython.core.magic import magics_class, Magics
 from thamos.discover import discover_python_version
 
 from .lib import _EMOJI
-from .lib import _print_report
+from .lib import print_report
 from .lib import horus_check_metadata_content
 from .lib import create_pipfile_from_packages
 from .lib import gather_libraries
@@ -394,14 +394,14 @@ class HorusMagics(Magics):
 
                 if not args.pipenv:
                     if lock_results["stack_info"]:
-                        _print_report(
+                        print_report(
                             lock_results["stack_info"],
                             title="Application stack guidance",
                         )
 
                     # Print report of the best one - thus index zero.
                     if lock_results["justification"]:
-                        _print_report(
+                        print_report(
                             lock_results["justification"],
                             title="Recommended stack report",
                         )
