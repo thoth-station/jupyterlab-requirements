@@ -240,26 +240,7 @@ export async function _handle_requirements(
 
             _.forEach(gathered_libraries, function(library) {
 
-              // TODO: Use new user-api endpoint when it will be available.
-              if ( library == "sklearn") {
-                _.set(identified_packages, "scikit-learn", "*")
-              }
-
-              else if ( library == "dotenv" ) {
-                _.set(identified_packages, "python-dotenv", "*")
-              }
-
-              else if ( library == "IPython" ) {
-                _.set(identified_packages, "ipython", "*")
-              }
-
-              else if ( library == "gzip" ) {
-                _.unset(identified_packages, "gzip")
-              }
-
-              else {
                 _.set(identified_packages, library, "*")
-              }
 
             })
 

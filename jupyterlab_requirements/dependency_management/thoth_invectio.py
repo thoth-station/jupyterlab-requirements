@@ -30,6 +30,8 @@ from tornado import web
 import invectio
 import distutils
 
+from thamos.lib import get_package_from_imported_packages
+
 _LOGGER = logging.getLogger("jupyterlab_requirements.thoth_invectio")
 
 
@@ -55,4 +57,22 @@ class ThothInvectioHandler(APIHandler):
         libs = filter(lambda k: k not in std_lib | set(sys.builtin_module_names), report)
         library_gathered = list(libs)
         _LOGGER.info("Thoth invectio library gathered: %r", library_gathered)
-        self.finish(json.dumps(library_gathered))
+
+        # Use Thoth user-API endpoint to verify what is the packages using that import name
+        verified_libraries = set()
+        for import_name in library_gathered:
+
+            try:
+                imported_packages = get_package_from_imported_packages(import_name)
+
+                if imported_packages:
+                    unique_packages = set([p["package_name"] for p in imported_packages])
+
+                    for unique_package in unique_packages:
+                        verified_libraries.append(unique_package)
+                        _LOGGER.info(f"Package name {unique_package} identifed for import name {import_name}")
+
+            except Exception as e:
+                _LOGGER.warning(e)
+
+        self.finish(json.dumps(list(verified_libraries)))

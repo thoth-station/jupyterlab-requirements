@@ -43,6 +43,7 @@ from thoth.python import Source, PackageVersion
 from thoth.common import ThothAdviserIntegrationEnum
 
 from thamos.lib import advise_using_config, _get_origin
+from thamos.lib import get_package_from_imported_packages
 from thamos.config import _Configuration
 from thamos.discover import discover_python_version
 
@@ -507,7 +508,24 @@ def gather_libraries(notebook_path: str) -> typing.List[str]:
     except Exception as e:
         _LOGGER.error(f"Could not gather libraries: {e}")
 
-    return library_gathered
+    # Use Thoth user-API endpoint to verify what is the packages using that import name
+    verified_libraries = set()
+    for import_name in library_gathered:
+
+        try:
+            imported_packages = get_package_from_imported_packages(import_name)
+
+            if imported_packages:
+                unique_packages = set([p["package_name"] for p in imported_packages])
+
+                for unique_package in unique_packages:
+                    verified_libraries.append(unique_package)
+                    _LOGGER.info(f"Package name {unique_package} identifed for import name {import_name}")
+
+        except Exception as e:
+            _LOGGER.warning(e)
+
+    return list(verified_libraries)
 
 
 def load_files(base_path: str) -> typing.Tuple[str, typing.Optional[str]]:

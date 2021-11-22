@@ -41,8 +41,8 @@ Here you can find a list of magic commands available and a description for each 
 
 | magic command | options | description |
 | ------------- | ------------------ | ------------------ |
-| %horus check-kernel | --kernel-name | Check what packages are available in the kernel (pip list output). |
-| %horus delete-kernel | --kernel-name | Delete kernel created with horus. |
+| %horus check-kernel | --kernel-name {KERNEL_NAME} | Check what packages are available in the kernel (pip list output). |
+| %horus delete-kernel | --kernel-name {KERNEL_NAME} | Delete kernel created with horus. |
 | %horus list-kernels |  | List kernels available (jupyter kernelspec list). |
 | %horus set-kernel |  | Prepare environment for the notebook to run (create kernel (if does not exist) and install dependencies from notebook metadata (if they exist)) |
 |  | --force | This command will delete existint kernel with that name and recreate it. |
