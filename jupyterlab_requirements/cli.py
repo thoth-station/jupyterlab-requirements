@@ -316,7 +316,7 @@ def save(
         pipfile_string, pipfile_lock_string = load_files(base_path=save_files_path)
 
         pipfile_ = Pipfile.from_string(pipfile_string)
-        pipfile_lock_ = PipfileLock.from_string(pipfile_content=pipfile_lock_string, pipfile=pipfile_)
+        pipfile_lock_ = PipfileLock.from_string(pipfile_content=str(pipfile_lock_string), pipfile=pipfile_)
 
     if pipfile or save_all:
         if "requirements" in notebook_metadata and not force:
@@ -350,7 +350,7 @@ def save(
 
         if thoth_config or save_all:
             config = _Configuration()
-            config.load_config_from_file(config_path=Path(save_files_path).joinpath(".thoth.yaml"))
+            config.load_config_from_file(config_path=str(Path(save_files_path).joinpath(".thoth.yaml")))
 
             if "thoth_config" in notebook_metadata and not force:
                 raise FileExistsError(
@@ -432,7 +432,7 @@ def discover(ctx: click.Context, path: str, store_files_path: str, show_only: bo
                 "Use --force to overwrite existing content or --show-only to visualize the Pipfile."
             )
         else:
-            pipfile.to_file(path=pipfile_path)
+            pipfile.to_file(path=str(pipfile_path))
 
     ctx.exit(0)
 

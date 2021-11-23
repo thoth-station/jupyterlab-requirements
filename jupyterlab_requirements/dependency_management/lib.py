@@ -57,7 +57,7 @@ _EMOJI = {
 }
 
 
-def print_report(report: dict, title: typing.Optional[str] = None):
+def print_report(report: typing.List, title: typing.Optional[str] = None):
     """Print reasoning to user."""
     console = Console()
     table = Table(
@@ -581,8 +581,8 @@ def load_files(base_path: str) -> typing.Tuple[str, typing.Optional[str]]:
     pipfile_lock_path = Path(base_path).joinpath("Pipfile.lock")
 
     project = Project.from_files(
-        pipfile_path=pipfile_path,
-        pipfile_lock_path=pipfile_lock_path,
+        pipfile_path=str(pipfile_path),
+        pipfile_lock_path=str(pipfile_lock_path),
         without_pipfile_lock=not pipfile_lock_path.exists(),
     )
 
@@ -613,7 +613,7 @@ def lock_dependencies_with_thoth(
     """Lock dependencies using Thoth resolution engine."""
     initial_path = Path.cwd()
     # Get origin before changing path
-    origin: str = _get_origin()
+    origin: typing.Optional[str] = _get_origin()
     _LOGGER.info("Origin identified by thamos: %r", origin)
 
     env_path = kernels_path.joinpath(kernel_name)
@@ -720,7 +720,7 @@ def lock_dependencies_with_thoth(
 
             if requirements_format == "pipenv":
                 _LOGGER.info("Writing to Pipfile/Pipfile.lock in %r", env_path.as_posix())
-                project.to_files(pipfile_path=pipfile_path, pipfile_lock_path=pipfile_lock_path)
+                project.to_files(pipfile_path=str(pipfile_path), pipfile_lock_path=str(pipfile_lock_path))
         except Exception as e:
             _LOGGER.debug("Requirements files cannot be stored due to: %r", e)
 
@@ -1048,7 +1048,7 @@ def horus_lock_command(
     python_version: typing.Optional[str] = None,
     save_in_notebook: bool = True,
     save_on_disk: bool = False,
-):
+) -> typing.Tuple[dict, dict]:
     """Lock requirements in notebook metadata."""
     results = {}
     results["kernel_name"] = ""
@@ -1154,6 +1154,10 @@ def horus_lock_command(
     if resolution_engine == "pipenv":
         _, lock_results = lock_dependencies_with_pipenv(kernel_name=kernel, pipfile_string=pipfile_.to_string())
 
+        # Remove if Pipenv is used after Thoth was used.
+        if notebook_metadata.get("analysis_id"):
+            notebook_metadata["analysis_id"] = ""
+
         if not lock_results["error"]:
             requirements_lock = lock_results["requirements_lock"]
         else:
@@ -1177,7 +1181,7 @@ def horus_lock_command(
             config = _Configuration()
             config.load_config_from_string(thoth_config_string)
             config_path = complete_path.joinpath(".thoth.yaml")
-            config.save_config(path=config_path)
+            config.save_config(path=str(config_path))
 
     if save_in_notebook and not error:
         notebook_metadata["dependency_resolution_engine"] = resolution_engine
@@ -1258,14 +1262,14 @@ def horus_set_kernel_command(
         pipfile_string = notebook_metadata.get("requirements")
         pipfile_ = Pipfile.from_string(pipfile_string)
         pipfile_path = complete_path.joinpath("Pipfile")
-        pipfile_.to_file(path=pipfile_path)
+        pipfile_.to_file(path=str(pipfile_path))
 
     # requirements lock
     if not is_magic_command:
         pipfile_lock_string = notebook_metadata.get("requirements_lock")
         pipfile_lock_ = PipfileLock.from_string(pipfile_content=pipfile_lock_string, pipfile=pipfile_)
         pipfile_lock_path = complete_path.joinpath("Pipfile.lock")
-        pipfile_lock_.to_file(path=pipfile_lock_path)
+        pipfile_lock_.to_file(path=str(pipfile_lock_path))
 
     if dependency_resolution_engine == "thoth" and not is_magic_command:
         # thoth
@@ -1273,7 +1277,7 @@ def horus_set_kernel_command(
         config = _Configuration()
         config.load_config_from_string(thoth_config_string)
         config_path = complete_path.joinpath(".thoth.yaml")
-        config.save_config(path=config_path)
+        config.save_config(path=str(config_path))
 
     # 2. Create virtualenv and install dependencies
     install_packages(
@@ -1366,7 +1370,7 @@ def horus_extract_command(
                 "Use --force to overwrite existing content or --show-only to visualize it."
             )
         else:
-            pipfile_.to_file(path=pipfile_path)
+            pipfile_.to_file(path=str(pipfile_path))
 
     if pipfile_lock or extract_all:
         pipfile_lock_string = notebook_metadata.get("requirements_lock")
@@ -1384,7 +1388,7 @@ def horus_extract_command(
                 "Use --force to overwrite existing content or --show-only to visualize it."
             )
         else:
-            pipfile_lock_.to_file(path=pipfile_lock_path)
+            pipfile_lock_.to_file(path=str(pipfile_lock_path))
 
     if thoth_config or extract_all:
         thoth_config_string = notebook_metadata.get("thoth_config")

@@ -323,7 +323,7 @@ class HorusMagics(Magics):
         if args.command == "lock":
             _LOGGER.info("Show dependencies content from notebook content.")
 
-            results, lock_results = horus_lock_command(
+            general_results, lock_results = horus_lock_command(
                 path=nb_path,
                 resolution_engine="thoth" if not args.pipenv else "pipenv",
                 timeout=args.timeout,
@@ -361,14 +361,14 @@ class HorusMagics(Magics):
                     path=nb_path,
                     kernel_name=args.kernel_name,
                     save_in_notebook=False,
-                    resolution_engine=results["dependency_resolution_engine"],
+                    resolution_engine=general_results.get("dependency_resolution_engine"),
                     is_magic_command=True,
                 )
 
                 return json.dumps(
                     {
                         "kernel_name": kernel_results["kernel_name"],
-                        "resolution_engine": results["dependency_resolution_engine"],
+                        "resolution_engine": general_results.get("dependency_resolution_engine"),
                     }
                 )
 
