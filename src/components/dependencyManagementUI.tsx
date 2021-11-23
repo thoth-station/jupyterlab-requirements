@@ -779,7 +779,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
           advise.requirements,
           advise.requirement_lock,
           this.state.thoth_config,
-          advise.analysis_id
+          advise.thoth_analysis_id
         )
 
       } catch ( error ) {
@@ -881,7 +881,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
             result.requirements_lock
           )
 
-          await delete_key_from_notebook_metadata( this.props.panel, "analysis_id" )
+          await delete_key_from_notebook_metadata( this.props.panel, "thoth_analysis_id" )
 
       } catch ( error ) {
 

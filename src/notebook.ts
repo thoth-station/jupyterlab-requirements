@@ -315,13 +315,13 @@ export async function set_resolution_engine( notebook: NotebookPanel, dependency
  export async function set_thoth_analysis_id( notebook: NotebookPanel, thoth_analysis_id: string ): Promise<void> {
     const metadata = notebook.model.metadata
 
-    if ( metadata.has("analysis_id") == false ) {
-        metadata.set('analysis_id', JSON.stringify(thoth_analysis_id) )
+    if ( metadata.has("thoth_analysis_id") == false ) {
+        metadata.set('thoth_analysis_id', JSON.stringify(thoth_analysis_id) )
 
     } else {
         console.debug( "Notebook Thoth analysis ID already exists. Updating." )
         // update the notebook metadata
-        metadata.set('analysis_id', JSON.stringify(thoth_analysis_id) )
+        metadata.set('thoth_analysis_id', JSON.stringify(thoth_analysis_id) )
     }
 
     console.debug( "Notebook Thoth analysis ID has been set successfully." )

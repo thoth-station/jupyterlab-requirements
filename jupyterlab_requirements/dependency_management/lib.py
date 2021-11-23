@@ -186,7 +186,7 @@ def horus_check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -
     resolution_engine = notebook_metadata.get("dependency_resolution_engine")
 
     if resolution_engine == "thoth":
-        for thoth_specific_key in ["thoth_config", "analysis_id"]:
+        for thoth_specific_key in ["thoth_config", "thoth_analysis_id"]:
             if thoth_specific_key not in notebook_metadata.keys():
 
                 if is_cli:
@@ -202,11 +202,11 @@ def horus_check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -
                     }
                 )
             else:
-                if thoth_specific_key == "analysis_id":
-                    analysis_id = notebook_metadata.get("analysis_id")
+                if thoth_specific_key == "thoth_analysis_id":
+                    thoth_analysis_id = notebook_metadata.get("thoth_analysis_id")
                     result.append(
                         {
-                            "message": f"Thoth analysis ID: {analysis_id}",
+                            "message": f"Thoth analysis ID: {thoth_analysis_id}",
                             "type": "INFO",
                         }
                     )
@@ -627,7 +627,7 @@ def lock_dependencies_with_thoth(
     _LOGGER.info(f"Input Pipfile: \n{pipfile_string}")
 
     advise = {
-        "analysis_id": "",
+        "thoth_analysis_id": "",
         "requirements": {},
         "requirement_lock": {},
         "error": False,
@@ -668,8 +668,8 @@ def lock_dependencies_with_thoth(
             raise Exception("Analysis was not successful.")
 
         result, error_result = response
-        analysis_id = result["parameters"]["output"].split("/")[-1]
-        advise["analysis_id"] = analysis_id
+        thoth_analysis_id = result["parameters"]["output"].split("/")[-1]
+        advise["thoth_analysis_id"] = thoth_analysis_id
 
         if error_result:
             advise["error"] = True
@@ -965,7 +965,7 @@ def horus_show_command(
     results = {}
     results["kernel_name"] = ""
     results["dependency_resolution_engine"] = ""
-    results["analysis_id"] = ""
+    results["thoth_analysis_id"] = ""
     results["pipfile"] = ""
     results["pipfile_lock"] = ""
     results["thoth_config"] = ""
@@ -990,8 +990,8 @@ def horus_show_command(
     dependency_resolution_engine = notebook_metadata.get("dependency_resolution_engine")
     results["dependency_resolution_engine"] = dependency_resolution_engine
 
-    analysis_id = notebook_metadata.get("analysis_id")
-    results["analysis_id"] = analysis_id
+    thoth_analysis_id = notebook_metadata.get("thoth_analysis_id")
+    results["thoth_analysis_id"] = thoth_analysis_id
 
     pipfile_string = notebook_metadata.get("requirements")
 
@@ -1143,7 +1143,7 @@ def horus_lock_command(
             requirements = lock_results["requirements"]
             requirements_lock = lock_results["requirement_lock"]
             notebook_metadata["thoth_config"] = json.dumps(thoth_config.content)
-            notebook_metadata["analysis_id"] = lock_results["analysis_id"]
+            notebook_metadata["thoth_analysis_id"] = lock_results["thoth_analysis_id"]
 
         else:
             error = True
@@ -1152,8 +1152,8 @@ def horus_lock_command(
         _, lock_results = lock_dependencies_with_pipenv(kernel_name=kernel, pipfile_string=pipfile_.to_string())
 
         # Remove if Pipenv is used after Thoth was used.
-        if notebook_metadata.get("analysis_id"):
-            notebook_metadata["analysis_id"] = ""
+        if notebook_metadata.get("thoth_analysis_id"):
+            notebook_metadata["thoth_analysis_id"] = ""
 
         if not lock_results["error"]:
             requirements_lock = lock_results["requirements_lock"]

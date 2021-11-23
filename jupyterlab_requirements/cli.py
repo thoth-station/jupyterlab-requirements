@@ -217,8 +217,8 @@ def show(
     else:
         click.echo(f"Resolution engine identified: {results['dependency_resolution_engine']!s}")
 
-    if results["analysis_id"]:
-        click.echo(f"Thoth analysis ID: {results['analysis_id']!s}")
+    if results["thoth_analysis_id"]:
+        click.echo(f"Thoth analysis ID: {results['thoth_analysis_id']!s}")
 
     if results["pipfile"]:
         click.echo(results["pipfile"])

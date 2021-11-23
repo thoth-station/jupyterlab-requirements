@@ -25,7 +25,7 @@ export interface Justification {
 }
 
 export interface Advise {
-    analysis_id: string,
+    thoth_analysis_id: string,
     error: boolean,
     error_msg: string,
     requirements: Requirements,

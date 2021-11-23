@@ -564,7 +564,7 @@ export async function remove_notebook_metadata(
     delete_key_from_notebook_metadata( panel, "requirements_lock" )
     delete_key_from_notebook_metadata( panel, "thoth_config" )
     delete_key_from_notebook_metadata( panel, "dependency_resolution_engine" )
-    delete_key_from_notebook_metadata( panel, "analysis_id" )
+    delete_key_from_notebook_metadata( panel, "thoth_analysis_id" )
 
     // Save all changes to disk.
     panel.context.save()

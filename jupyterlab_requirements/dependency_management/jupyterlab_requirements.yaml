@@ -365,7 +365,7 @@ components:
     ThothAdvise:
       description: Thoth advise response.
       required:
-        - analysis_id
+        - thoth_analysis_id
         - requirements
         - requirement_lock
         - error
@@ -374,7 +374,7 @@ components:
         - justifications
       type: object
       properties:
-        analysis_id:
+        thoth_analysis_id:
           type: string
           description: Thoth Analysis ID.
         requirements:
