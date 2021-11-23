@@ -1032,6 +1032,53 @@ def horus_show_command(
     return results
 
 
+def update_runtime_environment_in_thoth_config(
+    kernel: str,
+    config: str,
+    os_name: typing.Optional[str] = None,
+    os_version: typing.Optional[str] = None,
+    python_version: typing.Optional[str] = None,
+    recommendation_type: typing.Optional[str] = None,
+) -> str:
+    """Update runtime environment in thoth config."""
+    thoth_config = _Configuration()
+    thoth_config.load_config_from_string(config)
+
+    runtime_environments = []
+    # runtime environment with same name does not exists.
+    runtime_environment = dict(thoth_config.get_runtime_environment())
+    runtime_environment["name"] = kernel
+
+    # Assign parameters
+    operating_system = {
+        "name": runtime_environment["operating_system"]["name"],
+        "version": runtime_environment["operating_system"]["version"],
+    }
+
+    if os_name:
+        operating_system["name"] = os_name
+
+    if os_version:
+        operating_system["version"] = os_version
+
+    runtime_environment["operating_system"] = operating_system
+
+    if python_version:
+        runtime_environment["python_version"] = python_version
+
+    if recommendation_type:
+        runtime_environment["recommendation_type"] = recommendation_type
+
+    # Assign runtime environment to thoth config runtime environment.
+    runtime_environments.append(runtime_environment)
+    thoth_config.content["runtime_environments"] = runtime_environments
+
+    # TODO: Use adjusted method from thamos
+    # thoth_config.set_runtime_environment(runtime_environment=runtime_environment, force=True)
+
+    return json.dumps(thoth_config.content)
+
+
 def horus_lock_command(
     path: str,
     resolution_engine: str,
@@ -1098,41 +1145,20 @@ def horus_lock_command(
             _LOGGER.error(f"Could not get notebook content!: {e!r}")
             notebook_content_py = ""
 
-        # runtime environment
-        runtime_environments = []
-        runtime_environment = dict(thoth_config.get_runtime_environment())
-        runtime_environment["name"] = kernel
-
-        operating_system = {
-            "name": runtime_environment["operating_system"]["name"],
-            "version": runtime_environment["operating_system"]["version"],
-        }
-
-        if os_name:
-            operating_system["name"] = os_name
-
-        if os_version:
-            operating_system["version"] = os_version
-
-        runtime_environment["operating_system"] = operating_system
-
-        if python_version:
-            runtime_environment["python_version"] = python_version
-
-        runtime_environment["recommendation_type"] = recommendation_type
-
-        runtime_environments.append(runtime_environment)
-
-        # Assign runtime environment to thoth config runtime environment.
-        thoth_config.content["runtime_environments"] = runtime_environments
-
-        # TODO: Use adjusted method from thamos
-        # thoth_config.set_runtime_environment(runtime_environment=runtime_environment, force=True)
+        # update runtime environment in thoth config
+        thoth_config_updated = update_runtime_environment_in_thoth_config(
+            kernel=kernel,
+            config=json.dumps(thoth_config.content),
+            os_name=os_name,
+            os_version=os_version,
+            python_version=python_version,
+            recommendation_type=recommendation_type,
+        )
 
         _, lock_results = lock_dependencies_with_thoth(
             kernel_name=kernel,
             pipfile_string=requirements,
-            config=json.dumps(thoth_config.content),
+            config=thoth_config_updated,
             timeout=timeout,
             force=force,
             debug=debug,
@@ -1142,7 +1168,7 @@ def horus_lock_command(
         if not lock_results["error"]:
             requirements = lock_results["requirements"]
             requirements_lock = lock_results["requirement_lock"]
-            notebook_metadata["thoth_config"] = json.dumps(thoth_config.content)
+            notebook_metadata["thoth_config"] = thoth_config_updated
             notebook_metadata["thoth_analysis_id"] = lock_results["thoth_analysis_id"]
 
         else:
@@ -1174,9 +1200,8 @@ def horus_lock_command(
 
         if resolution_engine == "thoth":
             # thoth
-            thoth_config_string = json.dumps(thoth_config.content)
             config = _Configuration()
-            config.load_config_from_string(thoth_config_string)
+            config.load_config_from_string(thoth_config_updated)
             config_path = complete_path.joinpath(".thoth.yaml")
             config.save_config(path=str(config_path))
 

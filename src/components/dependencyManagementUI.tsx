@@ -96,6 +96,9 @@ export interface IDependencyManagementUIState {
   thoth_timeout: number,
   thoth_force: boolean,
   thoth_debug: boolean,
+  os_name: string,
+  os_version: string,
+  python_version: string,
   root_directory: string,
   thoth_resolution_error_msg: string,
   pipenv_resolution_error_msg: string
@@ -148,6 +151,9 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         thoth_timeout: 180,
         thoth_force: false,
         thoth_debug: true,
+        os_name: "ubi",
+        os_version: "8",
+        python_version: "3.8",
         root_directory: "",
         thoth_resolution_error_msg: undefined,
         pipenv_resolution_error_msg: undefined
@@ -170,6 +176,9 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       this.setKernelName = this.setKernelName.bind(this)
       this.setRecommendationType = this.setRecommendationType.bind(this)
       this.setTimeout = this.setTimeout.bind(this)
+      this.setPythonVersion = this.setPythonVersion.bind(this)
+      this.setOSName = this.setOSName.bind(this)
+      this.setOSVersion = this.setOSVersion.bind(this)
       this.setRootDirectoryPath = this.setRootDirectoryPath.bind(this)
 
       this._model = new KernelModel ( this.props.panel.sessionContext )
@@ -332,7 +341,8 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
       this.setState(
         {
-          thoth_config: initial_thoth_config
+          thoth_config: initial_thoth_config,
+          python_version: thoth_python_version
         }
       );
     }
@@ -351,7 +361,8 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
       this.setState(
         {
-          thoth_config: initial_thoth_config
+          thoth_config: initial_thoth_config,
+          os_name: thoth_os_name
         }
       );
     }
@@ -370,7 +381,8 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
       this.setState(
         {
-          thoth_config: initial_thoth_config
+          thoth_config: initial_thoth_config,
+          os_version: thoth_os_version
         }
       );
     }
@@ -746,6 +758,10 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
           this.state.thoth_timeout,
           this.state.thoth_force,
           this.state.thoth_debug,
+          this.state.python_version,
+          this.state.os_name,
+          this.state.os_version,
+          this.state.recommendation_type,
           notebook_content,
           JSON.stringify(thoth_config),
           JSON.stringify(this.state.requirements)
@@ -929,7 +945,11 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         this.props.loaded_requirements_lock,
         this.props.loaded_resolution_engine
       )
+      console.log(ui_on_start_state.thoth_config)
 
+      _.set(ui_on_start_state, "os_name", ui_on_start_state.thoth_config.runtime_environments[0].operating_system.name)
+      _.set(ui_on_start_state, "os_version", ui_on_start_state.thoth_config.runtime_environments[0].operating_system.version)
+      _.set(ui_on_start_state, "python_version", ui_on_start_state.thoth_config.runtime_environments[0].python_version)
       _.set(ui_on_start_state, "root_directory", root_directory)
 
       await this.setNewState(ui_on_start_state);
@@ -1024,24 +1044,28 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                                       <br />
                                     </div>
 
-      if ( this.state.thoth_config.runtime_environments[0].base_image ) {
-        var baseImageInput = <div>
-                              <label>
-                                Thoth base image:
-                                <input
-                                  title="Thoth base image"
-                                  type="text"
-                                  name="thoth_base_image"
-                                  value={this.state.thoth_config.runtime_environments[0].base_image}
-                                  onChange={this.setBaseImage}
-                                />
-                              </label>
-                              <br />
-                            </div>
-      }
+      if ( this.state.thoth_config ) {
 
-      else {
-        var baseImageInput = <div></div>
+          if ( this.state.thoth_config.runtime_environments[0].base_image ) {
+            var baseImageInput = <div>
+                                  <label>
+                                    Thoth base image:
+                                    <input
+                                      title="Thoth base image"
+                                      type="text"
+                                      name="thoth_base_image"
+                                      value={this.state.thoth_config.runtime_environments[0].base_image}
+                                      onChange={this.setBaseImage}
+                                    />
+                                  </label>
+                                  <br />
+                                </div>
+          }
+
+        else {
+          var baseImageInput = <div></div>
+        }
+
       }
 
       let timeoutInput = <div>
@@ -1062,10 +1086,10 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                                 <label>
                                   Thoth Python Version:
                                   <input
-                                    title="Thoth OS name"
+                                    title="Thoth Python version"
                                     type="text"
                                     name="thoth_python_version"
-                                    value={this.state.thoth_config.runtime_environments[0].python_version}
+                                    value={this.state.python_version}
                                     onChange={this.setPythonVersion}
                                   />
                                 </label>
@@ -1079,7 +1103,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                               title="Thoth OS name"
                               type="text"
                               name="thoth_os_name"
-                              value={this.state.thoth_config.runtime_environments[0].operating_system.name}
+                              value={this.state.os_name}
                               onChange={this.setOSName}
                             />
                           </label>
@@ -1093,7 +1117,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                               title="Thoth OS version"
                               type="text"
                               name="thoth_os_version"
-                              value={this.state.thoth_config.runtime_environments[0].operating_system.version}
+                              value={this.state.os_version}
                               onChange={this.setOSVersion}
                             />
                           </label>
@@ -1117,7 +1141,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       let debugInput =  <div>
                           <label>
                             Thoth debug:
-                            <select onChange={() => this.setForceParameter}>
+                            <select onChange={() => this.setDebugParameter}>
                               title="Thoth debug parameter"
                               name="thoth_debug"
                               value={this.state.thoth_debug}
@@ -1230,8 +1254,8 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
               <div>
                 <fieldset>
                   <p>Pinned down software stack found in notebook metadata!<br></br>
-                  The runtime environment found in the notebook does not match your environment. <br></br>
-                  Please use install button.</p>
+                  The runtime environment found in the notebook does not match the environment in system. <br></br>
+                  Use install button.</p>
                 </fieldset>
               </div>
               {optionsForm}

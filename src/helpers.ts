@@ -93,9 +93,11 @@ export async function  _handle_thoth_config(
         try {
             // Load thoth_config from notebook metadata, if any, otherwise get default one
             var thoth_config_loaded: ThothConfig = loaded_config_file
+            console.log("loaded config from notebook metadata:", thoth_config_loaded)
 
             // Define detected config
             var thoth_config_detected: ThothConfig = await create_config( default_kernel_name );
+            console.log("discovered config from system:", thoth_config_detected)
 
             var is_default_config = false
             // If the endpoint cannot be reached or there are issues with thamos config creation
