@@ -632,7 +632,8 @@ def lock_dependencies_with_thoth(
         "requirement_lock": {},
         "error": False,
         "error_msg": "",
-        "stack_info": {},
+        "stack_info": [],
+        "justification": [],
     }
 
     returncode = 0
@@ -679,21 +680,17 @@ def lock_dependencies_with_thoth(
             # Use report of the best one, therefore index 0
             if result["report"] and result["report"]["products"]:
                 justifications = result["report"]["products"][0]["justification"]
-                _LOGGER.info(f"Justification: {justifications}")
-
-                stack_info = result["report"]["stack_info"]
-                _LOGGER.debug(f"Stack info {stack_info}")
-
                 pipfile = result["report"]["products"][0]["project"]["requirements"]
                 pipfile_lock = result["report"]["products"][0]["project"]["requirements_locked"]
 
                 advise["requirements"] = pipfile
                 advise["requirement_lock"] = pipfile_lock
                 advise["error"] = False
-                advise["justification"] = result["report"]["products"][0]["justification"]
+                advise["justification"] = justifications
 
             if result["report"] and result["report"]["stack_info"]:
-                advise["stack_info"] = result["report"]["stack_info"]
+                stack_info = result["report"]["stack_info"]
+                advise["stack_info"] = stack_info
 
     except Exception as api_error:
         _LOGGER.debug(f"error locking dependencies using Thoth: {api_error}")

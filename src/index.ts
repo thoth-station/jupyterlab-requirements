@@ -179,6 +179,8 @@ async function activate(
                     console.debug("kernel_name", kernel_name)
                     const resolution_engine: string = _.get(jsonObject, "resolution_engine")
                     console.debug("resolution_engine", resolution_engine)
+                    const thoth_analysis_id: string = _.get(jsonObject, "analysis_id")
+                    console.debug("analysis_id", thoth_analysis_id)
 
                     let notebook_metadata = notebook.model.metadata
                     notebook_metadata.set('dependency_resolution_engine', resolution_engine)
@@ -187,6 +189,7 @@ async function activate(
                       retrieve_config_file(kernel_name).then(thoth_config  => {
                           notebook_metadata.set('thoth_config', JSON.stringify(thoth_config))
                       })
+                      notebook_metadata.set('analysis_id', thoth_analysis_id)
                     }
 
                     get_dependencies(kernel_name).then(value => {

@@ -256,12 +256,12 @@ export async function set_thoth_configuration( notebook: NotebookPanel, config_f
         metadata.set('thoth_config', JSON.stringify(config_file) )
 
     } else {
-        console.debug( "Notebook Thoth config already exist. Updating." )
+        console.debug( "Notebook Thoth config already exists. Updating." )
         // update the notebook metadata
         metadata.set('thoth_config', JSON.stringify(config_file) )
     }
 
-    console.debug( "Notebook Thoth config have been set successfully." )
+    console.debug( "Notebook Thoth config has been set successfully." )
   }
 
 /**
@@ -306,6 +306,25 @@ export async function set_resolution_engine( notebook: NotebookPanel, dependency
     }
 
     console.debug( "Dependency resolution engine used for requirements have been set successfully." )
+  }
+
+/**
+ * Function: Set Thoth analysis id into notebook metadata.
+ */
+
+ export async function set_thoth_analysis_id( notebook: NotebookPanel, thoth_analysis_id: string ): Promise<void> {
+    const metadata = notebook.model.metadata
+
+    if ( metadata.has("analysis_id") == false ) {
+        metadata.set('analysis_id', JSON.stringify(thoth_analysis_id) )
+
+    } else {
+        console.debug( "Notebook Thoth analysis ID already exists. Updating." )
+        // update the notebook metadata
+        metadata.set('analysis_id', JSON.stringify(thoth_analysis_id) )
+    }
+
+    console.debug( "Notebook Thoth analysis ID has been set successfully." )
   }
 
 

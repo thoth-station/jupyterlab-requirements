@@ -365,12 +365,18 @@ components:
     ThothAdvise:
       description: Thoth advise response.
       required:
+        - analysis_id
         - requirements
         - requirement_lock
         - error
         - error_msg
+        - stack_info
+        - justifications
       type: object
       properties:
+        analysis_id:
+          type: string
+          description: Thoth Analysis ID.
         requirements:
           type: string
           description: Pipfile.
@@ -383,6 +389,12 @@ components:
         error_msg:
           type: string
           description: Error message present only if error is true, otherwise empty string.
+        stack_info:
+          type: string
+          description: Stack info from Thoth results.
+        justifications:
+          type: string
+          description: Justifications from Thoth results.
 
     ThothConfig:
       type: object

@@ -26,6 +26,7 @@ import {
     set_requirements,
     set_requirement_lock,
     set_resolution_engine,
+    set_thoth_analysis_id,
     set_thoth_configuration,
     take_notebook_content
 } from "./notebook";
@@ -503,7 +504,8 @@ export async function set_notebook_metadata(
     resolution_engine: string,
     requirements: Requirements,
     requirements_lock: RequirementsLock,
-    thoth_config?: ThothConfig
+    thoth_config?: ThothConfig,
+    thoth_analysis_id?: string
   ) {
 
     await set_resolution_engine( panel , resolution_engine )
@@ -512,6 +514,7 @@ export async function set_notebook_metadata(
 
     if (resolution_engine == "thoth" ) {
         await set_thoth_configuration( panel , thoth_config )
+        await set_thoth_analysis_id ( panel, thoth_analysis_id )
     }
 
     // Save all changes to disk.
@@ -551,7 +554,7 @@ export async function _parse_packages_from_state(
 }
 
 /**
- * Function: Set all notebook metadata generated
+ * Function: Remove all notebook metadata generated
  */
 
 export async function remove_notebook_metadata(
@@ -561,6 +564,7 @@ export async function remove_notebook_metadata(
     delete_key_from_notebook_metadata( panel, "requirements_lock" )
     delete_key_from_notebook_metadata( panel, "thoth_config" )
     delete_key_from_notebook_metadata( panel, "dependency_resolution_engine" )
+    delete_key_from_notebook_metadata( panel, "analysis_id" )
 
     // Save all changes to disk.
     panel.context.save()

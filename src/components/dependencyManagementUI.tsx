@@ -20,7 +20,7 @@ import { DependencyManagementSaveButton } from './dependencyManagementSaveButton
 import { DependencyManagementInstallButton } from './dependencyManagementInstallButton'
 import { DependencyManagementNewPackageButton } from './dependencyManagementAddPackageButton';
 
-import { get_python_version, take_notebook_content } from "../notebook";
+import { delete_key_from_notebook_metadata, get_python_version, take_notebook_content } from "../notebook";
 import { Requirements, RequirementsLock } from '../types/requirements';
 
 import { ThothConfig } from '../types/thoth';
@@ -778,7 +778,8 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
           "thoth",
           advise.requirements,
           advise.requirement_lock,
-          this.state.thoth_config
+          this.state.thoth_config,
+          advise.analysis_id
         )
 
       } catch ( error ) {
@@ -873,12 +874,14 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       }
 
       try {
-        await set_notebook_metadata(
-          this.props.panel,
-          "pipenv",
-          notebookMetadataRequirements,
-          result.requirements_lock
-        )
+          await set_notebook_metadata(
+            this.props.panel,
+            "pipenv",
+            notebookMetadataRequirements,
+            result.requirements_lock
+          )
+
+          await delete_key_from_notebook_metadata( this.props.panel, "analysis_id" )
 
       } catch ( error ) {
 

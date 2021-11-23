@@ -369,6 +369,7 @@ class HorusMagics(Magics):
                     {
                         "kernel_name": kernel_results["kernel_name"],
                         "resolution_engine": general_results.get("dependency_resolution_engine"),
+                        "analysis_id": lock_results.get("analysis_id"),
                     }
                 )
 
