@@ -276,6 +276,8 @@ When you are ready with a new contribution open a Pull Request!! We are very hap
 Demo development status and new features
 ========================================
 
+* `v0.13.0 <https://www.youtube.com/watch?v=7BuxODwRKq8>`__ [Nov 22 2021]
+
 * `v0.11.0 <https://www.youtube.com/watch?v=SFui8yrMVjw>`__ [Sep 13 2021]
 
 * `v0.10.4 <https://www.youtube.com/watch?v=FjVxNTXO70I>`__ [Aug 10 2021]
