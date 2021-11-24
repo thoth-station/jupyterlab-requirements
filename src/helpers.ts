@@ -97,7 +97,7 @@ export async function  _handle_thoth_config(
 
             // Define detected config
             var thoth_config_detected: ThothConfig = await create_config( default_kernel_name );
-            console.log("discovered config from system:", thoth_config_detected)
+            console.log("discovered config from kernel .thoth.yaml or detected from system:", thoth_config_detected)
 
             var is_default_config = false
             // If the endpoint cannot be reached or there are issues with thamos config creation

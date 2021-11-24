@@ -945,7 +945,6 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         this.props.loaded_requirements_lock,
         this.props.loaded_resolution_engine
       )
-      console.log(ui_on_start_state.thoth_config)
 
       _.set(ui_on_start_state, "os_name", ui_on_start_state.thoth_config.runtime_environments[0].operating_system.name)
       _.set(ui_on_start_state, "os_version", ui_on_start_state.thoth_config.runtime_environments[0].operating_system.version)
