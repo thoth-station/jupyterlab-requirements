@@ -484,34 +484,14 @@ def horus_delete_kernel(kernel_name: str, kernels_path: Path = Path.home().joinp
     return command_output
 
 
-def gather_libraries(notebook_path: str) -> typing.List[typing.Dict]:
-    """Gather libraries with invectio."""
-    library_gathered = []
-    try:
-        notebook_content_py = get_notebook_content(notebook_path=notebook_path, py_format=True)
-
-        try:
-            tree = ast.parse(notebook_content_py)
-        except Exception:
-            raise
-
-        visitor = invectio.lib.InvectioLibraryUsageVisitor()
-        visitor.visit(tree)
-
-        report = visitor.get_module_report()
-
-        std_lib_path = Path(sysconfig.get_python_lib(standard_lib=True))
-        std_lib = {p.name.rstrip(".py") for p in std_lib_path.iterdir()}
-
-        libs = filter(lambda k: k not in std_lib | set(sys.builtin_module_names), report)
-        library_gathered = list(libs)
-    except Exception as e:
-        _LOGGER.error(f"Could not gather libraries: {e}")
-
+def verify_gathered_libraries(
+    gathered_libraries: typing.List[str],
+):
+    """Verify gathered libraries from invectio."""
     # Use Thoth user-API endpoint to verify what is the packages using that import name
     verified_libraries = []
 
-    for import_name in library_gathered:
+    for import_name in gathered_libraries:
         unique_packages: typing.List[typing.Dict] = []
 
         try:
@@ -549,6 +529,33 @@ def gather_libraries(notebook_path: str) -> typing.List[typing.Dict]:
             _LOGGER.warning(f"No packages identified for import name {import_name}: {error}")
 
     return verified_libraries
+
+
+def gather_libraries(notebook_path: str) -> typing.List[str]:
+    """Gather libraries with invectio."""
+    gathered_libraries = []
+    try:
+        notebook_content_py = get_notebook_content(notebook_path=notebook_path, py_format=True)
+
+        try:
+            tree = ast.parse(notebook_content_py)
+        except Exception:
+            raise
+
+        visitor = invectio.lib.InvectioLibraryUsageVisitor()
+        visitor.visit(tree)
+
+        report = visitor.get_module_report()
+
+        std_lib_path = Path(sysconfig.get_python_lib(standard_lib=True))
+        std_lib = {p.name.rstrip(".py") for p in std_lib_path.iterdir()}
+
+        libs = filter(lambda k: k not in std_lib | set(sys.builtin_module_names), report)
+        gathered_libraries = list(libs)
+    except Exception as e:
+        _LOGGER.error(f"Could not gather libraries: {e}")
+
+    return gathered_libraries
 
 
 def load_files(base_path: str) -> typing.Tuple[str, typing.Optional[str]]:

@@ -47,6 +47,7 @@ from .lib import horus_list_kernels
 from .lib import load_files
 from .lib import print_report
 from .lib import save_notebook_content
+from .lib import verify_gathered_libraries
 
 from .magic_commands import HorusMagics
 
@@ -80,6 +81,7 @@ __all__ = [
     "load_files",
     "print_report",
     "save_notebook_content",
+    "verify_gathered_libraries",
     "HorusMagics",
     "_EMOJI",
 ]
