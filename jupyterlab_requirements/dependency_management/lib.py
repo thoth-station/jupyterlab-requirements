@@ -484,7 +484,7 @@ def horus_delete_kernel(kernel_name: str, kernels_path: Path = Path.home().joinp
     return command_output
 
 
-def gather_libraries(notebook_path: str) -> typing.List[str]:
+def gather_libraries(notebook_path: str) -> typing.List[typing.Dict]:
     """Gather libraries with invectio."""
     library_gathered = []
     try:
@@ -509,23 +509,46 @@ def gather_libraries(notebook_path: str) -> typing.List[str]:
         _LOGGER.error(f"Could not gather libraries: {e}")
 
     # Use Thoth user-API endpoint to verify what is the packages using that import name
-    verified_libraries = set()
+    verified_libraries = []
+
     for import_name in library_gathered:
+        unique_packages: typing.List[typing.Dict] = []
 
         try:
             imported_packages = get_package_from_imported_packages(import_name)
 
             if imported_packages:
-                unique_packages = set([p["package_name"] for p in imported_packages])
+                for package in imported_packages:
+                    if package["package_name"] not in [p["package_name"] for p in unique_packages]:
+                        unique_packages.append(
+                            {
+                                "package_name": package["package_name"],
+                                "index_url": package["index_url"],
+                            }
+                        )
+                    else:
+                        existing_indexes = [
+                            p["index_url"] for p in unique_packages if p["package_name"] == package["package_name"]
+                        ]
+
+                        if package["index_url"] not in existing_indexes:
+                            unique_packages.append(
+                                {
+                                    "package_name": package["package_name"],
+                                    "index_url": package["index_url"],
+                                }
+                            )
 
                 for unique_package in unique_packages:
                     verified_libraries.append(unique_package)
-                    _LOGGER.info(f"Package name {unique_package} identifed for import name {import_name}")
+                    _LOGGER.info(
+                        f"Package name {unique_package['package_name']} identifed for import name {import_name}"
+                    )
 
-        except Exception as e:
-            _LOGGER.warning(e)
+        except Exception as error:
+            _LOGGER.warning(f"No packages identified for import name {import_name}: {error}")
 
-    return list(verified_libraries)
+    return verified_libraries
 
 
 def load_files(base_path: str) -> typing.Tuple[str, typing.Optional[str]]:
