@@ -177,7 +177,7 @@ export async function set_requirements( notebook: NotebookPanel, requirements: R
  * Function: Get Python requirements lock from notebook metadata.
  */
 
-export function get_requirement_lock( notebook: NotebookPanel ): Promise<RequirementsLock|null> {
+export function get_requirements_lock( notebook: NotebookPanel ): Promise<RequirementsLock|null> {
     return new Promise( async ( resolve, reject ) => {
         const notebook_metadata = notebook.model.metadata
 
@@ -203,14 +203,14 @@ export function get_requirement_lock( notebook: NotebookPanel ): Promise<Require
  * Function: Set Python requirements into notebook metadata.
  */
 
-export async function set_requirement_lock( notebook: NotebookPanel, requirements_lock: RequirementsLock ): Promise<void> {
+export async function set_requirements_lock( notebook: NotebookPanel, requirements_lock: RequirementsLock ): Promise<void> {
     const notebook_metadata = notebook.model.metadata
 
     if ( notebook_metadata.has("requirements_lock") == false ) {
         notebook_metadata.set('requirements_lock', JSON.stringify(requirements_lock) )
 
     } else {
-        console.debug( "Notebook requirement_lock already exist. Updating." )
+        console.debug( "Notebook requirements_lock already exist. Updating." )
         // update the notebook metadata
         notebook_metadata.set('requirements_lock', JSON.stringify(requirements_lock) )
     }
@@ -256,12 +256,12 @@ export async function set_thoth_configuration( notebook: NotebookPanel, config_f
         metadata.set('thoth_config', JSON.stringify(config_file) )
 
     } else {
-        console.debug( "Notebook Thoth config already exist. Updating." )
+        console.debug( "Notebook Thoth config already exists. Updating." )
         // update the notebook metadata
         metadata.set('thoth_config', JSON.stringify(config_file) )
     }
 
-    console.debug( "Notebook Thoth config have been set successfully." )
+    console.debug( "Notebook Thoth config has been set successfully." )
   }
 
 /**
@@ -306,6 +306,25 @@ export async function set_resolution_engine( notebook: NotebookPanel, dependency
     }
 
     console.debug( "Dependency resolution engine used for requirements have been set successfully." )
+  }
+
+/**
+ * Function: Set Thoth analysis id into notebook metadata.
+ */
+
+ export async function set_thoth_analysis_id( notebook: NotebookPanel, thoth_analysis_id: string ): Promise<void> {
+    const metadata = notebook.model.metadata
+
+    if ( metadata.has("thoth_analysis_id") == false ) {
+        metadata.set('thoth_analysis_id', thoth_analysis_id )
+
+    } else {
+        console.debug( "Notebook Thoth analysis ID already exists. Updating." )
+        // update the notebook metadata
+        metadata.set('thoth_analysis_id', thoth_analysis_id )
+    }
+
+    console.debug( "Notebook Thoth analysis ID has been set successfully." )
   }
 
 

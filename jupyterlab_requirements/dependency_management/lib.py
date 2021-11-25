@@ -57,7 +57,7 @@ _EMOJI = {
 }
 
 
-def print_report(report: dict, title: typing.Optional[str] = None):
+def print_report(report: typing.List, title: typing.Optional[str] = None):
     """Print reasoning to user."""
     console = Console()
     table = Table(
@@ -186,7 +186,7 @@ def horus_check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -
     resolution_engine = notebook_metadata.get("dependency_resolution_engine")
 
     if resolution_engine == "thoth":
-        for thoth_specific_key in ["thoth_config"]:
+        for thoth_specific_key in ["thoth_config", "thoth_analysis_id"]:
             if thoth_specific_key not in notebook_metadata.keys():
 
                 if is_cli:
@@ -202,12 +202,21 @@ def horus_check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -
                     }
                 )
             else:
-                result.append(
-                    {
-                        "message": f"{thoth_specific_key} key is present in notebook metadata.",
-                        "type": "INFO",
-                    }
-                )
+                if thoth_specific_key == "thoth_analysis_id":
+                    thoth_analysis_id = notebook_metadata.get("thoth_analysis_id")
+                    result.append(
+                        {
+                            "message": f"Thoth analysis ID: {thoth_analysis_id}",
+                            "type": "INFO",
+                        }
+                    )
+                else:
+                    result.append(
+                        {
+                            "message": f"{thoth_specific_key} key is present in notebook metadata.",
+                            "type": "INFO",
+                        }
+                    )
 
     for mandatory_key in ["requirements"]:
         if mandatory_key not in notebook_metadata.keys():
@@ -572,8 +581,8 @@ def load_files(base_path: str) -> typing.Tuple[str, typing.Optional[str]]:
     pipfile_lock_path = Path(base_path).joinpath("Pipfile.lock")
 
     project = Project.from_files(
-        pipfile_path=pipfile_path,
-        pipfile_lock_path=pipfile_lock_path,
+        pipfile_path=str(pipfile_path),
+        pipfile_lock_path=str(pipfile_lock_path),
         without_pipfile_lock=not pipfile_lock_path.exists(),
     )
 
@@ -604,7 +613,7 @@ def lock_dependencies_with_thoth(
     """Lock dependencies using Thoth resolution engine."""
     initial_path = Path.cwd()
     # Get origin before changing path
-    origin: str = _get_origin()
+    origin: typing.Optional[str] = _get_origin()
     _LOGGER.info("Origin identified by thamos: %r", origin)
 
     env_path = kernels_path.joinpath(kernel_name)
@@ -617,7 +626,16 @@ def lock_dependencies_with_thoth(
     _LOGGER.info("Current path: %r ", env_path.as_posix())
     _LOGGER.info(f"Input Pipfile: \n{pipfile_string}")
 
-    advise = {"requirements": {}, "requirement_lock": {}, "error": False, "error_msg": "", "stack_info": {}}
+    advise = {
+        "thoth_analysis_id": "",
+        "requirements": {},
+        "requirements_lock": {},
+        "error": False,
+        "error_msg": "",
+        "stack_info": [],
+        "justification": [],
+    }
+
     returncode = 0
 
     temp = tempfile.NamedTemporaryFile(prefix="jl_thoth_", mode="w+t")
@@ -650,6 +668,8 @@ def lock_dependencies_with_thoth(
             raise Exception("Analysis was not successful.")
 
         result, error_result = response
+        thoth_analysis_id = result["parameters"]["output"].split("/")[-1]
+        advise["thoth_analysis_id"] = thoth_analysis_id
 
         if error_result:
             advise["error"] = True
@@ -660,21 +680,17 @@ def lock_dependencies_with_thoth(
             # Use report of the best one, therefore index 0
             if result["report"] and result["report"]["products"]:
                 justifications = result["report"]["products"][0]["justification"]
-                _LOGGER.info(f"Justification: {justifications}")
-
-                stack_info = result["report"]["stack_info"]
-                _LOGGER.debug(f"Stack info {stack_info}")
-
                 pipfile = result["report"]["products"][0]["project"]["requirements"]
                 pipfile_lock = result["report"]["products"][0]["project"]["requirements_locked"]
 
                 advise["requirements"] = pipfile
-                advise["requirement_lock"] = pipfile_lock
+                advise["requirements_lock"] = pipfile_lock
                 advise["error"] = False
-                advise["justification"] = result["report"]["products"][0]["justification"]
+                advise["justification"] = justifications
 
             if result["report"] and result["report"]["stack_info"]:
-                advise["stack_info"] = result["report"]["stack_info"]
+                stack_info = result["report"]["stack_info"]
+                advise["stack_info"] = stack_info
 
     except Exception as api_error:
         _LOGGER.debug(f"error locking dependencies using Thoth: {api_error}")
@@ -701,7 +717,7 @@ def lock_dependencies_with_thoth(
 
             if requirements_format == "pipenv":
                 _LOGGER.info("Writing to Pipfile/Pipfile.lock in %r", env_path.as_posix())
-                project.to_files(pipfile_path=pipfile_path, pipfile_lock_path=pipfile_lock_path)
+                project.to_files(pipfile_path=str(pipfile_path), pipfile_lock_path=str(pipfile_lock_path))
         except Exception as e:
             _LOGGER.debug("Requirements files cannot be stored due to: %r", e)
 
@@ -949,6 +965,7 @@ def horus_show_command(
     results = {}
     results["kernel_name"] = ""
     results["dependency_resolution_engine"] = ""
+    results["thoth_analysis_id"] = ""
     results["pipfile"] = ""
     results["pipfile_lock"] = ""
     results["thoth_config"] = ""
@@ -972,6 +989,9 @@ def horus_show_command(
 
     dependency_resolution_engine = notebook_metadata.get("dependency_resolution_engine")
     results["dependency_resolution_engine"] = dependency_resolution_engine
+
+    thoth_analysis_id = notebook_metadata.get("thoth_analysis_id")
+    results["thoth_analysis_id"] = thoth_analysis_id
 
     pipfile_string = notebook_metadata.get("requirements")
 
@@ -1012,6 +1032,53 @@ def horus_show_command(
     return results
 
 
+def update_runtime_environment_in_thoth_config(
+    kernel: str,
+    config: str,
+    os_name: typing.Optional[str] = None,
+    os_version: typing.Optional[str] = None,
+    python_version: typing.Optional[str] = None,
+    recommendation_type: typing.Optional[str] = None,
+) -> str:
+    """Update runtime environment in thoth config."""
+    thoth_config = _Configuration()
+    thoth_config.load_config_from_string(config)
+
+    runtime_environments = []
+    # runtime environment with same name does not exists.
+    runtime_environment = dict(thoth_config.get_runtime_environment())
+    runtime_environment["name"] = kernel
+
+    # Assign parameters
+    operating_system = {
+        "name": runtime_environment["operating_system"]["name"],
+        "version": runtime_environment["operating_system"]["version"],
+    }
+
+    if os_name:
+        operating_system["name"] = os_name
+
+    if os_version:
+        operating_system["version"] = os_version
+
+    runtime_environment["operating_system"] = operating_system
+
+    if python_version:
+        runtime_environment["python_version"] = python_version
+
+    if recommendation_type:
+        runtime_environment["recommendation_type"] = recommendation_type
+
+    # Assign runtime environment to thoth config runtime environment.
+    runtime_environments.append(runtime_environment)
+    thoth_config.content["runtime_environments"] = runtime_environments
+
+    # TODO: Use adjusted method from thamos
+    # thoth_config.set_runtime_environment(runtime_environment=runtime_environment, force=True)
+
+    return json.dumps(thoth_config.content)
+
+
 def horus_lock_command(
     path: str,
     resolution_engine: str,
@@ -1025,7 +1092,7 @@ def horus_lock_command(
     python_version: typing.Optional[str] = None,
     save_in_notebook: bool = True,
     save_on_disk: bool = False,
-):
+) -> typing.Tuple[dict, dict]:
     """Lock requirements in notebook metadata."""
     results = {}
     results["kernel_name"] = ""
@@ -1078,41 +1145,20 @@ def horus_lock_command(
             _LOGGER.error(f"Could not get notebook content!: {e!r}")
             notebook_content_py = ""
 
-        # runtime environment
-        runtime_environments = []
-        runtime_environment = dict(thoth_config.get_runtime_environment())
-        runtime_environment["name"] = kernel
-
-        operating_system = {
-            "name": runtime_environment["operating_system"]["name"],
-            "version": runtime_environment["operating_system"]["version"],
-        }
-
-        if os_name:
-            operating_system["name"] = os_name
-
-        if os_version:
-            operating_system["version"] = os_version
-
-        runtime_environment["operating_system"] = operating_system
-
-        if python_version:
-            runtime_environment["python_version"] = python_version
-
-        runtime_environment["recommendation_type"] = recommendation_type
-
-        runtime_environments.append(runtime_environment)
-
-        # Assign runtime environment to thoth config runtime environment.
-        thoth_config.content["runtime_environments"] = runtime_environments
-
-        # TODO: Use adjusted method from thamos
-        # thoth_config.set_runtime_environment(runtime_environment=runtime_environment, force=True)
+        # update runtime environment in thoth config
+        thoth_config_updated = update_runtime_environment_in_thoth_config(
+            kernel=kernel,
+            config=json.dumps(thoth_config.content),
+            os_name=os_name,
+            os_version=os_version,
+            python_version=python_version,
+            recommendation_type=recommendation_type,
+        )
 
         _, lock_results = lock_dependencies_with_thoth(
             kernel_name=kernel,
             pipfile_string=requirements,
-            config=json.dumps(thoth_config.content),
+            config=thoth_config_updated,
             timeout=timeout,
             force=force,
             debug=debug,
@@ -1121,14 +1167,19 @@ def horus_lock_command(
 
         if not lock_results["error"]:
             requirements = lock_results["requirements"]
-            requirements_lock = lock_results["requirement_lock"]
-            notebook_metadata["thoth_config"] = json.dumps(thoth_config.content)
+            requirements_lock = lock_results["requirements_lock"]
+            notebook_metadata["thoth_config"] = thoth_config_updated
+            notebook_metadata["thoth_analysis_id"] = lock_results["thoth_analysis_id"]
 
         else:
             error = True
 
     if resolution_engine == "pipenv":
         _, lock_results = lock_dependencies_with_pipenv(kernel_name=kernel, pipfile_string=pipfile_.to_string())
+
+        # Remove if Pipenv is used after Thoth was used.
+        if notebook_metadata.get("thoth_analysis_id"):
+            notebook_metadata["thoth_analysis_id"] = ""
 
         if not lock_results["error"]:
             requirements_lock = lock_results["requirements_lock"]
@@ -1149,11 +1200,10 @@ def horus_lock_command(
 
         if resolution_engine == "thoth":
             # thoth
-            thoth_config_string = json.dumps(thoth_config.content)
             config = _Configuration()
-            config.load_config_from_string(thoth_config_string)
+            config.load_config_from_string(thoth_config_updated)
             config_path = complete_path.joinpath(".thoth.yaml")
-            config.save_config(path=config_path)
+            config.save_config(path=str(config_path))
 
     if save_in_notebook and not error:
         notebook_metadata["dependency_resolution_engine"] = resolution_engine
@@ -1234,14 +1284,14 @@ def horus_set_kernel_command(
         pipfile_string = notebook_metadata.get("requirements")
         pipfile_ = Pipfile.from_string(pipfile_string)
         pipfile_path = complete_path.joinpath("Pipfile")
-        pipfile_.to_file(path=pipfile_path)
+        pipfile_.to_file(path=str(pipfile_path))
 
     # requirements lock
     if not is_magic_command:
         pipfile_lock_string = notebook_metadata.get("requirements_lock")
         pipfile_lock_ = PipfileLock.from_string(pipfile_content=pipfile_lock_string, pipfile=pipfile_)
         pipfile_lock_path = complete_path.joinpath("Pipfile.lock")
-        pipfile_lock_.to_file(path=pipfile_lock_path)
+        pipfile_lock_.to_file(path=str(pipfile_lock_path))
 
     if dependency_resolution_engine == "thoth" and not is_magic_command:
         # thoth
@@ -1249,7 +1299,7 @@ def horus_set_kernel_command(
         config = _Configuration()
         config.load_config_from_string(thoth_config_string)
         config_path = complete_path.joinpath(".thoth.yaml")
-        config.save_config(path=config_path)
+        config.save_config(path=str(config_path))
 
     # 2. Create virtualenv and install dependencies
     install_packages(
@@ -1342,7 +1392,7 @@ def horus_extract_command(
                 "Use --force to overwrite existing content or --show-only to visualize it."
             )
         else:
-            pipfile_.to_file(path=pipfile_path)
+            pipfile_.to_file(path=str(pipfile_path))
 
     if pipfile_lock or extract_all:
         pipfile_lock_string = notebook_metadata.get("requirements_lock")
@@ -1360,7 +1410,7 @@ def horus_extract_command(
                 "Use --force to overwrite existing content or --show-only to visualize it."
             )
         else:
-            pipfile_lock_.to_file(path=pipfile_lock_path)
+            pipfile_lock_.to_file(path=str(pipfile_lock_path))
 
     if thoth_config or extract_all:
         thoth_config_string = notebook_metadata.get("thoth_config")

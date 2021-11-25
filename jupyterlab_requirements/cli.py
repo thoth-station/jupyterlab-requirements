@@ -18,7 +18,6 @@
 """A CLI for jupyterlab-requirements: Horus."""
 
 import logging
-import os
 import json
 import sys
 import subprocess
@@ -28,8 +27,6 @@ import typing
 
 from typing import Optional
 from pathlib import Path
-from rich.console import Console
-from rich.table import Table
 
 from thoth.python import Pipfile, PipfileLock
 from thamos.config import _Configuration
@@ -37,7 +34,6 @@ from thamos.discover import discover_python_version
 
 from jupyterlab_requirements import __version__
 
-from jupyterlab_requirements.dependency_management import _EMOJI
 from jupyterlab_requirements.dependency_management import create_pipfile_from_packages
 from jupyterlab_requirements.dependency_management import gather_libraries
 from jupyterlab_requirements.dependency_management import get_packages
@@ -221,6 +217,9 @@ def show(
     else:
         click.echo(f"Resolution engine identified: {results['dependency_resolution_engine']!s}")
 
+    if results["thoth_analysis_id"]:
+        click.echo(f"Thoth analysis ID: {results['thoth_analysis_id']!s}")
+
     if results["pipfile"]:
         click.echo(results["pipfile"])
 
@@ -317,7 +316,7 @@ def save(
         pipfile_string, pipfile_lock_string = load_files(base_path=save_files_path)
 
         pipfile_ = Pipfile.from_string(pipfile_string)
-        pipfile_lock_ = PipfileLock.from_string(pipfile_content=pipfile_lock_string, pipfile=pipfile_)
+        pipfile_lock_ = PipfileLock.from_string(pipfile_content=str(pipfile_lock_string), pipfile=pipfile_)
 
     if pipfile or save_all:
         if "requirements" in notebook_metadata and not force:
@@ -351,7 +350,7 @@ def save(
 
         if thoth_config or save_all:
             config = _Configuration()
-            config.load_config_from_file(config_path=Path(save_files_path).joinpath(".thoth.yaml"))
+            config.load_config_from_file(config_path=str(Path(save_files_path).joinpath(".thoth.yaml")))
 
             if "thoth_config" in notebook_metadata and not force:
                 raise FileExistsError(
@@ -433,7 +432,7 @@ def discover(ctx: click.Context, path: str, store_files_path: str, show_only: bo
                 "Use --force to overwrite existing content or --show-only to visualize the Pipfile."
             )
         else:
-            pipfile.to_file(path=pipfile_path)
+            pipfile.to_file(path=str(pipfile_path))
 
     ctx.exit(0)
 
@@ -471,34 +470,10 @@ def check(ctx: click.Context, path: str, output_format: str) -> None:
         sys.stdout.write("\n")
 
     elif output_format == "table":
-        table = Table()
-
-        header = set()
-        for item in result:
-            for key in item.keys():
-                header.add(key)
-
-        header_sorted = sorted(header)
-        for element in header_sorted:
-            table.add_column(
-                element.replace("_", " ").capitalize(),
-                style="cyan",
-                overflow="fold",
-            )
-
-        for item in result:
-            row = []
-            for key in header_sorted:
-                entry = item.get(key)
-                if not bool(int(os.getenv("JUPYTERLAB_REQUIREMENTS_NO_EMOJI", 0))) and isinstance(entry, str):
-                    entry = _EMOJI.get(entry, entry)
-
-                row.append(entry if entry is not None else "-")
-
-            table.add_row(*row)
-
-        console = Console()
-        console.print(table, justify="center")
+        print_report(
+            result,
+            title="Horus check results",
+        )
 
     sys.exit(1 if any(item.get("type") == "ERROR" for item in result) else 0)
 
@@ -563,32 +538,10 @@ def list_kernels(ctx: click.Context) -> None:
                 }
             )
 
-    table = Table()
-
-    header = set()
-    for item in result:
-        for key in item.keys():
-            header.add(key)
-
-    header_sorted = sorted(header)
-    for element in header_sorted:
-        table.add_column(
-            element.replace("_", " ").capitalize(),
-            style="cyan",
-            overflow="fold",
-        )
-
-    for item in result:
-        row = []
-        for key in header_sorted:
-            entry = item.get(key)
-            row.append(entry if entry is not None else "-")
-
-        table.add_row(*row)
-
-    console = Console()
-
-    console.print(table, justify="center")
+    print_report(
+        result,
+        title="Kernels available",
+    )
 
 
 @cli.command("delete-kernel")
@@ -647,32 +600,10 @@ def check_kernel(ctx: click.Context, kernel_name: str) -> None:
 
         result.append({"package name": package_name, "package version": packages[package_name]})
 
-    table = Table()
-
-    header = set()
-    for item in result:
-        for key in item.keys():
-            header.add(key)
-
-    header_sorted = sorted(header)
-    for element in header_sorted:
-        table.add_column(
-            element.replace("_", " ").capitalize(),
-            style="cyan",
-            overflow="fold",
-        )
-
-    for item in result:
-        row = []
-        for key in header_sorted:
-            entry = item.get(key)
-            row.append(entry if entry is not None else "-")
-
-        table.add_row(*row)
-
-    console = Console()
-
-    console.print(table, justify="center")
+    return print_report(
+        result,
+        title=f"{kernel_name} kernel packages",
+    )
 
     ctx.exit(0)
 

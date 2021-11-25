@@ -12,11 +12,26 @@
 import { Requirements, RequirementsLock } from "./requirements";
 
 
+export interface StackInfo {
+    link: string,
+    message: string,
+    type: string
+}
+
+export interface Justification {
+    link: string,
+    message: string,
+    type: string
+}
+
 export interface Advise {
+    thoth_analysis_id: string,
     error: boolean,
     error_msg: string,
     requirements: Requirements,
-    requirement_lock: RequirementsLock
+    requirements_lock: RequirementsLock,
+    stack_info: Array<StackInfo>,
+    justifications: Array<Justification>
 }
 
 export interface PipenvResult {

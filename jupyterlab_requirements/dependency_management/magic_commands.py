@@ -24,8 +24,6 @@ import argparse
 import ipynbname
 
 from pathlib import Path
-from rich.console import Console
-from rich.table import Table
 
 from IPython.core.magic import line_magic  # Called with %
 
@@ -34,7 +32,6 @@ from IPython.core.magic import line_magic  # Called with %
 from IPython.core.magic import magics_class, Magics
 from thamos.discover import discover_python_version
 
-from .lib import _EMOJI
 from .lib import print_report
 from .lib import horus_check_metadata_content
 from .lib import create_pipfile_from_packages
@@ -266,9 +263,9 @@ class HorusMagics(Magics):
             notebook = get_notebook_content(notebook_path=nb_path)
             notebook_metadata = notebook.get("metadata")
 
-            result = horus_check_metadata_content(notebook_metadata=notebook_metadata, is_cli=False)
+            results = horus_check_metadata_content(notebook_metadata=notebook_metadata, is_cli=False)
 
-            result.insert(
+            results.insert(
                 0,
                 {
                     "message": f"notebook name: {nb_name}",
@@ -276,35 +273,10 @@ class HorusMagics(Magics):
                 },
             )
 
-            table = Table()
-
-            header = set()
-            for item in result:
-                for key in item.keys():
-                    header.add(key)
-
-            header_sorted = sorted(header)
-            for element in header_sorted:
-                table.add_column(
-                    element.replace("_", " ").capitalize(),
-                    style="cyan",
-                    overflow="fold",
-                )
-
-            for item in result:
-                row = []
-                for key in header_sorted:
-                    entry = item.get(key)
-                    if not bool(int(os.getenv("JUPYTERLAB_REQUIREMENTS_NO_EMOJI", 0))) and isinstance(entry, str):
-                        entry = _EMOJI.get(entry, entry)
-
-                    row.append(entry if entry is not None else "-")
-
-                table.add_row(*row)
-
-            console = Console()
-
-            return console.print(table, justify="center")
+            return print_report(
+                results,
+                title="Horus check results",
+            )
 
         if args.command == "requirements":
             _LOGGER.info("Managing requirements in notebook content.")
@@ -323,49 +295,27 @@ class HorusMagics(Magics):
         if args.command == "show":
             _LOGGER.info("Show dependencies content from notebook content.")
 
-            results = horus_show_command(
+            result = horus_show_command(
                 path=nb_path,
                 pipfile=args.pipfile,
                 pipfile_lock=args.pipfile_lock,
                 thoth_config=args.thoth_config,
             )
 
-            result = []
-            for r in results:
+            results = []
+            for r in result:
 
-                result.append(
+                results.append(
                     {
                         "type": r,
-                        "result": results[r],
+                        "result": result[r],
                     }
                 )
 
-            table = Table()
-
-            header = set()
-            for item in result:
-                for key in item.keys():
-                    header.add(key)
-
-            header_sorted = sorted(header)
-            for element in header_sorted:
-                table.add_column(
-                    element.replace("_", " ").capitalize(),
-                    style="cyan",
-                    overflow="fold",
-                )
-
-            for item in result:
-                row = []
-                for key in header_sorted:
-                    entry = item.get(key)
-                    row.append(entry if entry is not None else "-")
-
-                table.add_row(*row)
-
-            console = Console()
-
-            return console.print(table, justify="center")
+            return print_report(
+                results,
+                title="Horus show results",
+            )
 
         if args.command == "convert":
             _LOGGER.info("Cleaning notebook content to allow reproducibility...")
@@ -373,7 +323,7 @@ class HorusMagics(Magics):
         if args.command == "lock":
             _LOGGER.info("Show dependencies content from notebook content.")
 
-            results, lock_results = horus_lock_command(
+            general_results, lock_results = horus_lock_command(
                 path=nb_path,
                 resolution_engine="thoth" if not args.pipenv else "pipenv",
                 timeout=args.timeout,
@@ -411,14 +361,15 @@ class HorusMagics(Magics):
                     path=nb_path,
                     kernel_name=args.kernel_name,
                     save_in_notebook=False,
-                    resolution_engine=results["dependency_resolution_engine"],
+                    resolution_engine=general_results.get("dependency_resolution_engine"),
                     is_magic_command=True,
                 )
 
                 return json.dumps(
                     {
                         "kernel_name": kernel_results["kernel_name"],
-                        "resolution_engine": results["dependency_resolution_engine"],
+                        "resolution_engine": general_results.get("dependency_resolution_engine"),
+                        "thoth_analysis_id": lock_results.get("thoth_analysis_id"),
                     }
                 )
 
@@ -448,38 +399,16 @@ class HorusMagics(Magics):
 
             packages = get_packages(kernel_name=args.kernel_name)
 
-            result = []
+            results = []
 
             for package_name in packages:
 
-                result.append({"package name": package_name, "package version": packages[package_name]})
+                results.append({"package name": package_name, "package version": packages[package_name]})
 
-            table = Table()
-
-            header = set()
-            for item in result:
-                for key in item.keys():
-                    header.add(key)
-
-            header_sorted = sorted(header)
-            for element in header_sorted:
-                table.add_column(
-                    element.replace("_", " ").capitalize(),
-                    style="cyan",
-                    overflow="fold",
-                )
-
-            for item in result:
-                row = []
-                for key in header_sorted:
-                    entry = item.get(key)
-                    row.append(entry if entry is not None else "-")
-
-                table.add_row(*row)
-
-            console = Console()
-
-            return console.print(table, justify="center")
+            return print_report(
+                results,
+                title=f"{args.kernel_name} kernel packages",
+            )
 
         if args.command == "delete-kernel":
             _LOGGER.info("Delete kernel (if exists).")
@@ -503,48 +432,26 @@ class HorusMagics(Magics):
 
         if args.command == "list-kernels":
             kernels = horus_list_kernels()
-            result = []
+            results = []
             for k in kernels:
 
                 if k == "python3":
-                    result.append(
+                    results.append(
                         {
                             "kernel name": f"{k} (default)",
                         }
                     )
                 else:
-                    result.append(
+                    results.append(
                         {
                             "kernel name": k,
                         }
                     )
 
-            table = Table()
-
-            header = set()
-            for item in result:
-                for key in item.keys():
-                    header.add(key)
-
-            header_sorted = sorted(header)
-            for element in header_sorted:
-                table.add_column(
-                    element.replace("_", " ").capitalize(),
-                    style="cyan",
-                    overflow="fold",
-                )
-
-            for item in result:
-                row = []
-                for key in header_sorted:
-                    entry = item.get(key)
-                    row.append(entry if entry is not None else "-")
-
-                table.add_row(*row)
-
-            console = Console()
-
-            return console.print(table, justify="center")
+            return print_report(
+                results,
+                title="Available kernels",
+            )
 
         if args.command == "discover":
             _LOGGER.info("Discover dependencies from notebook content.")

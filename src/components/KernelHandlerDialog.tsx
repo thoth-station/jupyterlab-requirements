@@ -79,10 +79,10 @@ export class KernelHandlerWidget extends React.Component<IKernelHandlerProps, IK
     async onDeleteKernel(kernel_name: string, kernels: Array<string>, state: IKernelHandlerState) {
 
       const kernel_to_delete = kernel_name
-      console.log("Kernel to be deleted:", kernel_to_delete)
+      console.debug("Kernel to be deleted:", kernel_to_delete)
 
       const message = await delete_kernel(kernel_to_delete)
-      console.log("After attempt to delete kernel...", message)
+      console.debug("After attempt to delete kernel...", message)
 
       INotification.warning(kernel_to_delete + " jupyter kernel has been deleted...")
 
@@ -107,13 +107,13 @@ export class KernelHandlerWidget extends React.Component<IKernelHandlerProps, IK
     async onStart() {
 
       const kernels = await get_kernel_list()
-      console.log("kernels retrieved", kernels)
+      console.debug("kernels retrieved", kernels)
 
       var ui_on_start_state = this.state
 
       _.set(ui_on_start_state, "kernels", kernels)
 
-      console.log("Number of kernels:", _.size(kernels))
+      console.debug("Number of kernels:", _.size(kernels))
 
       if ( _.size(kernels) >= 1) {
         _.set(ui_on_start_state, "kernel_name", kernels[0])
@@ -150,8 +150,6 @@ export class KernelHandlerWidget extends React.Component<IKernelHandlerProps, IK
                             </div>
 
         var ui_status = this.state.status
-
-        console.log(this.state)
 
         switch(ui_status) {
 

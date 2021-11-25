@@ -45,7 +45,7 @@ class DependenciesFilesHandler(APIHandler):
 
         kernel_name: str = input_data["kernel_name"]
         requirements: str = input_data["requirements"]
-        requirements_lock: str = input_data["requirement_lock"]
+        requirements_lock: str = input_data["requirements_lock"]
         complete_path: str = input_data["complete_path"]
 
         env_path = Path(complete_path).joinpath(path_to_store).joinpath(kernel_name)

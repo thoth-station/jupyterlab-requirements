@@ -24,8 +24,9 @@ import {
     delete_key_from_notebook_metadata,
     get_kernel_name,
     set_requirements,
-    set_requirement_lock,
+    set_requirements_lock,
     set_resolution_engine,
+    set_thoth_analysis_id,
     set_thoth_configuration,
     take_notebook_content
 } from "./notebook";
@@ -92,9 +93,11 @@ export async function  _handle_thoth_config(
         try {
             // Load thoth_config from notebook metadata, if any, otherwise get default one
             var thoth_config_loaded: ThothConfig = loaded_config_file
+            console.log("loaded config from notebook metadata:", thoth_config_loaded)
 
             // Define detected config
             var thoth_config_detected: ThothConfig = await create_config( default_kernel_name );
+            console.log("discovered config from kernel .thoth.yaml or detected from system:", thoth_config_detected)
 
             var is_default_config = false
             // If the endpoint cannot be reached or there are issues with thamos config creation
@@ -503,15 +506,17 @@ export async function set_notebook_metadata(
     resolution_engine: string,
     requirements: Requirements,
     requirements_lock: RequirementsLock,
-    thoth_config?: ThothConfig
+    thoth_config?: ThothConfig,
+    thoth_analysis_id?: string
   ) {
 
     await set_resolution_engine( panel , resolution_engine )
     await set_requirements( panel , requirements )
-    await set_requirement_lock( panel , requirements_lock )
+    await set_requirements_lock( panel , requirements_lock )
 
     if (resolution_engine == "thoth" ) {
         await set_thoth_configuration( panel , thoth_config )
+        await set_thoth_analysis_id ( panel, thoth_analysis_id )
     }
 
     // Save all changes to disk.
@@ -551,7 +556,7 @@ export async function _parse_packages_from_state(
 }
 
 /**
- * Function: Set all notebook metadata generated
+ * Function: Remove all notebook metadata generated
  */
 
 export async function remove_notebook_metadata(
@@ -561,6 +566,7 @@ export async function remove_notebook_metadata(
     delete_key_from_notebook_metadata( panel, "requirements_lock" )
     delete_key_from_notebook_metadata( panel, "thoth_config" )
     delete_key_from_notebook_metadata( panel, "dependency_resolution_engine" )
+    delete_key_from_notebook_metadata( panel, "thoth_analysis_id" )
 
     // Save all changes to disk.
     panel.context.save()
