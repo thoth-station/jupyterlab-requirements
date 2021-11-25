@@ -4,7 +4,7 @@ ipython
 invectio
 thoth-python>=0.16.6
 thoth-common
-thamos>=1.16.1
+thamos>=1.21.0
 jupyterlab>=3.1.0
 jupyter-require>=0.4.0
 click

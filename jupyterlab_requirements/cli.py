@@ -53,6 +53,7 @@ from jupyterlab_requirements.dependency_management import horus_list_kernels
 from jupyterlab_requirements.dependency_management import load_files
 from jupyterlab_requirements.dependency_management import print_report
 from jupyterlab_requirements.dependency_management import save_notebook_content
+from jupyterlab_requirements.dependency_management import verify_gathered_libraries
 
 
 _LOGGER = logging.getLogger("thoth.jupyterlab_requirements.cli")
@@ -405,7 +406,9 @@ def discover(ctx: click.Context, path: str, store_files_path: str, show_only: bo
 
         horus discover [YOUR_NOTEBOOK].ipynb --force
     """
-    packages = gather_libraries(notebook_path=path)
+    gathered_libraries = gather_libraries(notebook_path=path)
+    verified_libraries = verify_gathered_libraries(gathered_libraries=gathered_libraries)
+    packages = [package["package_name"] for package in verified_libraries]
 
     if packages:
         click.echo(f"Thoth invectio libraries gathered: {json.dumps(packages)}")

@@ -30,6 +30,8 @@ from tornado import web
 import invectio
 import distutils
 
+from .lib import verify_gathered_libraries
+
 _LOGGER = logging.getLogger("jupyterlab_requirements.thoth_invectio")
 
 
@@ -53,6 +55,11 @@ class ThothInvectioHandler(APIHandler):
         report = visitor.get_module_report()
 
         libs = filter(lambda k: k not in std_lib | set(sys.builtin_module_names), report)
-        library_gathered = list(libs)
-        _LOGGER.info("Thoth invectio library gathered: %r", library_gathered)
-        self.finish(json.dumps(library_gathered))
+        gathered_libraries = list(libs)
+        _LOGGER.info("Thoth invectio library gathered: %r", gathered_libraries)
+
+        # Use Thoth user-API endpoint to verify what is the packages using that import name
+        verified_libraries = verify_gathered_libraries(gathered_libraries=gathered_libraries)
+        packages = [package["package_name"] for package in verified_libraries]
+
+        self.finish(json.dumps(list(packages)))

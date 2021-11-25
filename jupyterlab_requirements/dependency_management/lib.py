@@ -43,6 +43,7 @@ from thoth.python import Source, PackageVersion
 from thoth.common import ThothAdviserIntegrationEnum
 
 from thamos.lib import advise_using_config, _get_origin
+from thamos.lib import get_package_from_imported_packages
 from thamos.config import _Configuration
 from thamos.discover import discover_python_version
 
@@ -483,9 +484,63 @@ def horus_delete_kernel(kernel_name: str, kernels_path: Path = Path.home().joinp
     return command_output
 
 
+def verify_gathered_libraries(
+    gathered_libraries: typing.List[str],
+):
+    """Verify gathered libraries from invectio."""
+    # Use Thoth user-API endpoint to verify what is the packages using that import name
+    verified_libraries = []
+
+    for import_name in gathered_libraries:
+        unique_packages: typing.List[typing.Dict] = []
+
+        try:
+            imported_packages = get_package_from_imported_packages(import_name)
+
+            if imported_packages:
+                for package in imported_packages:
+                    if package["package_name"] not in [p["package_name"] for p in unique_packages]:
+                        unique_packages.append(
+                            {
+                                "package_name": package["package_name"],
+                                "index_url": package["index_url"],
+                            }
+                        )
+                    else:
+                        existing_indexes = [
+                            p["index_url"] for p in unique_packages if p["package_name"] == package["package_name"]
+                        ]
+
+                        if package["index_url"] not in existing_indexes:
+                            unique_packages.append(
+                                {
+                                    "package_name": package["package_name"],
+                                    "index_url": package["index_url"],
+                                }
+                            )
+
+                for unique_package in unique_packages:
+                    verified_libraries.append(unique_package)
+                    _LOGGER.info(
+                        f"Package name {unique_package['package_name']} identifed for import name {import_name}"
+                    )
+
+        except Exception as error:
+            _LOGGER.warning(f"No packages identified for import name {import_name}: {error}")
+            _LOGGER.warning(f"Using {import_name} as package identified.")
+            verified_libraries.append(
+                {
+                    "package_name": import_name,
+                    "index_url": "https://pypi.org/simple",
+                }
+            )
+
+    return verified_libraries
+
+
 def gather_libraries(notebook_path: str) -> typing.List[str]:
     """Gather libraries with invectio."""
-    library_gathered = []
+    gathered_libraries = []
     try:
         notebook_content_py = get_notebook_content(notebook_path=notebook_path, py_format=True)
 
@@ -503,11 +558,11 @@ def gather_libraries(notebook_path: str) -> typing.List[str]:
         std_lib = {p.name.rstrip(".py") for p in std_lib_path.iterdir()}
 
         libs = filter(lambda k: k not in std_lib | set(sys.builtin_module_names), report)
-        library_gathered = list(libs)
+        gathered_libraries = list(libs)
     except Exception as e:
         _LOGGER.error(f"Could not gather libraries: {e}")
 
-    return library_gathered
+    return gathered_libraries
 
 
 def load_files(base_path: str) -> typing.Tuple[str, typing.Optional[str]]:
