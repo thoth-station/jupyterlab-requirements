@@ -177,7 +177,7 @@ export async function set_requirements( notebook: NotebookPanel, requirements: R
  * Function: Get Python requirements lock from notebook metadata.
  */
 
-export function get_requirement_lock( notebook: NotebookPanel ): Promise<RequirementsLock|null> {
+export function get_requirements_lock( notebook: NotebookPanel ): Promise<RequirementsLock|null> {
     return new Promise( async ( resolve, reject ) => {
         const notebook_metadata = notebook.model.metadata
 
@@ -203,14 +203,14 @@ export function get_requirement_lock( notebook: NotebookPanel ): Promise<Require
  * Function: Set Python requirements into notebook metadata.
  */
 
-export async function set_requirement_lock( notebook: NotebookPanel, requirements_lock: RequirementsLock ): Promise<void> {
+export async function set_requirements_lock( notebook: NotebookPanel, requirements_lock: RequirementsLock ): Promise<void> {
     const notebook_metadata = notebook.model.metadata
 
     if ( notebook_metadata.has("requirements_lock") == false ) {
         notebook_metadata.set('requirements_lock', JSON.stringify(requirements_lock) )
 
     } else {
-        console.debug( "Notebook requirement_lock already exist. Updating." )
+        console.debug( "Notebook requirements_lock already exist. Updating." )
         // update the notebook metadata
         notebook_metadata.set('requirements_lock', JSON.stringify(requirements_lock) )
     }

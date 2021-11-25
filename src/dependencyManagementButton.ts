@@ -17,7 +17,7 @@ import { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
 
 import { IDisposable } from '@lumino/disposable';
 
-import { get_requirements, get_requirement_lock, get_thoth_configuration, get_resolution_engine } from "./notebook";
+import { get_requirements, get_requirements_lock, get_thoth_configuration, get_resolution_engine } from "./notebook";
 import { DependenciesManagementUI } from './components/dependencyManagementUI';
 import { THOTH_TOOLBAR_BUTTON_POSITION } from './constants';
 
@@ -39,7 +39,7 @@ export class ManageDependenciesButtonExtension
         console.log("requirements", initial_requirements);
 
         // Check if any requirements locked are stored in notebook metadata
-        const initial_requirements_lock = await get_requirement_lock(this.panel);
+        const initial_requirements_lock = await get_requirements_lock(this.panel);
         console.log("requirements_lock", initial_requirements_lock);
 
         // Check if any thoth config is stored in notebook metadata

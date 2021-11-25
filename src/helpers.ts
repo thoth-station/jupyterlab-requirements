@@ -24,7 +24,7 @@ import {
     delete_key_from_notebook_metadata,
     get_kernel_name,
     set_requirements,
-    set_requirement_lock,
+    set_requirements_lock,
     set_resolution_engine,
     set_thoth_analysis_id,
     set_thoth_configuration,
@@ -512,7 +512,7 @@ export async function set_notebook_metadata(
 
     await set_resolution_engine( panel , resolution_engine )
     await set_requirements( panel , requirements )
-    await set_requirement_lock( panel , requirements_lock )
+    await set_requirements_lock( panel , requirements_lock )
 
     if (resolution_engine == "thoth" ) {
         await set_thoth_configuration( panel , thoth_config )

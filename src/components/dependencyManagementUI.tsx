@@ -793,7 +793,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
           this.props.panel,
           "thoth",
           advise.requirements,
-          advise.requirement_lock,
+          advise.requirements_lock,
           this.state.thoth_config,
           advise.thoth_analysis_id
         )
@@ -806,7 +806,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         await store_dependencies_on_disk(
           this.state.kernel_name,
           advise.requirements,
-          advise.requirement_lock,
+          advise.requirements_lock,
           'overlays',
           this.state.root_directory
         )

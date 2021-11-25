@@ -629,7 +629,7 @@ def lock_dependencies_with_thoth(
     advise = {
         "thoth_analysis_id": "",
         "requirements": {},
-        "requirement_lock": {},
+        "requirements_lock": {},
         "error": False,
         "error_msg": "",
         "stack_info": [],
@@ -684,7 +684,7 @@ def lock_dependencies_with_thoth(
                 pipfile_lock = result["report"]["products"][0]["project"]["requirements_locked"]
 
                 advise["requirements"] = pipfile
-                advise["requirement_lock"] = pipfile_lock
+                advise["requirements_lock"] = pipfile_lock
                 advise["error"] = False
                 advise["justification"] = justifications
 
@@ -1167,7 +1167,7 @@ def horus_lock_command(
 
         if not lock_results["error"]:
             requirements = lock_results["requirements"]
-            requirements_lock = lock_results["requirement_lock"]
+            requirements_lock = lock_results["requirements_lock"]
             notebook_metadata["thoth_config"] = thoth_config_updated
             notebook_metadata["thoth_analysis_id"] = lock_results["thoth_analysis_id"]
 

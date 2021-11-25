@@ -194,7 +194,7 @@ export async function delete_kernel (
 export async function store_dependencies (
     kernel_name: string,
     requirements: string,
-    requirement_lock: string,
+    requirements_lock: string,
     path_to_store: string = ".local/share/thoth/kernels",
     complete_path: string,
     init: RequestInit = {},
@@ -204,7 +204,7 @@ export async function store_dependencies (
     const dataToSend = {
       kernel_name: kernel_name,
       requirements: requirements,
-      requirement_lock: requirement_lock,
+      requirements_lock: requirements_lock,
       path_to_store: path_to_store,
       complete_path: complete_path
     };

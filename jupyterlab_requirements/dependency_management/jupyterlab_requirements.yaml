@@ -367,7 +367,7 @@ components:
       required:
         - thoth_analysis_id
         - requirements
-        - requirement_lock
+        - requirements_lock
         - error
         - error_msg
         - stack_info
@@ -380,7 +380,7 @@ components:
         requirements:
           type: string
           description: Pipfile.
-        requirement_lock:
+        requirements_lock:
           type: string
           description: Pipfile.lock.
         error:
@@ -468,12 +468,12 @@ components:
     PipenvResult:
       description: Pipenv response.
       required:
-        - requirement_lock
+        - requirements_lock
         - error
         - error_msg
       type: object
       properties:
-        requirement_lock:
+        requirements_lock:
           type: string
           description: Pipfile.lock.
         error:

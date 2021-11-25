@@ -29,7 +29,7 @@ export interface Advise {
     error: boolean,
     error_msg: string,
     requirements: Requirements,
-    requirement_lock: RequirementsLock,
+    requirements_lock: RequirementsLock,
     stack_info: Array<StackInfo>,
     justifications: Array<Justification>
 }
