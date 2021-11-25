@@ -48,6 +48,7 @@ from .lib import horus_requirements_command
 from .lib import horus_set_kernel_command
 from .lib import horus_show_command
 from .lib import horus_lock_command
+from .lib import verify_gathered_libraries
 
 _LOGGER = logging.getLogger("thoth.jupyterlab_requirements.magic_commands")
 
@@ -547,7 +548,9 @@ class HorusMagics(Magics):
 
         if args.command == "discover":
             _LOGGER.info("Discover dependencies from notebook content.")
-            packages_ = gather_libraries(notebook_path=nb_path)
+            gathered_libraries = gather_libraries(notebook_path=nb_path)
+            verified_libraries = verify_gathered_libraries(gathered_libraries=gathered_libraries)
+            packages_ = [package["package_name"] for package in verified_libraries]
 
             if packages_:
                 _LOGGER.info(f"Thoth invectio libraries gathered: {json.dumps(packages_)}")

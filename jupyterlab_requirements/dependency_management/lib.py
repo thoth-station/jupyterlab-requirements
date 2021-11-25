@@ -527,6 +527,13 @@ def verify_gathered_libraries(
 
         except Exception as error:
             _LOGGER.warning(f"No packages identified for import name {import_name}: {error}")
+            _LOGGER.warning(f"Using {import_name} as package identified.")
+            verified_libraries.append(
+                {
+                    "package_name": import_name,
+                    "index_url": "https://pypi.org/simple",
+                }
+            )
 
     return verified_libraries
 

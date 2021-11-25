@@ -11,6 +11,13 @@ presubmits:
             - "pre-commit"
             - "run"
             - "--all-files"
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1"
 
 
   - name: thoth-mypy-py38
