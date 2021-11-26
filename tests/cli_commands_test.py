@@ -17,7 +17,7 @@
 
 """A class for implementing horus' test cases for commands."""
 
-from tests.base import HorusTestCase
+from tests.base_test import HorusTestCase
 
 from jupyterlab_requirements.dependency_management.lib import get_notebook_content
 from jupyterlab_requirements.dependency_management.lib import horus_check_metadata_content
@@ -27,36 +27,37 @@ from jupyterlab_requirements.dependency_management.lib import horus_set_kernel_c
 from jupyterlab_requirements.dependency_management.lib import horus_requirements_command
 
 
-
 class HorusCheckCommandTestCase(HorusTestCase):
     """A class for horus check test cases."""
+
     notebook = get_notebook_content(notebook_path=HorusTestCase.empty_notebook_path)
     notebook_metadata = notebook.get("metadata")
 
     result = horus_check_metadata_content(notebook_metadata=notebook_metadata)
 
     exit_code = 1 if any(item.get("type") == "ERROR" for item in result) else 0
-    assert exit_code is 1
-
+    assert exit_code == 1
 
 
 class HorusRequirementsCommandTestCase(HorusTestCase):
     """A class for horus requirements test cases."""
 
 
-
 class HorusListKernelsCommandTestCase(HorusTestCase):
     """A class for horus list kernels test cases."""
+
     kernels = horus_list_kernels()
     HorusTestCase._KERNEL_SCHEMA(kernels)
-    assert 'python3' in kernels
+    assert "python3" in kernels
 
 
 class HorusSetKernelCommandTestCase(HorusTestCase):
     """A class for horus set kernel test cases."""
+
     # horus_set_kernel_command
 
 
 class HorusDeleteKernelCommandTestCase(HorusTestCase):
     """A class for horus delete kernel test cases."""
+
     # horus_delete_kernel

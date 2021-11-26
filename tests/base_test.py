@@ -35,8 +35,4 @@ class HorusTestCase:
     data_dir = Path(os.path.dirname(os.path.realpath(__file__))) / "data"
     empty_notebook_path = data_dir / "empty-notebook.ipynb"
 
-    _KERNEL_SCHEMA = Schema(
-        [
-            All(str, Length(min=1))
-        ]
-    )
+    _KERNEL_SCHEMA = Schema([All(str, Length(min=1))])
