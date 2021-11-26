@@ -18,7 +18,7 @@ thoth-common = "*"
 virtualenv = "*"
 
 [dev-packages]
-jupyter-packaging = "*"
+jupyter_packaging = "~=0.10,<2"
 pytest = "*"
 pytest-timeout = "*"
 pytest-cov = "*"
