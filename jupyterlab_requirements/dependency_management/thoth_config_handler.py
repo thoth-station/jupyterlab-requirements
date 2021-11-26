@@ -21,6 +21,7 @@ import os
 import json
 import logging
 
+from typing import Dict, Any
 from pathlib import Path
 from jupyter_server.base.handlers import APIHandler
 from .lib import get_thoth_config
@@ -53,7 +54,7 @@ class ThothConfigHandler(APIHandler):
         """Update Thoth config file."""
         initial_path = Path.cwd()
         input_data = self.get_json_body()
-        new_runtime_environment: str = input_data["runtime_environment"]
+        new_runtime_environment: Dict[str, Any] = input_data["runtime_environment"]
         force: bool = input_data["force"]
         complete_path: str = input_data["complete_path"]
 

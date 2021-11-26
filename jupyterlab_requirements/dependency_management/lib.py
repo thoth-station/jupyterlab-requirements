@@ -57,7 +57,7 @@ _EMOJI = {
 }
 
 
-def print_report(report: typing.List, title: typing.Optional[str] = None):
+def print_report(report: typing.List, title: typing.Optional[str] = None) -> None:
     """Print reasoning to user."""
     console = Console()
     table = Table(
@@ -484,7 +484,7 @@ def horus_list_kernels(kernels_path: Path = Path.home().joinpath(".local/share/t
     except Exception as e:
         _LOGGER.error(f"Kernel list could not be obtained: {e}")
 
-    # Delete folder from host
+    # Parse json output from command
     kernels = [k for k in json.loads(command_output.stdout.decode("utf-8"))["kernelspecs"]]
 
     return kernels

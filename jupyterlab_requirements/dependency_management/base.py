@@ -38,7 +38,7 @@ class AsyncTasks:
 
     task_index = 0
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Init."""
         self.tasks: Dict[int, asyncio.Task] = dict()
 

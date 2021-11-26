@@ -26,11 +26,11 @@ class BaseSpecHandler(web.StaticFileHandler, APIHandler):
     """Base class handler."""
 
     @staticmethod
-    def get_resource_metadata():
+    def get_resource_metadata() -> None:
         """Return the (resource, mime-type) for the handlers spec."""
         pass
 
-    def initialize(self):
+    def initialize(self) -> None:
         """Initialize class."""
         web.StaticFileHandler.initialize(self, path=os.path.dirname(__file__))
 
