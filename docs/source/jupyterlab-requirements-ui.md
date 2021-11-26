@@ -6,6 +6,8 @@ This jupyterlab extension provides a button directly in the notebook to manage t
 <img alt="JupyterLab Requirements Extension" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/JupyterLabRequirementsExtension.jpg">
 </div>
 
+NOTE: jupyterlab-requirements UI has a Python backend and Javascript frontend logic. Python backend relies on [thamos](https://github.com/thoth-station/thamos) library (CLI and library for interacting with Thoth services) to work specifically with jupyter notebooks.
+
 ## How to use it
 
 ### Start adding dependencies from empty notebook

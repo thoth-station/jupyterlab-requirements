@@ -2,6 +2,8 @@
 
 As of `v0.10.0` jupyterlab-requirements supports `%horus` magic command directly in the cells so that the user can speed up all dependency management taks, working in one place. Magic commands are automatically loaded when you start a notebook and they automatically identify the notebook you are using.
 
+NOTE: horus magic commands work combining Python and Javascript code. Python code relies on [thamos](https://github.com/thoth-station/thamos) library (CLI and library for interacting with Thoth services) to work specifically with jupyter notebooks.
+
 To learn more about how to use the `%horus` magic commands check out the documentation below or the video [here](https://www.youtube.com/watch?v=FjVxNTXO70I).
 
 Here you can find a list of magic commands available and a description for each of them.
