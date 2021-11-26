@@ -6,6 +6,7 @@ As of [v0.9.0](https://youtu.be/fW0YKugL26g) jupyterlab-requirements supports a 
 <img alt="JupyterLab Requirements Horus CLI" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/JupyterLabRequirementsExtensionCLI.png">
 </div>
 
+NOTE: horus CLI is an extension of [thamos](https://github.com/thoth-station/thamos) library (CLI and library for interacting with Thoth services) to work specifically with jupyter notebooks.
 
 ## check
 
