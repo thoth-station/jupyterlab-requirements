@@ -270,7 +270,14 @@ By default, the `jlpm run build` command generates the source maps for this exte
    jupyter lab build --minimize=False
 
 
-When you are ready with a new contribution open a Pull Request!! We are very happy to receive contributions from the community!
+9. Run tests using the command
+
+.. code-block:: console
+
+   pipenv run python3 setup.py test
+
+
+When all tests passed and you are ready with a new contribution open a Pull Request!! We are very happy to receive contributions from the community!
 
 
 Demo development status and new features
