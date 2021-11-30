@@ -33,11 +33,11 @@ from thamos.config import _Configuration
 _LOGGER = logging.getLogger("jupyterlab_requirements.thoth_config_handler")
 
 
-class ThothConfigHandler(APIHandler):
+class ThothConfigHandler(APIHandler):  # type: ignore[misc]
     """Thoth config handler for user requirements."""
 
     @web.authenticated
-    def post(self):
+    def post(self):  # type: ignore
         """Retrieve or create Thoth config file."""
         input_data = self.get_json_body()
         kernel_name: str = input_data["kernel_name"]
@@ -50,7 +50,7 @@ class ThothConfigHandler(APIHandler):
         self.finish(json.dumps(thoth_config))
 
     @web.authenticated
-    def put(self):
+    def put(self):  # type: ignore
         """Update Thoth config file."""
         initial_path = Path.cwd()
         input_data = self.get_json_body()
@@ -60,7 +60,7 @@ class ThothConfigHandler(APIHandler):
 
         os.chdir(complete_path)
 
-        configuration = _Configuration()
+        configuration = _Configuration()  # type: ignore
 
         if not configuration.config_file_exists():
             _LOGGER.info("Thoth config does not exist, creating it...")

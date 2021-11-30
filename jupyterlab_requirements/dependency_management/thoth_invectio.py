@@ -35,11 +35,11 @@ from .lib import verify_gathered_libraries
 _LOGGER = logging.getLogger("jupyterlab_requirements.thoth_invectio")
 
 
-class ThothInvectioHandler(APIHandler):
+class ThothInvectioHandler(APIHandler):  # type: ignore
     """Thoth invectio handler for user requirements."""
 
     @web.authenticated
-    def post(self):
+    def post(self):  # type: ignore
         """Gather import libraries using invectio."""
         input_data = self.get_json_body()
         notebook_content: str = input_data["notebook_content"]

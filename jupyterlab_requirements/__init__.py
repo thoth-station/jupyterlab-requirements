@@ -49,7 +49,7 @@ with (HERE / "labextension" / "package.json").open() as fid:
 # running IPython.
 
 
-def load_ipython_extension(ipython):
+def load_ipython_extension(ipython):  # type: ignore
     """Register magic commands when loading Ipython.
 
     Any module file that define a function named `load_ipython_extension`
@@ -61,15 +61,15 @@ def load_ipython_extension(ipython):
     ipython.register_magics(HorusMagics)
 
 
-def _jupyter_labextension_paths():
+def _jupyter_labextension_paths():  # type: ignore
     return [{"src": "labextension", "dest": data["name"]}]
 
 
-def _jupyter_server_extension_points():
+def _jupyter_server_extension_points():  # type: ignore
     return [{"module": "jupyterlab_requirements"}]
 
 
-def _jupyter_server_extension_paths():
+def _jupyter_server_extension_paths():  # type: ignore
     """Jupyter Server Extension Paths.
 
     Returns a list of dictionaries with metadata describing
@@ -78,7 +78,7 @@ def _jupyter_server_extension_paths():
     return [{"module": "jupyterlab_requirements"}]
 
 
-def _load_jupyter_server_extension(lab_app):
+def _load_jupyter_server_extension(lab_app):  # type: ignore
     """Register the API handler to receive HTTP requests from the frontend extension.
 
     Parameters
@@ -97,7 +97,10 @@ def _load_jupyter_server_extension(lab_app):
     # Prepend the base_url so that it works in a jupyterhub setting
     custom_handlers = [
         (
-            url_path_join(base_url, r"/jupyterlab_requirements/{}".format(YamlSpecHandler.get_resource_metadata()[0])),
+            url_path_join(
+                base_url,
+                r"/jupyterlab_requirements/{}".format(YamlSpecHandler.get_resource_metadata()[0]),  # type: ignore
+            ),
             YamlSpecHandler,
         ),
         (url_path_join(base_url, f"/{url_path}/thoth/config"), ThothConfigHandler),

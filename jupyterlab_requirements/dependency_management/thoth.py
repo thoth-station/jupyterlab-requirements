@@ -19,6 +19,7 @@
 import json
 import os
 import logging
+import typing
 
 from pathlib import Path
 
@@ -36,7 +37,7 @@ class ThothAdviseHandler(DependencyManagementBaseHandler):
     """Thoth handler to receive optimized software stack."""
 
     @web.authenticated
-    def post(self):
+    def post(self):  # type: ignore
         """Post method for class."""
         input_data = self.get_json_body()
 
@@ -44,7 +45,9 @@ class ThothAdviseHandler(DependencyManagementBaseHandler):
 
         self.redirect_to_task(task_index)
 
-    async def lock_using_thoth(self, input_data):
+    async def lock_using_thoth(
+        self, input_data: typing.Dict[str, typing.Any]
+    ) -> typing.Tuple[int, typing.Dict[str, typing.Any]]:
         """Lock dependencies using Thoth service."""
         initial_path = Path.cwd()
 
@@ -58,7 +61,7 @@ class ThothAdviseHandler(DependencyManagementBaseHandler):
         force: bool = input_data["thoth_force"]
         debug: bool = input_data["thoth_debug"]
         notebook_content: str = input_data["notebook_content"]
-        requirements: dict = json.loads(input_data["requirements"])
+        requirements: typing.Dict[str, typing.Any] = json.loads(input_data["requirements"])
 
         pipfile_string = Pipfile.from_dict(requirements).to_string()
 

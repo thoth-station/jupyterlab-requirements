@@ -32,11 +32,11 @@ from .lib import get_packages
 _LOGGER = logging.getLogger("jupyterlab_requirements.discover_handler")
 
 
-class DependencyInstalledHandler(APIHandler):
+class DependencyInstalledHandler(APIHandler):  # type: ignore[misc]
     """Dependency management handler to discover dependencies installed."""
 
     @web.authenticated
-    def post(self):
+    def post(self):  # type: ignore
         """Discover list of packages installed."""
         input_data = self.get_json_body()
 
@@ -47,22 +47,22 @@ class DependencyInstalledHandler(APIHandler):
         self.finish(json.dumps(packages))
 
 
-class PythonVersionHandler(APIHandler):
+class PythonVersionHandler(APIHandler):  # type: ignore[misc]
     """Dependency management handler to discover Python version present."""
 
     @web.authenticated
-    def get(self):
+    def get(self):  # type: ignore
         """Discover python version available."""
         python_version = discover_python_version()
 
         self.finish(json.dumps(python_version))
 
 
-class RootPathHandler(APIHandler):
+class RootPathHandler(APIHandler):  # type: ignore[misc]
     """Discover root for the project."""
 
     @web.authenticated
-    def get(self):
+    def get(self):  # type: ignore
         """Discover root directory of the project."""
         try:
             process_output = subprocess.run("git rev-parse --show-toplevel", capture_output=True, shell=True)

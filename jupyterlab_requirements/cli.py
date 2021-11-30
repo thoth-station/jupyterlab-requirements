@@ -21,7 +21,7 @@ import logging
 import json
 import sys
 import subprocess
-import yaml
+import yaml  # type: ignore
 import click
 import typing
 
@@ -349,7 +349,7 @@ def save(
     if resolution_engine == "thoth":
 
         if thoth_config or save_all:
-            config = _Configuration()  # noqa
+            config = _Configuration()  # type: ignore
             config.load_config_from_file(config_path=str(Path(save_files_path).joinpath(".thoth.yaml")))
 
             if "thoth_config" in notebook_metadata and not force:

@@ -40,14 +40,14 @@ class AsyncTasks:
 
     def __init__(self) -> None:
         """Init."""
-        self.tasks: Dict[int, asyncio.Task] = dict()
+        self.tasks: Dict[int, asyncio.Task] = dict()  # type: ignore
 
-    def create_task(self, task: Callable, task_inputs) -> int:
+    def create_task(self, task: Callable, task_inputs) -> int:  # type: ignore
         """Add an asynchronous task into the queue."""
         AsyncTasks.task_index += 1
         task_index = AsyncTasks.task_index
 
-        async def _run_task(task_index, task, task_inputs) -> Any:
+        async def _run_task(task_index, task, task_inputs) -> Any:  # type: ignore
             try:
                 _LOGGER.debug(f"Task to be executed {task_index}.")
                 result = await task(task_inputs)
@@ -67,7 +67,7 @@ class AsyncTasks:
 
             return result
 
-        self.tasks[task_index] = asyncio.ensure_future(_run_task(task_index, task, task_inputs))  # type: ignore
+        self.tasks[task_index] = asyncio.ensure_future(_run_task(task_index, task, task_inputs))
 
         return task_index
 
@@ -90,19 +90,19 @@ class AsyncTasks:
 
         self.tasks[task_index].cancel()
 
-    def __del__(self):
+    def __del__(self):  # type: ignore
         """Destructor."""
         for task in filter(lambda t: not t.cancelled(), self.tasks.values()):
             task.cancel()
 
 
-class DependencyManagementBaseHandler(APIHandler):
+class DependencyManagementBaseHandler(APIHandler):  # type: ignore[misc]
     """Bsse Handler for dependency management."""
 
     _tasks = AsyncTasks()
 
     @web.authenticated
-    def get(self, index: int):
+    def get(self, index: int):  # type: ignore
         """`GET /tasks/<id>` Returns the task `index` status.
 
         Status are:
@@ -131,7 +131,7 @@ class DependencyManagementBaseHandler(APIHandler):
                 self.set_status(200)
                 self.finish(json.dumps(r[1]))
 
-    def redirect_to_task(self, task_index: int):
+    def redirect_to_task(self, task_index: int):  # type: ignore
         """Close a request by redirecting to a task."""
         self.set_status(202)
         self.set_header("Location", "/{}/tasks/{}".format(NAMESPACE, task_index))

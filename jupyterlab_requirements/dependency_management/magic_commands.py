@@ -51,11 +51,11 @@ _LOGGER = logging.getLogger("thoth.jupyterlab_requirements.magic_commands")
 
 
 @magics_class
-class HorusMagics(Magics):
+class HorusMagics(Magics):  # type: ignore[misc]
     """Horus jupyterlab-requirements CLI as magic commands."""
 
-    @line_magic
-    def horus(self, line: str):
+    @line_magic  # type: ignore[misc]
+    def horus(self, line: str):  # type: ignore
         """Horus magic commands."""
         parser = argparse.ArgumentParser(description="This is Horus: jupyterlab-requirements CLI.")
         parser.add_argument("--verbose", help="increase output verbosity", action="store_true")

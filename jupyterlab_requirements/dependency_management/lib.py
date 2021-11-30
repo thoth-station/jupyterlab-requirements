@@ -25,10 +25,11 @@ import typing
 import tempfile
 import json
 import sys
-import yaml
+import yaml  # type: ignore
 import invectio
 import distutils.sysconfig as sysconfig
 
+from subprocess import CompletedProcess
 from virtualenv import cli_run
 from pathlib import Path
 
@@ -57,7 +58,7 @@ _EMOJI = {
 }
 
 
-def print_report(report: typing.List, title: typing.Optional[str] = None) -> None:
+def print_report(report: typing.List[typing.Dict[str, typing.Any]], title: str = "") -> None:
     """Print reasoning to user."""
     console = Console()
     table = Table(
@@ -77,8 +78,8 @@ def print_report(report: typing.List, title: typing.Optional[str] = None) -> Non
     header = header - to_remove
 
     header_list = sorted(header)
-    for item in header_list:
-        table.add_column(item.replace("_", " ").capitalize(), style="cyan", overflow="fold")
+    for item_ in header_list:
+        table.add_column(item_.replace("_", " ").capitalize(), style="cyan", overflow="fold")
 
     for item in report:
         row = []
@@ -101,7 +102,7 @@ def print_report(report: typing.List, title: typing.Optional[str] = None) -> Non
     console.print(table, justify="center")
 
 
-def get_notebook_content(notebook_path: str, py_format: bool = False):
+def get_notebook_content(notebook_path: str, py_format: bool = False) -> typing.Any:
     """Get JSON of the notebook content."""
     actual_path = Path(notebook_path)
 
@@ -130,7 +131,9 @@ def get_notebook_content(notebook_path: str, py_format: bool = False):
         return notebook_content_py
 
 
-def horus_check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -> list:
+def horus_check_metadata_content(
+    notebook_metadata: typing.Dict[str, typing.Any], is_cli: bool = True
+) -> typing.List[typing.Dict[str, typing.Any]]:
     """Check the metadata of notebook for dependencies."""
     result = []
 
@@ -401,7 +404,9 @@ def install_packages(
     )
 
 
-def get_packages(kernel_name: str, kernels_path: Path = Path.home().joinpath(".local/share/thoth/kernels")) -> dict:
+def get_packages(
+    kernel_name: str, kernels_path: Path = Path.home().joinpath(".local/share/thoth/kernels")
+) -> typing.Dict[str, str]:
     """Get packages in the virtualenv (pip list)."""
     _LOGGER.info(f"kernel_name selected: {kernel_name}")
 
@@ -490,7 +495,9 @@ def horus_list_kernels(kernels_path: Path = Path.home().joinpath(".local/share/t
     return kernels
 
 
-def horus_delete_kernel(kernel_name: str, kernels_path: Path = Path.home().joinpath(".local/share/thoth/kernels")):
+def horus_delete_kernel(
+    kernel_name: str, kernels_path: Path = Path.home().joinpath(".local/share/thoth/kernels")
+) -> CompletedProcess:  # type: ignore
     """Delete kernel from host."""
     # Delete jupyter kernel
     try:
@@ -518,13 +525,13 @@ def horus_delete_kernel(kernel_name: str, kernels_path: Path = Path.home().joinp
 
 def verify_gathered_libraries(
     gathered_libraries: typing.List[str],
-):
+) -> typing.List[typing.Dict[str, str]]:
     """Verify gathered libraries from invectio."""
     # Use Thoth user-API endpoint to verify what is the packages using that import name
     verified_libraries = []
 
     for import_name in gathered_libraries:
-        unique_packages: typing.List[typing.Dict] = []
+        unique_packages: typing.List[typing.Dict[str, str]] = []
 
         try:
             imported_packages = get_package_from_imported_packages(import_name)
@@ -632,7 +639,7 @@ def lock_dependencies_with_thoth(
     debug: bool,
     notebook_content: str,
     kernels_path: Path = Path.home().joinpath(".local/share/thoth/kernels"),
-) -> typing.Tuple[int, dict]:
+) -> typing.Tuple[int, typing.Dict[str, typing.Any]]:
     """Lock dependencies using Thoth resolution engine."""
     initial_path = Path.cwd()
     # Get origin before changing path
@@ -762,7 +769,7 @@ def get_thoth_config(
 
     _LOGGER.info(f"kernel_name selected: {kernel_name} and path: {env_path}")
 
-    config = _Configuration()
+    config = _Configuration()  # type: ignore
 
     if not config.config_file_exists():
         _LOGGER.debug("Thoth config does not exist, creating it...")
@@ -782,7 +789,7 @@ def lock_dependencies_with_pipenv(
     kernel_name: str,
     pipfile_string: str,
     kernels_path: Path = Path.home().joinpath(".local/share/thoth/kernels"),
-) -> typing.Tuple[int, dict]:
+) -> typing.Tuple[int, typing.Dict[str, typing.Any]]:
     """Lock dependencies using Pipenv resolution engine."""
     initial_path = Path.cwd()
     env_path = kernels_path.joinpath(kernel_name)
@@ -889,7 +896,7 @@ def horus_requirements_command(
     add: typing.Optional[typing.List[str]] = None,
     remove: typing.Optional[typing.List[str]] = None,
     save_in_notebook: bool = True,
-):
+) -> Pipfile:
     """Horus requirements command."""
     notebook = get_notebook_content(notebook_path=path)
     notebook_metadata = dict(notebook.get("metadata"))
@@ -947,7 +954,7 @@ def horus_requirements_command(
     return pipfile_
 
 
-def create_pipfile_from_packages(packages: list, python_version: str) -> Pipfile:
+def create_pipfile_from_packages(packages: typing.List[str], python_version: str) -> Pipfile:
     """Create Pipfile from list of packages."""
     source = Source(url="https://pypi.org/simple", name="pypi", verify_ssl=True)
 
@@ -964,7 +971,7 @@ def create_pipfile_from_packages(packages: list, python_version: str) -> Pipfile
     return pipfile_
 
 
-def save_notebook_content(notebook_path: str, notebook: dict):
+def save_notebook_content(notebook_path: str, notebook: typing.Dict[str, typing.Any]) -> typing.Dict[str, typing.Any]:
     """Save notebook content."""
     with open(notebook_path, "w") as notebook_content:
         json.dump(notebook, notebook_content)
@@ -977,7 +984,7 @@ def horus_show_command(
     pipfile: bool = False,
     pipfile_lock: bool = False,
     thoth_config: bool = False,
-):
+) -> typing.Dict[str, typing.Any]:
     """Horus show command."""
     show_all: bool = False
 
@@ -1048,7 +1055,7 @@ def horus_show_command(
         if not thoth_config_string:
             results["thoth_config"] = "No .thoth.yaml identified in notebook metadata."
         else:
-            config = _Configuration()
+            config = _Configuration()  # type: ignore
             config.load_config_from_string(thoth_config_string)
             results["thoth_config"] = f"\n.thoth.yaml:\n\n{yaml.dump(config.content)}"
 
@@ -1064,7 +1071,7 @@ def update_runtime_environment_in_thoth_config(
     recommendation_type: typing.Optional[str] = None,
 ) -> str:
     """Update runtime environment in thoth config."""
-    thoth_config = _Configuration()
+    thoth_config = _Configuration()  # type: ignore
     thoth_config.load_config_from_string(config)
 
     runtime_environments = []
@@ -1115,7 +1122,7 @@ def horus_lock_command(
     python_version: typing.Optional[str] = None,
     save_in_notebook: bool = True,
     save_on_disk: bool = False,
-) -> typing.Tuple[dict, dict]:
+) -> typing.Tuple[typing.Dict[str, typing.Any], typing.Dict[str, typing.Any]]:
     """Lock requirements in notebook metadata."""
     results = {}
     results["kernel_name"] = ""
@@ -1159,7 +1166,7 @@ def horus_lock_command(
         if not thoth_config_string:
             thoth_config = get_thoth_config(kernel_name=kernel)
         else:
-            thoth_config = _Configuration()
+            thoth_config = _Configuration()  # type: ignore
             thoth_config.load_config_from_string(thoth_config_string)
 
         try:
@@ -1223,7 +1230,7 @@ def horus_lock_command(
 
         if resolution_engine == "thoth":
             # thoth
-            config = _Configuration()
+            config = _Configuration()  # type: ignore
             config.load_config_from_string(thoth_config_updated)
             config_path = complete_path.joinpath(".thoth.yaml")
             config.save_config(path=str(config_path))
@@ -1250,7 +1257,7 @@ def horus_set_kernel_command(
     resolution_engine: typing.Optional[str] = None,
     is_magic_command: bool = False,
     force: bool = False,
-):
+) -> typing.Dict[str, typing.Any]:
     """Create kernel using dependencies in notebook metadata."""
     results = {}
     results["kernel_name"] = ""
@@ -1277,7 +1284,7 @@ def horus_set_kernel_command(
     if kernel == "python3":
         kernel = "jupyterlab-requirements"
 
-    results["kernel_name"]: str = kernel
+    results["kernel_name"]: str = kernel  # type: ignore
 
     home = Path.home()
     store_path: Path = home.joinpath(".local/share/thoth/kernels")
@@ -1319,7 +1326,7 @@ def horus_set_kernel_command(
     if dependency_resolution_engine == "thoth" and not is_magic_command:
         # thoth
         thoth_config_string = notebook_metadata.get("thoth_config")
-        config = _Configuration()
+        config = _Configuration()  # type: ignore
         config.load_config_from_string(thoth_config_string)
         config_path = complete_path.joinpath(".thoth.yaml")
         config.save_config(path=str(config_path))
@@ -1353,7 +1360,7 @@ def horus_extract_command(
     thoth_config: bool = False,
     use_overlay: bool = False,
     force: bool = False,
-):
+) -> typing.Dict[str, typing.Any]:
     """Horus extract command."""
     results = {}
     results["kernel_name"] = ""
@@ -1441,7 +1448,7 @@ def horus_extract_command(
         if not thoth_config_string:
             raise KeyError("No .thoth.yaml identified in notebook metadata.")
 
-        config = _Configuration()
+        config = _Configuration()  # type: ignore
         config.load_config_from_string(thoth_config_string)
 
         yaml_path = Path(".thoth.yaml")

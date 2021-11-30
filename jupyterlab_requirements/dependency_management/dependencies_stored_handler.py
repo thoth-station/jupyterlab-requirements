@@ -29,11 +29,11 @@ from thoth.python import Project
 _LOGGER = logging.getLogger("jupyterlab_requirements.dependencies_files_handler")
 
 
-class DependenciesStoredHandler(APIHandler):
+class DependenciesStoredHandler(APIHandler):  # type: ignore[misc]
     """Dependencies files handler to retrieve dependencies files."""
 
     @web.authenticated
-    def post(self):
+    def post(self):  # type: ignore
         """Get requirements file from disk."""
         input_data = self.get_json_body()
 
