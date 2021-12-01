@@ -1,10 +1,19 @@
 """jupyterlab-requirements setup."""
 import os
+import setuptools
 
 from pathlib import Path
 
-from jupyter_packaging import create_cmdclass, install_npm, ensure_targets, combine_commands
-import setuptools
+try:
+    from jupyter_packaging import wrap_installers, npm_builder, get_data_files
+except ImportError as e:
+    import logging
+    import sys
+
+    logging.basicConfig(format="%(levelname)s: %(message)s")
+    logging.warning("Build tool `jupyter-packaging` is missing. Install it with pip or conda.")
+    if not ("--name" in sys.argv or "--version" in sys.argv):
+        raise e
 
 HERE = Path(__file__).parent.resolve()
 
@@ -34,8 +43,6 @@ jstargets = [
     os.path.join(lab_path, "package.json"),
 ]
 
-package_data_spec = {name: ["*"]}
-
 # name of the labextension
 labext_name = "jupyterlab_requirements"
 
@@ -52,18 +59,10 @@ data_files_spec = [
 
 # To deploy simultaneously the frontend and the backend,
 # the frontend NPM package needs to be built and inserted in the Python package.
-cmdclass = create_cmdclass("jsdeps", package_data_spec=package_data_spec, data_files_spec=data_files_spec)
+post_develop = npm_builder(build_cmd="install:extension", source_dir="src", build_dir=lab_path)
+cmdclass = wrap_installers(post_develop=post_develop, ensured_targets=jstargets)
 
-cmdclass["jsdeps"] = combine_commands(
-    # it will build the frontend NPM package
-    install_npm(HERE, build_cmd="build:prod", npm=["jlpm"]),
-    # It will copy the NPM package in the Python package
-    # and force it to be copied in a place JupyterLab
-    # is looking for frontend extensions when the Python package is installed.
-    ensure_targets(jstargets),
-)
-
-README: str = Path(HERE, "README.rst").read_text()
+long_description: str = Path(HERE, "README.rst").read_text()
 
 
 def _get_install_requires():
@@ -80,9 +79,10 @@ setup_args = dict(
     author="Francesco Murdaca",
     author_email="fmurdaca@redhat.com",
     description="JupyterLab Extension for dependency management and optimization",
-    long_description=README,
+    long_description=long_description,
     long_description_content_type="text/x-rst",
     cmdclass=cmdclass,
+    data_files=get_data_files(data_files_spec),
     packages=setuptools.find_packages(),
     install_requires=_get_install_requires(),
     zip_safe=False,
