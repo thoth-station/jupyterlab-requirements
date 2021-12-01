@@ -1111,11 +1111,11 @@ def update_runtime_environment_in_thoth_config(
 
 def horus_lock_command(
     path: str,
-    resolution_engine: str,
-    timeout: int,
-    force: bool,
-    debug: bool,
-    recommendation_type: str,
+    resolution_engine: str = "thoth",
+    timeout: int = 180,
+    force: bool = False,
+    debug: bool = False,
+    recommendation_type: str = "latest",
     kernel_name: typing.Optional[str] = None,
     os_name: typing.Optional[str] = None,
     os_version: typing.Optional[str] = None,
@@ -1194,6 +1194,7 @@ def horus_lock_command(
             debug=debug,
             notebook_content=notebook_content_py,
         )
+        lock_results["thoth_config"] = thoth_config_updated
 
         if not lock_results["error"]:
             requirements = lock_results["requirements"]
