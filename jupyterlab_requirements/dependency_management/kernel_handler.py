@@ -31,11 +31,11 @@ from .lib import horus_delete_kernel
 _LOGGER = logging.getLogger("jupyterlab_requirements.kernel_handler")
 
 
-class JupyterKernelHandler(APIHandler):
+class JupyterKernelHandler(APIHandler):  # type: ignore[misc]
     """Jupyter Kernel handler to create new kernel for notebooks."""
 
     @web.authenticated
-    def post(self):
+    def post(self):  # type: ignore
         """POST request for JupyterKernelHandler."""
         input_data = self.get_json_body()
 
@@ -48,7 +48,7 @@ class JupyterKernelHandler(APIHandler):
         self.finish(json.dumps({"data": f"installed kernel {kernel_name} at {kernels_path}"}))
 
     @web.authenticated
-    def get(self):
+    def get(self):  # type: ignore
         """Get kernel list."""
         try:
             kernels_output = subprocess.run(
@@ -72,7 +72,7 @@ class JupyterKernelHandler(APIHandler):
         self.finish(json.dumps(kernels))
 
     @web.authenticated
-    def delete(self):
+    def delete(self):  # type: ignore
         """Delete selected kernel."""
         input_data = self.get_json_body()
 

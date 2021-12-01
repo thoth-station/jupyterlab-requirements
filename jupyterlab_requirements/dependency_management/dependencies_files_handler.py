@@ -31,11 +31,11 @@ from thoth.python import Project
 _LOGGER = logging.getLogger("jupyterlab_requirements.dependencies_files_handler")
 
 
-class DependenciesFilesHandler(APIHandler):
+class DependenciesFilesHandler(APIHandler):  # type: ignore[misc]
     """Dependencies files handler to store dependencies files."""
 
     @web.authenticated
-    def post(self):
+    def post(self):  # type: ignore
         """Store requirements file to disk."""
         initial_path = Path.cwd()
         input_data = self.get_json_body()
@@ -75,11 +75,11 @@ class DependenciesFilesHandler(APIHandler):
         self.finish(json.dumps({"message": f"Successfully stored requirements at {env_path}!"}))
 
 
-class DependenciesNotebookNameHandler(APIHandler):
+class DependenciesNotebookNameHandler(APIHandler):  # type: ignore[misc]
     """Notebook name handler for notebook file name."""
 
     @web.authenticated
-    def post(self):
+    def post(self):  # type: ignore
         """Store current notebook name handled."""
         input_data = self.get_json_body()
 

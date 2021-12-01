@@ -1,10 +1,13 @@
 """jupyterlab-requirements setup."""
 import os
+import sys
 
 from pathlib import Path
 
 from jupyter_packaging import create_cmdclass, install_npm, ensure_targets, combine_commands
 import setuptools
+
+from setuptools.command.test import test as TestCommand  # noqa
 
 HERE = Path(__file__).parent.resolve()
 
@@ -70,6 +73,51 @@ def _get_install_requires():
     with open("requirements.txt", "r") as requirements_file:
         res = requirements_file.readlines()
         return [req.split(" ", maxsplit=1)[0] for req in res if req]
+
+
+class Test(TestCommand):
+    """Introduce test command to run testsuite using pytest."""
+
+    _IMPLICIT_PYTEST_ARGS = [
+        "--timeout=45",
+        "--cov=thoth",
+        "--cov-report=xml",
+        "--mypy",
+        "--capture=no",
+        "--verbose",
+        "-l",
+        "-s",
+        "-vv",
+        "tests/",
+    ]
+
+    user_options = [("pytest-args=", "a", "Arguments to pass into py.test")]
+
+    def initialize_options(self):
+        """Initialize command options."""
+        super().initialize_options()
+        self.pytest_args = None
+
+    def finalize_options(self):
+        """Finalize command options."""
+        super().finalize_options()
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        """Run pytests."""
+        import pytest
+
+        passed_args = list(self._IMPLICIT_PYTEST_ARGS)
+
+        if self.pytest_args:
+            self.pytest_args = [arg for arg in self.pytest_args.split() if arg]
+            passed_args.extend(self.pytest_args)
+
+        sys.exit(pytest.main(passed_args))
+
+
+cmdclass["test"] = Test
 
 
 setup_args = dict(

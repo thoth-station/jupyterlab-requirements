@@ -21,7 +21,7 @@ import logging
 import json
 import sys
 import subprocess
-import yaml
+import yaml  # type: ignore
 import click
 import typing
 
@@ -55,7 +55,7 @@ from jupyterlab_requirements.dependency_management import verify_gathered_librar
 _LOGGER = logging.getLogger("thoth.jupyterlab_requirements.cli")
 
 
-def _print_version(ctx: click.Context, _, value: str):
+def _print_version(ctx: click.Context, value: str) -> None:
     """Print version and exit."""
     if not value or ctx.resilient_parsing:
         return
@@ -74,10 +74,10 @@ def _print_version(ctx: click.Context, _, value: str):
     help="Be verbose about what's going on.",
 )
 def cli(
-    ctx: click.Context = None,
+    ctx: Optional[click.Context] = None,
     verbose: bool = False,
     output: Optional[str] = None,
-):
+) -> None:
     """Horus: CLI for jupyterlab-requirements."""
     if verbose:
         _LOGGER.setLevel(logging.DEBUG)
@@ -89,7 +89,7 @@ def cli(
 @cli.command("version")
 @click.pass_context
 @click.option("--json", "-j", "json_output", is_flag=True, help="Print output in JSON format.")
-def version(ctx: click.Context, json_output: bool = False):
+def version(ctx: click.Context, json_output: bool = False) -> None:
     """Print Horus, Thamos and Thoth version and exit."""
     click.echo(f"Horus (jupyterlab-requirements CLI) version: {__version__}")
 
@@ -142,7 +142,7 @@ def extract(
     thoth_config: bool = False,
     use_overlay: bool = False,
     force: bool = False,
-):
+) -> None:
     """Extract dependencies from notebook metadata.
 
     Examples:
@@ -195,7 +195,7 @@ def show(
     pipfile: bool = False,
     pipfile_lock: bool = False,
     thoth_config: bool = False,
-):
+) -> None:
     """Show dependencies from notebook metadata.
 
     Examples:
@@ -287,7 +287,7 @@ def save(
     pipfile_lock: bool = False,
     thoth_config: bool = False,
     force: bool = False,
-):
+) -> None:
     """Save dependencies in notebook metadata.
 
     Examples:
@@ -349,7 +349,7 @@ def save(
     if resolution_engine == "thoth":
 
         if thoth_config or save_all:
-            config = _Configuration()
+            config = _Configuration()  # type: ignore
             config.load_config_from_file(config_path=str(Path(save_files_path).joinpath(".thoth.yaml")))
 
             if "thoth_config" in notebook_metadata and not force:
@@ -395,7 +395,9 @@ def save(
     is_flag=True,
     help="Force actions for creation of Pipfile.",
 )
-def discover(ctx: click.Context, path: str, store_files_path: str, show_only: bool = False, force: bool = False):
+def discover(
+    ctx: click.Context, path: str, store_files_path: str, show_only: bool = False, force: bool = False
+) -> None:
     """Discover dependencies from notebook content.
 
     Examples:

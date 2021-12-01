@@ -221,11 +221,13 @@ The `jlpm` command is JupyterLab's pinned version of
    pipenv shell
 
 
+All following commands needs to be run from the virtualenv created and accessed with command in point 5.
+
 6. Install package in development mode
 
 .. code-block:: console
 
-   pip install -ve .
+   pip install -ve . --no-cache-dir
 
 
 7. Link your development version of the extension with JupyterLab
@@ -270,7 +272,14 @@ By default, the `jlpm run build` command generates the source maps for this exte
    jupyter lab build --minimize=False
 
 
-When you are ready with a new contribution open a Pull Request!! We are very happy to receive contributions from the community!
+9. Run tests using the command
+
+.. code-block:: console
+
+   python3 setup.py test
+
+
+When all tests passed and you are ready with a new contribution open a Pull Request!! We are very happy to receive contributions from the community!
 
 
 Demo development status and new features

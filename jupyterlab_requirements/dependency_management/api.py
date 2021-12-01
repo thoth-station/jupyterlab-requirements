@@ -22,32 +22,32 @@ from jupyter_server.base.handlers import APIHandler
 from tornado import web
 
 
-class BaseSpecHandler(web.StaticFileHandler, APIHandler):
+class BaseSpecHandler(web.StaticFileHandler, APIHandler):  # type: ignore[misc]
     """Base class handler."""
 
     @staticmethod
-    def get_resource_metadata():
+    def get_resource_metadata() -> None:
         """Return the (resource, mime-type) for the handlers spec."""
         pass
 
-    def initialize(self):
+    def initialize(self) -> None:  # type: ignore
         """Initialize class."""
         web.StaticFileHandler.initialize(self, path=os.path.dirname(__file__))
 
     @web.authenticated
-    def get(self):
+    def get(self):  # type: ignore
         """Get method."""
-        return web.StaticFileHandler.get(self, self.get_resource_metadata()[0])
+        return web.StaticFileHandler.get(self, self.get_resource_metadata()[0])  # type: ignore
 
-    def get_content_type(self):
+    def get_content_type(self):  # type: ignore
         """Get content type."""
-        return self.get_resource_metadata()[1]
+        return self.get_resource_metadata()[1]  # type: ignore
 
 
 class YamlSpecHandler(BaseSpecHandler):
     """Expose the ability to return specifications from static files."""
 
     @staticmethod
-    def get_resource_metadata():
+    def get_resource_metadata():  # type: ignore
         """Return the (resource, mime-type) for the handlers spec."""
         return "jupyterlab_requirements.yaml", "text/x-yaml"

@@ -4,21 +4,21 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-virtualenv = "*"
+click = "*"
+invectio = "*"
+ipynbname = "*"
 ipykernel = "*"
 ipython = "*"
-invectio = "*"
+jupyterlab = ">=3.1.0"
+pyyaml = "*"
+rich = "*"
 thamos = ">=1.21.0"
 thoth-python = ">=0.16.6"
 thoth-common = "*"
-jupyterlab = ">=3.1.0"
-click = "*"
-rich = "*"
-pyyaml = "*"
-ipynbname = "*"
+virtualenv = "*"
 
 [dev-packages]
-jupyter-packaging = "*"
+jupyter_packaging = "~=0.10,<2"
 pytest = "*"
 pytest-timeout = "*"
 pytest-cov = "*"
@@ -27,6 +27,7 @@ hypothesis = "*"
 pytest-mypy = "*"
 mypy = "*"
 pre-commit = "*"
+voluptuous = "*"
 
 [requires]
 python_version = "3.8"

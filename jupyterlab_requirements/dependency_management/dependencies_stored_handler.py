@@ -29,11 +29,11 @@ from thoth.python import Project
 _LOGGER = logging.getLogger("jupyterlab_requirements.dependencies_files_handler")
 
 
-class DependenciesStoredHandler(APIHandler):
+class DependenciesStoredHandler(APIHandler):  # type: ignore[misc]
     """Dependencies files handler to retrieve dependencies files."""
 
     @web.authenticated
-    def post(self):
+    def post(self):  # type: ignore
         """Get requirements file from disk."""
         input_data = self.get_json_body()
 
@@ -52,7 +52,7 @@ class DependenciesStoredHandler(APIHandler):
 
         if requirements_format == "pipenv":
             _LOGGER.debug("Get Pipfile/Pipfile.lock in %r", env_path)
-            project = Project.from_files(pipfile_path=pipfile_path, pipfile_lock_path=pipfile_lock_path)
+            project = Project.from_files(pipfile_path=str(pipfile_path), pipfile_lock_path=str(pipfile_lock_path))
 
         requirements = project.pipfile.to_dict()
         requirements_locked = project.pipfile_lock.to_dict()

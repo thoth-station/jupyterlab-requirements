@@ -29,9 +29,11 @@ presubmits:
       containers:
         - image: quay.io/thoth-station/thoth-pytest-ubi8-py38:v0.13.0
           command:
-            - "/usr/local/bin/mypy"
+            - "/bin/run-mypy"
             - "."
-            - "--ignore-missing-imports"
+            - --ignore-missing-imports
+            - --exclude
+            - "docs/|tests/|setup.py"
           resources:
             requests:
               memory: "1Gi"
@@ -39,3 +41,21 @@ presubmits:
             limits:
               memory: "1Gi"
               cpu: "1"
+
+  # - name: thoth-pytest-py38
+  #   decorate: true
+  #   skip_report: false
+  #   always_run: true
+  #   context: aicoe-ci/prow/pytest
+  #   spec:
+  #     containers:
+  #       - image: quay.io/thoth-station/thoth-pytest-py38:v0.13.0
+  #         command:
+  #           - "/bin/run-pytest"
+  #         resources:
+  #           requests:
+  #             memory: "1Gi"
+  #             cpu: "500m"
+  #           limits:
+  #             memory: "2Gi"
+  #             cpu: "1"

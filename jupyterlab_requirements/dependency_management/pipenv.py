@@ -18,6 +18,7 @@
 
 import json
 import logging
+import typing
 
 from .base import DependencyManagementBaseHandler
 from .lib import lock_dependencies_with_pipenv
@@ -32,7 +33,7 @@ class PipenvHandler(DependencyManagementBaseHandler):
     """pipenv handler to receive optimized software stack."""
 
     @web.authenticated
-    def post(self):
+    def post(self):  # type: ignore
         """Post method for class."""
         input_data = self.get_json_body()
 
@@ -40,10 +41,12 @@ class PipenvHandler(DependencyManagementBaseHandler):
 
         self.redirect_to_task(task_index)
 
-    async def lock_using_pipenv(self, input_data):
+    async def lock_using_pipenv(
+        self, input_data: typing.Dict[str, typing.Any]
+    ) -> typing.Tuple[int, typing.Dict[str, typing.Any]]:
         """Lock and install dependencies using pipenv."""
         kernel_name: str = input_data["kernel_name"]
-        requirements: dict = json.loads(input_data["requirements"])
+        requirements: typing.Dict[str, typing.Any] = json.loads(input_data["requirements"])
         pipfile_string = Pipfile.from_dict(requirements).to_string()
 
         returncode, result = lock_dependencies_with_pipenv(kernel_name=kernel_name, pipfile_string=pipfile_string)

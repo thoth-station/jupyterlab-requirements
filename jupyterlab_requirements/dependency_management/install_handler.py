@@ -17,6 +17,7 @@
 """Install API for jupyterlab requirements."""
 
 import logging
+import typing
 
 from .base import DependencyManagementBaseHandler
 from .lib import install_packages
@@ -29,7 +30,7 @@ class DependencyInstallHandler(DependencyManagementBaseHandler):
     """Dependency management handler to install dependencies."""
 
     @web.authenticated
-    def post(self):
+    def post(self):  # type: ignore
         """Post method for class."""
         input_data = self.get_json_body()
 
@@ -37,7 +38,9 @@ class DependencyInstallHandler(DependencyManagementBaseHandler):
 
         self.redirect_to_task(task_index)
 
-    async def install_dependencies(self, input_data):
+    async def install_dependencies(
+        self, input_data: typing.Dict[str, typing.Any]
+    ) -> typing.Tuple[int, typing.Dict[str, typing.Any]]:
         """Install packages using selected package manager."""
         kernel_name: str = input_data["kernel_name"]
         resolution_engine: str = input_data["resolution_engine"]
