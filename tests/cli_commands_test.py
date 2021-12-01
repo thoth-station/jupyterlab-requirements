@@ -157,4 +157,6 @@ class HorusLogCommandTestCase(HorusTestCase):
     """A class for horus log test cases."""
 
     log_str = horus_log_command(notebook_path=HorusTestCase.locked_notebook_path)
+    assert log_str
+
     assert isinstance(log_str, str)

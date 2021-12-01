@@ -54,6 +54,10 @@ horus extract [YOUR_NOTEBOOK].ipynb  --pipfile-lock
 horus extract [YOUR_NOTEBOOK].ipynb  --thoth-config
 ```
 
+## log
+
+This command is used to see logs from Thoth analysis ID resolution process (only if Thoth resolution engine was used).
+
 ## lock
 
 This command is used to create kernel, lock requirements, intall them and save them in the notebook metadata.

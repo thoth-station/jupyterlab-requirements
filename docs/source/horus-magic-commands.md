@@ -34,6 +34,11 @@ Here you can find a list of magic commands available and a description for each 
 |  | --pipfile-lock | It will extract and save locally only the Pipfile.lock. It will fail if the Pipfile.lock exists at that path. |
 |  | --thoth-config | It will extract and save locally only the .thoth.yaml. It will fail if the .thoth.yaml exists at that path. |
 
+## log
+| magic command | options | description |
+| ------------- | ------------------ | ------------------ |
+| %horus log | | See logs from Thoth analysis ID resolution process (only if Thoth resolution engine was used). |
+
 ## help
 | magic command | options | description |
 | ------------- | ------------------ | ------------------ |
@@ -81,4 +86,4 @@ Here you can find a list of magic commands available and a description for each 
 | %horus show |  | Show dependencies content from notebook metadata (if they exist) |
 |  | --pipfile | It will show only the Pipfile. |
 |  | --pipfile-lock | It will show only the Pipfile.lock. |
-|  | --thoth-config | It will show only the .thoth.yaml. |
+|  | --thoth-config | It will show only the .thoth.yaml. (only if Thoth resolution engine was used) |
