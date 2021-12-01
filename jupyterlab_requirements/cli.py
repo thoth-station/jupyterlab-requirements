@@ -42,6 +42,7 @@ from jupyterlab_requirements.dependency_management import horus_check_metadata_c
 from jupyterlab_requirements.dependency_management import horus_delete_kernel
 from jupyterlab_requirements.dependency_management import horus_extract_command
 from jupyterlab_requirements.dependency_management import horus_lock_command
+from jupyterlab_requirements.dependency_management import horus_log_command
 from jupyterlab_requirements.dependency_management import horus_requirements_command
 from jupyterlab_requirements.dependency_management import horus_set_kernel_command
 from jupyterlab_requirements.dependency_management import horus_show_command
@@ -813,6 +814,25 @@ def lock(
             "All dependencies content is stored in notebook metadata. "
             "Run `horus set-kernel [NOTEBOOK].ipynb` to prepare the kernel for your notebook."
         )
+
+
+@cli.command("log")
+@click.pass_context
+@click.argument("path")
+def log(
+    ctx: click.Context,
+    path: str,
+) -> None:
+    """Get log of finished analysis (only for Thoth)."""
+    try:
+        log_str = horus_log_command(notebook_path=path)
+
+        if log_str:
+            click.echo(log_str)
+    except Exception as e:
+        click.echo(e)
+
+    ctx.exit(1)
 
 
 __name__ == "__main__" and cli()

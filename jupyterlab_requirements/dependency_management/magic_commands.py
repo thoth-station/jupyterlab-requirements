@@ -41,6 +41,7 @@ from .lib import get_packages
 from .lib import horus_delete_kernel
 from .lib import horus_extract_command
 from .lib import horus_list_kernels
+from .lib import horus_log_command
 from .lib import horus_requirements_command
 from .lib import horus_set_kernel_command
 from .lib import horus_show_command
@@ -63,6 +64,9 @@ class HorusMagics(Magics):  # type: ignore[misc]
         subparsers = parser.add_subparsers(dest="command")
         # command: check
         _ = subparsers.add_parser("check", description="Check dependencies in notebook metadata.")
+
+        # command: log
+        _ = subparsers.add_parser("log", description="Check log from Thoth analysis id, if available.")
 
         # command: requirements
         requirements_command = subparsers.add_parser(
@@ -268,7 +272,8 @@ class HorusMagics(Magics):  # type: ignore[misc]
             results.insert(
                 0,
                 {
-                    "message": f"notebook name: {nb_name}",
+                    "key": "notebook_name",
+                    "message": nb_name,
                     "type": "INFO",
                 },
             )
@@ -469,6 +474,17 @@ class HorusMagics(Magics):  # type: ignore[misc]
             pipfile = create_pipfile_from_packages(packages=packages_, python_version=python_version)
 
             return json.dumps({"requirements": pipfile.to_dict(), "force": args.force})
+
+        if args.command == "log":
+            try:
+                log_str = horus_log_command(notebook_path=nb_path)
+                if log_str:
+                    lines = log_str.split("\n")
+                    for line in lines:
+                        print(line)
+
+            except Exception as e:
+                raise Exception(e)
 
         if args.command == "extract":
             _LOGGER.info("Extract dependencies content from notebook content.")
