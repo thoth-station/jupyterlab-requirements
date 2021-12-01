@@ -137,15 +137,25 @@ def horus_check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -
     if notebook_metadata.get("language_info"):
         language = notebook_metadata["language_info"]["name"]
 
-        if language and language != "python":
-            result.append(
-                {
-                    "message": "Only python programming language is supported.",
-                    "type": "ERROR",
-                }
-            )
+        if language:
+            if language != "python":
+                result.append(
+                    {
+                        "key": "programming_language",
+                        "message": "Only python is supported.",
+                        "type": "ERROR",
+                    }
+                )
+                return result
 
-            return result
+            else:
+                result.append(
+                    {
+                        "key": "programming_language",
+                        "message": f"{language}",
+                        "type": "INFO",
+                    }
+                )
 
     kernelspec = notebook_metadata.get("kernelspec")
 
@@ -157,7 +167,8 @@ def horus_check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -
 
     result.append(
         {
-            "message": f"kernel name: {kernel_name}",
+            "key": "kernel_name",
+            "message": f"{kernel_name}",
             "type": "INFO",
         }
     )
@@ -170,7 +181,8 @@ def horus_check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -
 
         result.append(
             {
-                "message": "dependency_resolution_engine key is not present in notebook metadata. "
+                "key": "dependency_resolution_engine",
+                "message": "key is not present in notebook metadata. "
                 f"It will be set after creating Pipfile and running {command}",
                 "type": "WARNING",
             }
@@ -178,7 +190,8 @@ def horus_check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -
     else:
         result.append(
             {
-                "message": f"dependency resolution engine: {notebook_metadata['dependency_resolution_engine']}",
+                "key": "dependency_resolution_engine",
+                "message": f"{notebook_metadata['dependency_resolution_engine']}",
                 "type": "INFO",
             }
         )
@@ -196,8 +209,8 @@ def horus_check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -
 
                 result.append(
                     {
-                        "message": f"{thoth_specific_key} key is not present in notebook metadata. "
-                        f"You can run {command}.",
+                        "key": f"{thoth_specific_key}",
+                        "message": "key is not present in notebook metadata. " f"You can run {command}.",
                         "type": "ERROR",
                     }
                 )
@@ -206,14 +219,16 @@ def horus_check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -
                     thoth_analysis_id = notebook_metadata.get("thoth_analysis_id")
                     result.append(
                         {
-                            "message": f"Thoth analysis ID: {thoth_analysis_id}",
+                            "key": f"{thoth_specific_key}",
+                            "message": f"{thoth_analysis_id}",
                             "type": "INFO",
                         }
                     )
                 else:
                     result.append(
                         {
-                            "message": f"{thoth_specific_key} key is present in notebook metadata.",
+                            "key": f"{thoth_specific_key}",
+                            "message": "key is present in notebook metadata.",
                             "type": "INFO",
                         }
                     )
@@ -228,7 +243,8 @@ def horus_check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -
 
             result.append(
                 {
-                    "message": f"{mandatory_key} key is not present in notebook metadata. "
+                    "key": f"{mandatory_key}",
+                    "message": "key is not present in notebook metadata. "
                     f"You can run {command} with its options to set them.",
                     "type": "ERROR",
                 }
@@ -236,7 +252,8 @@ def horus_check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -
         else:
             result.append(
                 {
-                    "message": f"{mandatory_key} key is present in notebook metadata.",
+                    "key": f"{mandatory_key}",
+                    "message": "key is present in notebook metadata.",
                     "type": "INFO",
                 }
             )
@@ -250,7 +267,8 @@ def horus_check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -
 
             result.append(
                 {
-                    "message": f"{mandatory_key} key is not present in notebook metadata. "
+                    "key": f"{mandatory_key}",
+                    "message": f"key is not present in notebook metadata. "
                     f"You can run {command} if Pipfile already exists.",
                     "type": "ERROR",
                 }
@@ -259,7 +277,8 @@ def horus_check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -
         else:
             result.append(
                 {
-                    "message": f"{mandatory_key} key is present in notebook metadata.",
+                    "key": f"{mandatory_key}",
+                    "message": "key is present in notebook metadata.",
                     "type": "INFO",
                 }
             )
@@ -277,6 +296,7 @@ def horus_check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -
 
             result.append(
                 {
+                    "key": "requirements_hash_match",
                     "message": f"Pipfile hash stated in Pipfile.lock {project.pipfile_lock.meta.hash['sha256'][:6]} "
                     f"does not correspond to Pipfile hash {project.pipfile.hash()['sha256'][:6]} - was Pipfile "
                     f"adjusted? Then you should run {command}.",
@@ -286,6 +306,7 @@ def horus_check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -
         else:
             result.append(
                 {
+                    "key": "requirements_hash_match",
                     "message": f"Pipfile hash stated in Pipfile.lock {project.pipfile_lock.meta.hash['sha256'][:6]} "
                     f"correspond to Pipfile hash {project.pipfile.hash()['sha256'][:6]}.",
                     "type": "INFO",
@@ -307,6 +328,7 @@ def horus_check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -
         if check == len([p.name for p in notebook_packages]):
             result.append(
                 {
+                    "key": "kernel_check",
                     "message": f"kernel {kernel_name} matches packages (name,version,PyPI index) "
                     "from requirements lock in your notebook metadata.",
                     "type": "WARNING",
@@ -320,7 +342,8 @@ def horus_check_metadata_content(notebook_metadata: dict, is_cli: bool = True) -
 
             result.append(
                 {
-                    "message": f"kernel {kernel_name} selected does not match your dependencies. "
+                    "key": "kernel_check",
+                    "message": f"kernel {kernel_name} does not match your dependencies. \n"
                     f"Please run command {command} to create kernel for your notebook.",
                     "type": "WARNING",
                 }
