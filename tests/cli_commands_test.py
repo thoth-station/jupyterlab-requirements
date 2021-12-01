@@ -42,6 +42,34 @@ class HorusCheckCommandTestCase(HorusTestCase):
 class HorusRequirementsCommandTestCase(HorusTestCase):
     """A class for horus requirements test cases."""
 
+    add = ["boto3"]
+
+    try:
+        tmp, tmp_path = HorusTestCase.create_temporary_copy(HorusTestCase.empty_notebook_path)
+
+        pipfile_ = horus_requirements_command(
+            path=tmp_path, index_url="https://pypi.org/simple", dev=False, add=add, remove=None
+        )
+
+        pipfile_dict = {
+            "packages": {"boto3": "*"},
+            "dev-packages": {},
+            "source": [{"url": "https://pypi.org/simple", "verify_ssl": True, "name": "pypi"}],
+            "requires": {"python_version": "3.8"},
+        }
+
+        assert pipfile_dict == pipfile_.to_dict()
+
+        notebook = get_notebook_content(notebook_path=tmp_path)
+        notebook_metadata = notebook.get("metadata")
+
+        result = horus_check_metadata_content(notebook_metadata=notebook_metadata)
+
+        assert result
+
+    finally:
+        tmp.close()
+
 
 class HorusListKernelsCommandTestCase(HorusTestCase):
     """A class for horus list kernels test cases."""

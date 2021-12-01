@@ -17,12 +17,15 @@
 
 """A base class for implementing horus' test cases."""
 
-from pathlib import Path
+import tempfile
+import shutil
 import os
 
+from pathlib import Path
 from voluptuous import All
 from voluptuous import Length
 from voluptuous import Schema
+from voluptuous import Optional
 
 
 class HorusTestCaseException(Exception):  # noqa: N818
@@ -34,5 +37,25 @@ class HorusTestCase:
 
     data_dir = Path(os.path.dirname(os.path.realpath(__file__))) / "data"
     empty_notebook_path = data_dir / "empty-notebook.ipynb"
+    requirements_notebook_path = data_dir / "requirements-notebook.ipynb"
+    locked_notebook_path = data_dir / "locked-notebook.ipynb"
 
     _KERNEL_SCHEMA = Schema([All(str, Length(min=1))])
+
+    _JUPYTERLAB_REQUIREMENTS_METADATA_SCHEMA = Schema(
+        {
+            "dependency_resolution_engine": All(str, Length(min=1)),
+            "requirements": All(str, Length(min=1)),
+            "requirements_lock": All(str, Length(min=1)),
+            Optional("thoth_config"): All(str, Length(min=1)),
+            Optional("adviser_analysis_id"): All(str, Length(min=1)),
+        }
+    )
+
+    @staticmethod
+    def create_temporary_copy(path: str):
+        """Create a temporary notebook."""
+        tmp = tempfile.NamedTemporaryFile(delete=True, prefix="notebook_test_", mode="w+t", suffix=".ipynb")
+        shutil.copy2(path, tmp.name)
+
+        return tmp, tmp.name
