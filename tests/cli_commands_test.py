@@ -24,7 +24,7 @@ from jupyterlab_requirements.dependency_management.lib import horus_check_metada
 from jupyterlab_requirements.dependency_management.lib import horus_delete_kernel
 from jupyterlab_requirements.dependency_management.lib import horus_list_kernels
 from jupyterlab_requirements.dependency_management.lib import horus_lock_command
-# from jupyterlab_requirements.dependency_management.lib import horus_set_kernel_command
+from jupyterlab_requirements.dependency_management.lib import horus_set_kernel_command
 from jupyterlab_requirements.dependency_management.lib import horus_requirements_command
 
 
@@ -96,7 +96,7 @@ class HorusLockCommandTestCase(HorusTestCase):
             kernel_name=kernel_name,
             os_name="ubi",
             os_version="8",
-            python_version="3.8"
+            python_version="3.8",
         )
 
         assert lock_results["error"] is False
@@ -133,10 +133,20 @@ class HorusLockCommandTestCase(HorusTestCase):
 class HorusSetKernelCommandTestCase(HorusTestCase):
     """A class for horus set kernel test cases."""
 
-    # horus_set_kernel_command
- 
+    kernel_name = "test-jl-set"
 
-class HorusDeleteKernelCommandTestCase(HorusTestCase):
-    """A class for horus delete kernel test cases."""
+    try:
+        tmp, tmp_path = HorusTestCase.create_temporary_copy(HorusTestCase.locked_notebook_path)
 
-    # horus_delete_kernel
+        results = horus_set_kernel_command(
+            path=tmp_path,
+            kernel_name=kernel_name,
+        )
+        assert results["dependency_resolution_engine"] == "thoth"
+
+        kernels = horus_list_kernels()
+        assert kernel_name in kernels
+
+    finally:
+        tmp.close()
+        horus_delete_kernel(kernel_name=kernel_name)
