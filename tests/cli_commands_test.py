@@ -22,6 +22,7 @@ from tests.base_test import HorusTestCase
 from jupyterlab_requirements.dependency_management.lib import get_notebook_content
 from jupyterlab_requirements.dependency_management.lib import horus_check_metadata_content
 from jupyterlab_requirements.dependency_management.lib import horus_delete_kernel
+from jupyterlab_requirements.dependency_management.lib import horus_log_command
 from jupyterlab_requirements.dependency_management.lib import horus_list_kernels
 from jupyterlab_requirements.dependency_management.lib import horus_lock_command
 from jupyterlab_requirements.dependency_management.lib import horus_set_kernel_command
@@ -82,7 +83,7 @@ class HorusListKernelsCommandTestCase(HorusTestCase):
 
 
 class HorusLockCommandTestCase(HorusTestCase):
-    """A class for horus set kernel test cases."""
+    """A class for horus lock dependencies test cases."""
 
     kernel_name = "test-jl-lock"
 
@@ -150,3 +151,12 @@ class HorusSetKernelCommandTestCase(HorusTestCase):
     finally:
         tmp.close()
         horus_delete_kernel(kernel_name=kernel_name)
+
+
+class HorusLogCommandTestCase(HorusTestCase):
+    """A class for horus log test cases."""
+
+    log_str = horus_log_command(notebook_path=HorusTestCase.locked_notebook_path)
+    assert log_str
+
+    assert isinstance(log_str, str)
