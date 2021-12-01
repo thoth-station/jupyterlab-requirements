@@ -40,6 +40,7 @@ from .lib import horus_check_metadata_content
 from .lib import horus_delete_kernel
 from .lib import horus_extract_command
 from .lib import horus_lock_command
+from .lib import horus_log_command
 from .lib import horus_requirements_command
 from .lib import horus_set_kernel_command
 from .lib import horus_show_command
@@ -75,6 +76,7 @@ __all__ = [
     "horus_extract_command",
     "horus_set_kernel_command",
     "horus_lock_command",
+    "horus_log_command",
     "horus_requirements_command",
     "horus_show_command",
     "horus_list_kernels",

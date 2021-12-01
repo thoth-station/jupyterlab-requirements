@@ -45,6 +45,7 @@ from thoth.common import ThothAdviserIntegrationEnum
 
 from thamos.lib import advise_using_config, _get_origin
 from thamos.lib import get_package_from_imported_packages
+from thamos.lib import get_log
 from thamos.config import _Configuration
 from thamos.discover import discover_python_version
 
@@ -171,7 +172,7 @@ def horus_check_metadata_content(
     result.append(
         {
             "key": "kernel_name",
-            "message": f"{kernel_name}",
+            "message": kernel_name,
             "type": "INFO",
         }
     )
@@ -212,7 +213,7 @@ def horus_check_metadata_content(
 
                 result.append(
                     {
-                        "key": f"{thoth_specific_key}",
+                        "key": thoth_specific_key,
                         "message": "key is not present in notebook metadata. " f"You can run {command}.",
                         "type": "ERROR",
                     }
@@ -222,7 +223,7 @@ def horus_check_metadata_content(
                     thoth_analysis_id = notebook_metadata.get("thoth_analysis_id")
                     result.append(
                         {
-                            "key": f"{thoth_specific_key}",
+                            "key": thoth_specific_key,
                             "message": f"{thoth_analysis_id}",
                             "type": "INFO",
                         }
@@ -230,7 +231,7 @@ def horus_check_metadata_content(
                 else:
                     result.append(
                         {
-                            "key": f"{thoth_specific_key}",
+                            "key": thoth_specific_key,
                             "message": "key is present in notebook metadata.",
                             "type": "INFO",
                         }
@@ -246,7 +247,7 @@ def horus_check_metadata_content(
 
             result.append(
                 {
-                    "key": f"{mandatory_key}",
+                    "key": mandatory_key,
                     "message": "key is not present in notebook metadata. "
                     f"You can run {command} with its options to set them.",
                     "type": "ERROR",
@@ -255,7 +256,7 @@ def horus_check_metadata_content(
         else:
             result.append(
                 {
-                    "key": f"{mandatory_key}",
+                    "key": mandatory_key,
                     "message": "key is present in notebook metadata.",
                     "type": "INFO",
                 }
@@ -270,7 +271,7 @@ def horus_check_metadata_content(
 
             result.append(
                 {
-                    "key": f"{mandatory_key}",
+                    "key": mandatory_key,
                     "message": f"key is not present in notebook metadata. "
                     f"You can run {command} if Pipfile already exists.",
                     "type": "ERROR",
@@ -280,7 +281,7 @@ def horus_check_metadata_content(
         else:
             result.append(
                 {
-                    "key": f"{mandatory_key}",
+                    "key": mandatory_key,
                     "message": "key is present in notebook metadata.",
                     "type": "INFO",
                 }
@@ -1462,3 +1463,27 @@ def horus_extract_command(
             config.save_config()
 
     return results
+
+
+def horus_log_command(notebook_path: str) -> str:
+    """Get log analysis results from adviser ID."""
+    notebook = get_notebook_content(notebook_path=notebook_path)
+    notebook_metadata = notebook.get("metadata")
+
+    if "requirements_lock" not in notebook_metadata.keys():
+        raise Exception(f"notebook at {notebook_path} does not has locked requirements.")
+
+    if "dependency_resolution_engine" not in notebook_metadata.keys():
+        raise Exception(f"notebook at {notebook_path} misses resolution engine key in metadata.")
+
+    if notebook_metadata["dependency_resolution_engine"] != "thoth":
+        raise Exception("This command is available only for Thoth resolution engine.")
+
+    if "thoth_analysis_id" not in notebook_metadata.keys():
+        raise Exception(f"thoth_analysis_id key is not present in the metadata of notebook at: {notebook_path}.")
+    else:
+        thoth_analysis_id = notebook_metadata["thoth_analysis_id"]
+
+    log_str = get_log(thoth_analysis_id)
+
+    return log_str  # type: ignore
