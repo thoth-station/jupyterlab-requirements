@@ -1,5 +1,43 @@
 # Changelog for Thoth's Template GitHub Project
 
+## Release 0.14.0 (2021-12-02T15:43:18)
+### Features
+* Add docs for horus log command
+* Constraint Jupyterlab due to new major release
+* Add horu log command
+* Make mypy happy and enabled it in prow
+* Add note on tests
+* disable-mypy
+* Add tests
+* adjust prow.yaml and add voluptuous
+* Improve check command
+* Add note in docs
+* standardize variable name from backend to frontend
+* Apply thoth advise inputs properly
+* rename analysis_id thoth_analysis_id
+* Add analysis ID from UI results
+* Adjust horus discover magic commands
+* Create common method in library
+* Fix prow
+* Use new thamos release
+* Update the labels for the bug and feature templates
+* Add link to v0.13.0 video
+* Use new thamos andpoint for horus discover
+* Add output results to cli
+### Bug Fixes
+* fix jsonify
+* fix mypy
+* Add analysis ID to metadata and fix print reports
+### Improvements
+* Add test for horus log command
+* Add test for set kernel
+* Add test for lock command
+* Add test for requirements command
+* Add tests for horus
+* make mypy more happy
+* Set test in setup.py
+* change to debug
+
 ## Release 0.13.0 (2021-11-16T16:53:28)
 ### Features
 * Add adviser report output to horus magic commands
