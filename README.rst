@@ -76,11 +76,11 @@ Usage
 
 There are 3 ways to interact with this extension:
 
-- `%horus magic commands <./docs/source/horus-magic-commands.md>`__ directly in your notebook's cells.
+- `%horus magic commands <https://github.com/thoth-station/jupyterlab-requirements/blob/master/docs/source/horus-magic-commands.md>`__ directly in your notebook's cells.
 
-- `horus CLI <./docs/source/horus-cli.md>`__ from terminal or integrated in pipelines.
+- `horus CLI <https://github.com/thoth-station/jupyterlab-requirements/blob/master/docs/source/horus-cli.md>`__ from terminal or integrated in pipelines.
 
-- `jupyterlab-requirements UI <./docs/source/jupyterlab-requirements-ui.md>`__ accessible through `Manage Dependencies` button that appears in the notebook when it is opened in JupyteLab.
+- `jupyterlab-requirements UI <https://github.com/thoth-station/jupyterlab-requirements/blob/master/docs/source/jupyterlab-requirements-ui.md>`__ accessible through `Manage Dependencies` button that appears in the notebook when it is opened in JupyteLab.
 
 
 Resolution engines
