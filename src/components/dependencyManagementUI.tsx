@@ -872,11 +872,11 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
       if ( result == undefined || result.error == true ) {
 
-        var error_msg = "No resolution engine was able to install dependencies, please contact Thoth team: "
+        var error_msg = "No resolution engine was able to lock dependencies, please contact Thoth team: "
         if ( result != undefined ) {
           console.debug("Pipenv resolution engine error:", result.error_msg)
           _.set(ui_state, "pipenv_resolution_error_msg", result.error_msg.toString())
-          var error_msg = `No resolution engine was able to install dependencies! Please contact Thoth team: `
+          var error_msg = `No resolution engine was able to lock dependencies! Please contact Thoth team: `
         }
 
         _.set(ui_state, "status", "failed_re")
