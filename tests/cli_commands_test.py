@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""A class for implementing horus' test cases for commands."""
+"""A class for implementing horus' test cases for library used in commands."""
 
 from tests.base_test import HorusTestCase
 

@@ -16,7 +16,6 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { INotebookModel, NotebookPanel } from '@jupyterlab/notebook';
 
 import { IDisposable } from '@lumino/disposable';
-
 import { get_requirements, get_requirements_lock, get_thoth_configuration, get_resolution_engine } from "./notebook";
 import { DependenciesManagementUI } from './components/dependencyManagementUI';
 import { THOTH_TOOLBAR_BUTTON_POSITION } from './constants';
