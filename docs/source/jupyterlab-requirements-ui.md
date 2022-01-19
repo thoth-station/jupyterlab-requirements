@@ -48,9 +48,13 @@ The following table describes the parameters available in the UI before using th
 | Kernel name | Select a name for the Jupyter Kernel where your dependencies will be installed. |
 | Path root project | This is the path considered as root of your project (automatically discovered but customizable if necessary (e.g. when using overlays)). |
 | Thoth Recommendation type | Recommendation type used when submitting request to Thoth resolution engine. |
+| Thoth Python version | Python version used when submitting request to Thoth resolution engine. |
+| Thoth OS name | Operating System name used when submitting request to Thoth resolution engine. |
+| Thoth OS version | Operating System version used when submitting request to Thoth resolution engine. |
 | Thoth timeout | Assign timeout in seconds for the request to Thoth resolution engine. |
 | Thoth force | `force` flag for the request to Thoth resolution engine in order to not consider cached results. |
 | Thoth debug | `debug` flag for the request to Thoth resolution engine to run in debug/verbose mode (WARNING: This will impact the quality of the results). |
+| Thoth labels | `labels` used when submitting request to Thoth resolution engine. |
 
 
 Finally after using the install button:

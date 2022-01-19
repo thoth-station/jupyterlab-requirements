@@ -66,6 +66,8 @@ Here you can find a list of magic commands available and a description for each 
 |  | --os-version {OS_NAME} | Operating System version used in request. |
 |  | --python-version {OS_NAME} | Python Interpreter version used in request. |
 |  | --kernel-name {KERNEL_NAME} | You can select the {KERNEL_NAME} where the dependencies will be installed |
+|  | --labels KEY1=VALUE1,KEY2=VALUE2 | You can add labels in the request to Thoth.
+
 
 ## lock with Pipenv
 | magic command | options | description |
