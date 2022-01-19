@@ -31,6 +31,7 @@ from IPython.core.magic import line_magic  # Called with %
 # from IPython.core.magic import cell_magic  # Called with %%
 from IPython.core.magic import magics_class, Magics
 from thamos.discover import discover_python_version
+from thamos.cli import _parse_labels
 
 from .lib import print_report
 from .lib import horus_check_metadata_content
@@ -140,6 +141,11 @@ class HorusMagics(Magics):  # type: ignore[misc]
             "--python-version",
             type=str,
             help="Use Python version for request to Thoth.",
+        )
+        lock_command.add_argument(
+            "--labels",
+            type=str,
+            help="Provide labels for the request to Thoth.",
         )
 
         # Use Pipenv
@@ -338,6 +344,7 @@ class HorusMagics(Magics):  # type: ignore[misc]
                 kernel_name=args.kernel_name,
                 os_name=args.os_name,
                 os_version=args.os_version,
+                labels=_parse_labels(args.labels),
                 python_version=args.python_version,
                 save_in_notebook=False,
                 save_on_disk=True,

@@ -31,6 +31,7 @@ from pathlib import Path
 from thoth.python import Pipfile, PipfileLock
 from thamos.config import _Configuration
 from thamos.discover import discover_python_version
+from thamos.cli import _parse_labels
 
 from jupyterlab_requirements import __version__
 
@@ -747,6 +748,15 @@ def requirements(
     required=False,
     help="Python version for Thoth advise request.",
 )
+@click.option(
+    "--labels",
+    "-l",
+    type=str,
+    metavar="KEY1=VALUE1,KEY2=VALUE2",
+    default=None,
+    show_default=True,
+    help="Labels used to label the request.",
+)
 def lock(
     ctx: click.Context,
     path: str,
@@ -759,6 +769,7 @@ def lock(
     os_name: Optional[str] = None,
     os_version: Optional[str] = None,
     python_version: Optional[str] = None,
+    labels: Optional[str] = None,
 ) -> None:
     """Lock requirements in notebook metadata.
 
@@ -783,6 +794,7 @@ def lock(
         os_name=os_name,
         os_version=os_version,
         python_version=python_version,
+        labels=_parse_labels(labels),
     )
 
     if results["kernel_name"] == "python3":

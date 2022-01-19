@@ -70,6 +70,7 @@ export async function lock_requirements_with_thoth(
   os_name: string,
   os_version: string,
   recommendation_type: string,
+  labels: string,
   notebook_content: string,
   thoth_config: string,
   requirements: string,
@@ -85,6 +86,7 @@ export async function lock_requirements_with_thoth(
       os_name: os_name,
       os_version: os_version,
       recommendation_type: recommendation_type,
+      labels: labels,
       notebook_content: notebook_content,
       thoth_config: thoth_config,
       requirements: requirements

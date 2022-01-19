@@ -640,6 +640,7 @@ def lock_dependencies_with_thoth(
     debug: bool,
     notebook_content: str,
     kernels_path: Path = Path.home().joinpath(".local/share/thoth/kernels"),
+    labels: typing.Optional[typing.Dict[str, str]] = None,
 ) -> typing.Tuple[int, typing.Dict[str, typing.Any]]:
     """Lock dependencies using Thoth resolution engine."""
     initial_path = Path.cwd()
@@ -691,6 +692,7 @@ def lock_dependencies_with_thoth(
             timeout=timeout,
             src_path=temp.name,
             debug=debug,
+            labels=labels,
         )
 
         _LOGGER.info(f"Response: {response}")
@@ -1121,6 +1123,7 @@ def horus_lock_command(
     os_name: typing.Optional[str] = None,
     os_version: typing.Optional[str] = None,
     python_version: typing.Optional[str] = None,
+    labels: typing.Optional[typing.Dict[str, str]] = None,
     save_in_notebook: bool = True,
     save_on_disk: bool = False,
 ) -> typing.Tuple[typing.Dict[str, typing.Any], typing.Dict[str, typing.Any]]:
@@ -1194,6 +1197,7 @@ def horus_lock_command(
             force=force,
             debug=debug,
             notebook_content=notebook_content_py,
+            labels=labels,
         )
         lock_results["thoth_config"] = thoth_config_updated
 

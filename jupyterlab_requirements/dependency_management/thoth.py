@@ -19,7 +19,7 @@
 import json
 import os
 import logging
-import typing
+from typing import Dict, Any, Tuple
 
 from pathlib import Path
 
@@ -27,6 +27,7 @@ from .base import DependencyManagementBaseHandler
 from .lib import lock_dependencies_with_thoth
 from .lib import update_runtime_environment_in_thoth_config
 from tornado import web
+from thamos.cli import _parse_labels
 
 from thoth.python import Pipfile
 
@@ -45,9 +46,7 @@ class ThothAdviseHandler(DependencyManagementBaseHandler):
 
         self.redirect_to_task(task_index)
 
-    async def lock_using_thoth(
-        self, input_data: typing.Dict[str, typing.Any]
-    ) -> typing.Tuple[int, typing.Dict[str, typing.Any]]:
+    async def lock_using_thoth(self, input_data: Dict[str, Any]) -> Tuple[int, Dict[str, Any]]:
         """Lock dependencies using Thoth service."""
         initial_path = Path.cwd()
 
@@ -61,7 +60,8 @@ class ThothAdviseHandler(DependencyManagementBaseHandler):
         force: bool = input_data["thoth_force"]
         debug: bool = input_data["thoth_debug"]
         notebook_content: str = input_data["notebook_content"]
-        requirements: typing.Dict[str, typing.Any] = json.loads(input_data["requirements"])
+        labels: str = input_data["labels"]
+        requirements: Dict[str, Any] = json.loads(input_data["requirements"])
 
         pipfile_string = Pipfile.from_dict(requirements).to_string()
 
@@ -92,6 +92,7 @@ class ThothAdviseHandler(DependencyManagementBaseHandler):
             debug=debug,
             notebook_content=notebook_content,
             pipfile_string=pipfile_string,
+            labels=_parse_labels(labels),
         )
 
         return returncode, advise

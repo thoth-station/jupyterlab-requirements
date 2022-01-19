@@ -101,7 +101,8 @@ export interface IDependencyManagementUIState {
   python_version: string,
   root_directory: string,
   thoth_resolution_error_msg: string,
-  pipenv_resolution_error_msg: string
+  pipenv_resolution_error_msg: string,
+  labels: string
 }
 
 /**
@@ -156,7 +157,8 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         python_version: "3.8",
         root_directory: "",
         thoth_resolution_error_msg: undefined,
-        pipenv_resolution_error_msg: undefined
+        pipenv_resolution_error_msg: undefined,
+        labels: ""
       }
 
       this.onStart = this.onStart.bind(this),
@@ -180,6 +182,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       this.setOSName = this.setOSName.bind(this)
       this.setOSVersion = this.setOSVersion.bind(this)
       this.setRootDirectoryPath = this.setRootDirectoryPath.bind(this)
+      this.setThothLabels = this.setThothLabels.bind(this)
 
       this._model = new KernelModel ( this.props.panel.sessionContext )
     }
@@ -387,6 +390,24 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       );
     }
 
+
+    /**
+     * Function: Set Thoth labels (comma separated values)
+     */
+
+    setThothLabels(event: React.ChangeEvent<HTMLInputElement>) {
+
+      var labels = event.target.value
+
+      // Check labels inputs (comma separated) is done on the backend currently!
+
+      this.setState(
+        {
+          labels: labels
+        }
+      );
+
+    }
 
     /**
      * Function: Set root directory where to place overlays and where to find .thoth.yaml
@@ -762,6 +783,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
           this.state.os_name,
           this.state.os_version,
           this.state.recommendation_type,
+          this.state.labels,
           notebook_content,
           JSON.stringify(thoth_config),
           JSON.stringify(this.state.requirements)
@@ -946,9 +968,12 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         this.props.loaded_resolution_engine
       )
 
-      _.set(ui_on_start_state, "os_name", ui_on_start_state.thoth_config.runtime_environments[0].operating_system.name)
-      _.set(ui_on_start_state, "os_version", ui_on_start_state.thoth_config.runtime_environments[0].operating_system.version)
-      _.set(ui_on_start_state, "python_version", ui_on_start_state.thoth_config.runtime_environments[0].python_version)
+      if ( _.has(ui_on_start_state.thoth_config, "runtime_environments") ) {
+        _.set(ui_on_start_state, "os_name", ui_on_start_state.thoth_config.runtime_environments[0].operating_system.name)
+        _.set(ui_on_start_state, "os_version", ui_on_start_state.thoth_config.runtime_environments[0].operating_system.version)
+        _.set(ui_on_start_state, "python_version", ui_on_start_state.thoth_config.runtime_environments[0].python_version)
+      }
+
       _.set(ui_on_start_state, "root_directory", root_directory)
 
       await this.setNewState(ui_on_start_state);
@@ -1150,6 +1175,19 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                           </label>
                         </div>
 
+      let labelsInput =  <div>
+        <label>
+          Labels:
+          <input
+            title="Comma separated labels"
+            type="text"
+            name="labels"
+            value={this.state.labels}
+            onChange={this.setThothLabels}
+          />
+        </label>
+      </div>
+
 
       let optionsForm = <div>
                           <section>
@@ -1167,6 +1205,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                             {timeoutInput}
                             {forceInput}
                             {debugInput}
+                            {labelsInput}
                           </form>
                         </div>
 

@@ -74,15 +74,17 @@ Thoth only can be combined with the commands below:
 
 Adding `--set-timeout` will set timeout for request to thoth.
 
-Adding `--force` will force request to thoth if one analysis result already exists.
+Adding `--force` will force the request to thoth if one analysis result already exists.
 
 Adding `--debug` will enable debug/verbose request to thoth. NOTE: It has an impact on the quality of the resolution process.
 
-Adding `--os-name` will use OS name in request to Thoth.
+Adding `--os-name` will use OS name in the request to Thoth.
 
-Adding `--os-version` will use OS version in request to Thoth.
+Adding `--os-version` will use OS version in the request to Thoth.
 
-Adding `--python-version` will use python version in request to Thoth.
+Adding `--python-version` will use python version in the request to Thoth.
+
+Adding `--labels` will add labels (e.g. KEY1=VALUE1,KEY2=VALUE2) in the request to Thoth.
 
 Usign Pipenv resolution engine:
 
