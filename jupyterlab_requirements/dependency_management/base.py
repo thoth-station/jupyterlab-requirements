@@ -119,17 +119,17 @@ class DependencyManagementBaseHandler(APIHandler):  # type: ignore[misc]
 
         """
         try:
-            r = self._tasks.get_task(int(index))
+            result = self._tasks.get_task(int(index))
         except ValueError as err:
             raise tornado.web.HTTPError(404, reason=str(err))
         else:
-            if r is None:
+            if result is None:
                 self.set_status(202)
                 self.finish("{}")
             else:
                 # We port errors to the frontend to show them to the user.
                 self.set_status(200)
-                self.finish(json.dumps(r[1]))
+                self.finish(json.dumps(result))
 
     def redirect_to_task(self, task_index: int):  # type: ignore
         """Close a request by redirecting to a task."""

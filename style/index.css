@@ -170,3 +170,46 @@ table.thoth-table th {
   display: inline-block;
   font-size: 16px;
 }
+
+ /* Form box */
+
+.thoth-form-box {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  background-color: #e4e4e4;
+}
+
+ /* Inputs with options to select */
+
+ .thoth-inputs-options label{
+  display: block;
+  text-align: left;
+  font-size: 15px;
+  margin: 0 0 0 0;
+}
+
+.thoth-inputs-options select {
+  font-size: 15px;
+  text-align: center;
+  width: 100%;
+  background: white;
+  border: 1px solid #f7d43a;
+  border-radius: 4px;
+}
+
+ /* Inputs with text */
+
+.thoth-inputs-text label{
+  text-align: left;
+  font-size: 15px;
+  margin: 0 0 0 0;
+}
+
+.thoth-inputs-text input[type=text]{
+  font-size: 15px;
+  width: 100%;
+  box-sizing: border-box;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+}

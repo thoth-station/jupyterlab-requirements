@@ -53,6 +53,7 @@ export interface RuntimeEnvironment {
     python_version: string,
     recommendation_type: string,
     base_image: string,
+    labels: object
 }
 
 export interface ThothConfig {
