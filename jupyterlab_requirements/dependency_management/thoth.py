@@ -19,7 +19,7 @@
 import json
 import os
 import logging
-from typing import Dict, Any, Tuple
+from typing import Dict, Any
 
 from pathlib import Path
 
@@ -46,7 +46,7 @@ class ThothAdviseHandler(DependencyManagementBaseHandler):
 
         self.redirect_to_task(task_index)
 
-    async def lock_using_thoth(self, input_data: Dict[str, Any]) -> Tuple[int, Dict[str, Any]]:
+    async def lock_using_thoth(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """Lock dependencies using Thoth service."""
         initial_path = Path.cwd()
 
@@ -84,7 +84,7 @@ class ThothAdviseHandler(DependencyManagementBaseHandler):
 
         os.chdir(initial_path)
 
-        returncode, advise = lock_dependencies_with_thoth(
+        _, advise = lock_dependencies_with_thoth(
             config=thoth_config_updated,
             kernel_name=kernel_name,
             timeout=timeout,
@@ -95,4 +95,4 @@ class ThothAdviseHandler(DependencyManagementBaseHandler):
             labels=_parse_labels(labels),
         )
 
-        return returncode, advise
+        return advise

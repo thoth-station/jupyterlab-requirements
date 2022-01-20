@@ -38,9 +38,7 @@ class DependencyInstallHandler(DependencyManagementBaseHandler):
 
         self.redirect_to_task(task_index)
 
-    async def install_dependencies(
-        self, input_data: typing.Dict[str, typing.Any]
-    ) -> typing.Tuple[int, typing.Dict[str, typing.Any]]:
+    async def install_dependencies(self, input_data: typing.Dict[str, typing.Any]) -> typing.Dict[str, typing.Any]:
         """Install packages using selected package manager."""
         kernel_name: str = input_data["kernel_name"]
         resolution_engine: str = input_data["resolution_engine"]
@@ -49,4 +47,4 @@ class DependencyInstallHandler(DependencyManagementBaseHandler):
 
         result = {"message": "installed with micropipenv", "kernel_name": kernel_name, "error": False}
 
-        return 0, result
+        return result

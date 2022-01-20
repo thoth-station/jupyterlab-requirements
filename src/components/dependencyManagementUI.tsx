@@ -64,6 +64,9 @@ import {
 const OK_BUTTON_CLASS = "thoth-ok-button";
 const CONTAINER_BUTTON = "thoth-container-button";
 const CONTAINER_BUTTON_CENTRE = "thoth-container-button-centre";
+const INPUT_FORM_BOX = "thoth-form-box";
+const INPUT_OPTIONS = "thoth-inputs-options";
+const INPUT_TEXT = "thoth-inputs-text";
 
 /**
  * Class: Holds properties for DependenciesManagementDialog.
@@ -144,7 +147,8 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
             },
             python_version: "3.8",
             recommendation_type: "latest",
-            base_image: ""
+            base_image: "",
+            labels: {}
           }]
         },
         error_msg: undefined,
@@ -171,18 +175,20 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       this.deleteRow = this.deleteRow.bind(this),
       this.deleteSavedRow = this.deleteSavedRow.bind(this),
       this.onSave = this.onSave.bind(this),
+      this.lock = this.lock.bind(this),
       this.lock_using_thoth = this.lock_using_thoth.bind(this),
       this.lock_using_pipenv = this.lock_using_pipenv.bind(this),
       this.install = this.install.bind(this),
       this.setKernel = this.setKernel.bind(this),
       this.setKernelName = this.setKernelName.bind(this)
-      this.setRecommendationType = this.setRecommendationType.bind(this)
+      this.changeRecommendationType = this.changeRecommendationType.bind(this)
       this.setTimeout = this.setTimeout.bind(this)
       this.setPythonVersion = this.setPythonVersion.bind(this)
       this.setOSName = this.setOSName.bind(this)
       this.setOSVersion = this.setOSVersion.bind(this)
       this.setRootDirectoryPath = this.setRootDirectoryPath.bind(this)
       this.setThothLabels = this.setThothLabels.bind(this)
+      this.setResolutionEngine = this.setResolutionEngine.bind(this)
 
       this._model = new KernelModel ( this.props.panel.sessionContext )
     }
@@ -250,27 +256,19 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
     }
 
     /**
-     * Function: Set recommendation type for thamos advise
-     */
-
-    setRecommendationType(recommendation_type: string) {
-
-      this.setState(
-        {
-          recommendation_type: recommendation_type
-        }
-      );
-    }
-
-    /**
      * Function: Change recommendation type for thamos advise
      */
 
     changeRecommendationType(event: React .ChangeEvent<HTMLInputElement>) {
 
       const recommendation_type = event.target.value;
-      this.setRecommendationType( recommendation_type )
-  }
+      this.setState(
+        {
+          recommendation_type: recommendation_type,
+        }
+      );
+
+    }
 
     /**
      * Function: Set force for thamos advise
@@ -400,10 +398,29 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       var labels = event.target.value
 
       // Check labels inputs (comma separated) is done on the backend currently!
+      var initial_thoth_config = this.state.thoth_config
+
+      _.set(initial_thoth_config, initial_thoth_config.runtime_environments[0].base_image, labels)
 
       this.setState(
         {
+          thoth_config: initial_thoth_config,
           labels: labels
+        }
+      );
+    }
+
+    /**
+     * Function: Set Resolution engine
+     */
+
+     setResolutionEngine(event: React.ChangeEvent<HTMLInputElement>) {
+
+      var resolution_engine = event.target.value
+
+      this.setState(
+        {
+          resolution_engine: resolution_engine
         }
       );
 
@@ -675,7 +692,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       )
 
       if ( _.get(deleted_case, "action_required") == "relock" ) {
-        await this.lock_using_thoth()
+        await this.lock()
         return
       }
 
@@ -748,8 +765,28 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         }
     }
 
+    async lock() {
+
+      var current_state = this.state
+      console.log("before locking", current_state)
+
+      if ( current_state.resolution_engine == "thoth" ) {
+          await this.lock_using_thoth()
+      }
+
+      else if ( current_state.resolution_engine == "pipenv" ) {
+        await this.lock_using_pipenv()
+      }
+
+      else {
+          console.error("This resolution engine is not supported: ", current_state.resolution_engine)
+      }
+
+    }
+
     async lock_using_thoth() {
 
+      // Prepare inputs for advise
       var ui_state = this.state
 
       _.set(ui_state, "status", "locking_requirements")
@@ -772,6 +809,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         var thoth_config: ThothConfig = _.get(result, "thoth_config")
       }
 
+      // Run adviser to lock dependencies
       try {
 
         var advise: Advise | undefined = await lock_requirements_with_thoth(
@@ -792,23 +830,63 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
       } catch ( error ) {
 
+        // Error in the code
         console.debug("Error locking requirements with Thoth", error)
-        _.set(ui_state, "status", "locking_requirements_using_pipenv")
+        _.set(ui_state, "status", "failed_re_thoth")
+        _.set(ui_state, "thoth_resolution_error_msg", "Error trying to lock dependencies with Thoth" )
+        _.set(
+          ui_state,
+          "error_msg",
+          error
+        )
         await this.setNewState(ui_state);
         return
       }
 
-      if ( advise == undefined || advise.error == true ) {
-        if ( advise != undefined ) {
+      console.log(advise)
+
+      // Error in the resolution process
+      if ( advise == undefined ) {
+        var error_msg = "Thoth resolution engine was not able to lock dependencies, try Pipenv or please contact Thoth team: "
+        _.set(ui_state, "status", "failed_re_thoth")
+        _.set(
+          ui_state,
+          "error_msg",
+          error_msg
+        )
+        await this.setNewState(ui_state);
+        return
+      }
+
+      if ( advise.error != true && advise.error != false && advise.error ) {
+          var error_msg = "Check error and try again."
+          console.log("Thoth resolution engine error:", advise.error)
+          _.set(ui_state, "thoth_resolution_error_msg", advise.error )
+          _.set(ui_state, "status", "failed_re_thoth")
+          _.set(
+            ui_state,
+            "error_msg",
+            error_msg
+          )
+          await this.setNewState(ui_state);
+          return
+      }
+
+      if ( advise.error == true ) {
+          var error_msg = "Thoth resolution engine was not able to lock dependencies, try Pipenv or please contact Thoth team: "
           console.log("Thoth resolution engine error:", advise.error_msg)
-        }
-        _.set(ui_state, "thoth_resolution_error_msg", advise.error_msg )
-        _.set(ui_state, "resolution_engine", "pipenv" )
-        _.set(ui_state, "status", "locking_requirements_using_pipenv")
+          _.set(ui_state, "thoth_resolution_error_msg", advise.error_msg )
+        _.set(ui_state, "status", "failed_re_thoth")
+        _.set(
+          ui_state,
+          "error_msg",
+          error_msg
+        )
         await this.setNewState(ui_state);
         return
       }
 
+      // Resolution process succeeded, saving all data.
       try {
 
         await set_notebook_metadata(
@@ -824,6 +902,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         console.debug("Error updating notebook metadata", error)
       }
 
+      console.log(advise)
       try {
         await store_dependencies_on_disk(
           this.state.kernel_name,
@@ -861,11 +940,15 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
     async lock_using_pipenv () {
 
+      _.set(ui_state, "status", "locking_requirements_using_pipenv")
+      await this.setNewState(ui_state);
+
       var ui_state = this.state
 
       const notebookMetadataRequirements = this.state.requirements;
       console.debug("Requirements for pipenv", JSON.stringify(notebookMetadataRequirements));
 
+      // Run Pipenv to lock dependencies
       try {
 
         var result = await lock_requirements_with_pipenv(
@@ -878,6 +961,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
         console.log("Error locking requirements with pipenv", error)
 
+        // Error in JH on cluster
         if ( error.message == "Gateway error while locking dependencies with pipenv.") {
             INotification.warning("Task was cancelled due to gateway error, try again please.")
             _.set(ui_state, "status", "failed")
@@ -886,22 +970,23 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
             return
         }
 
-        _.set(ui_state, "status", "failed_re")
+        // Error in code
+        _.set(ui_state, "status", "failed_re_pipenv")
         _.set(ui_state, "error_msg", "Error locking requirements, check logs and please contact Thoth team: ")
         await this.setNewState(ui_state);
         return
       }
 
+      // Error in Pipenv resolution process
       if ( result == undefined || result.error == true ) {
 
-        var error_msg = "No resolution engine was able to lock dependencies, please contact Thoth team: "
+        var error_msg = `Pipenv resolution engine was not able to lock dependencies, try Thoth or please contact Thoth team: `
+
         if ( result != undefined ) {
           console.debug("Pipenv resolution engine error:", result.error_msg)
           _.set(ui_state, "pipenv_resolution_error_msg", result.error_msg.toString())
-          var error_msg = `No resolution engine was able to lock dependencies! Please contact Thoth team: `
         }
-
-        _.set(ui_state, "status", "failed_re")
+        _.set(ui_state, "status", "failed_re_pipenv")
         _.set(
           ui_state,
           "error_msg",
@@ -911,6 +996,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         return
       }
 
+      // Resolution process succeeded, saving all data.
       try {
           await set_notebook_metadata(
             this.props.panel,
@@ -918,13 +1004,10 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
             notebookMetadataRequirements,
             result.requirements_lock
           )
-
           await delete_key_from_notebook_metadata( this.props.panel, "thoth_analysis_id" )
 
       } catch ( error ) {
-
         console.debug("Error storing metadata in notebook", error)
-
       }
 
       try {
@@ -1004,7 +1087,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                                         <div className={CONTAINER_BUTTON}>
                                           <div className={CONTAINER_BUTTON_CENTRE}>
                                             <DependencyManagementInstallButton
-                                            install={this.lock_using_thoth} />
+                                            install={this.lock} />
                                           </div>
                                         </div>
                                       </div>
@@ -1024,11 +1107,25 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                                     </div>
 
 
-      let kernelNameInput = <div>
+      let resolutionEngineInput = <div className={INPUT_OPTIONS} >
+                                    <label>
+                                      Resolution Engine:
+                                      <select onChange={() => this.setResolutionEngine}>
+                                        title="Resolution engine."
+                                        name="resolution_engine"
+                                        value={this.state.resolution_engine}
+                                        <option value="thoth">Thoth</option>
+                                        <option value="pipenv">Pipenv</option>
+                                      </select>
+                                    </label>
+                                    <br />
+                                  </div>
+
+      let kernelNameInput = <div className={INPUT_TEXT}>
                               <label>
                                 Kernel name:
                                 <input
-                                  title="Kernel name"
+                                  title="Kernel name."
                                   type="text"
                                   name="kernel_name"
                                   value={this.state.kernel_name}
@@ -1038,11 +1135,11 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                               <br />
                             </div>
 
-      let pathRootProjectInput =  <div>
+      let pathRootProjectInput =  <div className={INPUT_TEXT}>
                                     <label>
                                       Path root project:
                                       <input
-                                        title="Path root project"
+                                        title="Path root project."
                                         type="text"
                                         name="root_directory"
                                         value={this.state.root_directory}
@@ -1052,12 +1149,15 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                                     <br />
                                   </div>
 
-      let recommendationTypeInput = <div>
+      let recommendationTypeInput = <div className={INPUT_OPTIONS}>
                                       <label>
                                         Thoth Recommendation type:
-                                        <select onChange={() => this.changeRecommendationType}>
-                                          title="Recommendation Type"
+                                        <select
+                                          title="Recommendation Type."
                                           name="recommendation_type"
+                                          id="changeRecommendationType"
+                                        >
+                                          onChange={() => this.changeRecommendationType}
                                           value={this.state.recommendation_type}
                                           <option value="latest">latest</option>
                                           <option value="performance">performance</option>
@@ -1071,11 +1171,11 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       if ( this.state.thoth_config ) {
 
           if ( this.state.thoth_config.runtime_environments[0].base_image ) {
-            var baseImageInput = <div>
+            var baseImageInput = <div className={INPUT_TEXT}>
                                   <label>
                                     Thoth base image:
                                     <input
-                                      title="Thoth base image"
+                                      title="Thoth base image."
                                       type="text"
                                       name="thoth_base_image"
                                       value={this.state.thoth_config.runtime_environments[0].base_image}
@@ -1092,11 +1192,11 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
       }
 
-      let timeoutInput = <div>
+      let timeoutInput = <div className={INPUT_TEXT}>
                             <label>
                               Thoth timeout [s]:
                               <input
-                                title="Thoth timeout"
+                                title="Thoth timeout."
                                 type="text"
                                 name="thoth_timeout"
                                 value={this.state.thoth_timeout}
@@ -1106,25 +1206,25 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                             <br />
                           </div>
 
-      let pythonVersionInput = <div>
-                                <label>
-                                  Thoth Python Version:
-                                  <input
-                                    title="Thoth Python version"
-                                    type="text"
-                                    name="thoth_python_version"
-                                    value={this.state.python_version}
-                                    onChange={this.setPythonVersion}
-                                  />
-                                </label>
-                                <br />
-                              </div>
+      let pythonVersionInput = <div className={INPUT_TEXT}>
+                                  <label>
+                                    Thoth Python Version:
+                                    <input
+                                      title="Thoth Python version."
+                                      type="text"
+                                      name="thoth_python_version"
+                                      value={this.state.python_version}
+                                      onChange={this.setPythonVersion}
+                                    />
+                                  </label>
+                                  <br />
+                                </div>
 
-      let OSNameInput = <div>
+      let OSNameInput = <div className={INPUT_TEXT}>
                           <label>
-                            Thoth OS name:
+                            Thoth Operating System name:
                             <input
-                              title="Thoth OS name"
+                              title="Thoth Operating System name."
                               type="text"
                               name="thoth_os_name"
                               value={this.state.os_name}
@@ -1134,25 +1234,25 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                           <br />
                         </div>
 
-      let OSVersionInput = <div>
-                          <label>
-                            Thoth OS version:
-                            <input
-                              title="Thoth OS version"
-                              type="text"
-                              name="thoth_os_version"
-                              value={this.state.os_version}
-                              onChange={this.setOSVersion}
-                            />
-                          </label>
-                          <br />
+      let OSVersionInput = <div className={INPUT_TEXT}>
+                            <label>
+                              Thoth Operating System version:
+                              <input
+                                title="Thoth Operating System version."
+                                type="text"
+                                name="thoth_os_version"
+                                value={this.state.os_version}
+                                onChange={this.setOSVersion}
+                              />
+                            </label>
+                            <br />
                           </div>
 
-      let forceInput =  <div>
+      let forceInput =  <div className={INPUT_OPTIONS} >
                           <label>
                             Thoth force:
                             <select onChange={() => this.setForceParameter}>
-                              title="Thoth force parameter"
+                              title="Thoth force parameter."
                               name="thoth_force"
                               value={this.state.thoth_force}
                               <option value="false">False</option>
@@ -1162,24 +1262,25 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                           <br />
                         </div>
 
-      let debugInput =  <div>
+      let debugInput =  <div className={INPUT_OPTIONS}>
                           <label>
                             Thoth debug:
                             <select onChange={() => this.setDebugParameter}>
-                              title="Thoth debug parameter"
+                              title="Thoth debug parameter."
                               name="thoth_debug"
                               value={this.state.thoth_debug}
                               <option value="false">False</option>
                               <option value="true">True</option>
                             </select>
                           </label>
+                          <br />
                         </div>
 
-      let labelsInput =  <div>
+      let labelsInput =  <div className={INPUT_TEXT}>
         <label>
           Labels:
           <input
-            title="Comma separated labels"
+            title="Comma separated labels."
             type="text"
             name="labels"
             value={this.state.labels}
@@ -1188,26 +1289,50 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         </label>
       </div>
 
+      if ( this.state.resolution_engine == "thoth" ) {
 
-      let optionsForm = <div>
+        var optionsForm = <div>
+                            <section>
+                              <h2>OPTIONS</h2>
+                            </section>
+
+                            <div className={INPUT_FORM_BOX}>
+                            <form>
+                              {resolutionEngineInput}
+                              {kernelNameInput}
+                              {pathRootProjectInput}
+                              {recommendationTypeInput}
+                              {forceInput}
+                              {debugInput}
+                              {pythonVersionInput}
+                              {OSNameInput}
+                              {OSVersionInput}
+                              {baseImageInput}
+                              {timeoutInput}
+                              {labelsInput}
+                            </form>
+                            </div>
+                          </div>
+
+      }
+
+      else {
+
+        var optionsForm = <div>
                           <section>
                             <h2>OPTIONS</h2>
                           </section>
 
+                          <div className={INPUT_FORM_BOX}>
                           <form>
+                            {resolutionEngineInput}
                             {kernelNameInput}
                             {pathRootProjectInput}
-                            {recommendationTypeInput}
-                            {pythonVersionInput}
-                            {OSNameInput}
-                            {OSVersionInput}
-                            {baseImageInput}
-                            {timeoutInput}
-                            {forceInput}
-                            {debugInput}
-                            {labelsInput}
                           </form>
+                          </div>
                         </div>
+
+      }
 
       var ui_status = this.state.status
 
@@ -1410,20 +1535,18 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
         case "locking_requirements_using_pipenv":
 
-          this.lock_using_pipenv()
           return (
             <div>
               <fieldset>
-                <p>Thoth resolution engine failed... pipenv will be used to lock dependencies!</p>
+                <p>Using Pipenv to lock dependencies...</p>
               </fieldset>
             </div>
         );
 
-        case "failed_re":
+        case "failed_re_thoth":
 
           let paragrah_failure = <p>
             Thoth resolution engine failed because of: {this.state.thoth_resolution_error_msg} <br></br> <br></br>
-              Pipenv resolution engine failed because of: {this.state.pipenv_resolution_error_msg}<br></br> <br></br>
               {this.state.error_msg} <br></br>
           </p>
 
@@ -1454,6 +1577,45 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
               </div>
               <div>
                     {paragrah_failure}
+              </div>
+              <a href={"https://github.com/thoth-station/jupyterlab-requirements/issues/new?assignees=&labels=bug&template=bug_report.md"} target="_blank"> Open Issue </a>
+            </div>
+        );
+
+        case "failed_re_pipenv":
+
+          let paragrah_failure_pipenv = <p>
+              Pipenv resolution engine failed because of: {this.state.pipenv_resolution_error_msg}<br></br> <br></br>
+              {this.state.error_msg} <br></br>
+          </p>
+
+          return (
+            <div>
+              <div>
+                <div className={CONTAINER_BUTTON}>
+                  <div className={CONTAINER_BUTTON_CENTRE}>
+                    <button
+                      title='Finish.'
+                      className={OK_BUTTON_CLASS}
+                      onClick={() => this.changeUIstate(
+                        "loading",
+                        this.state.packages,
+                        this.state.loaded_packages,
+                        this.state.installed_packages,
+                        this.state.deleted_packages,
+                        this.state.requirements,
+                        this.state.kernel_name,
+                        this.state.thoth_config,
+                      )
+                      }
+                      >
+                      Ok
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div>
+                    {paragrah_failure_pipenv}
               </div>
               <a href={"https://github.com/thoth-station/jupyterlab-requirements/issues/new?assignees=&labels=bug&template=bug_report.md"} target="_blank"> Open Issue </a>
             </div>

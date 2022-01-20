@@ -41,14 +41,12 @@ class PipenvHandler(DependencyManagementBaseHandler):
 
         self.redirect_to_task(task_index)
 
-    async def lock_using_pipenv(
-        self, input_data: typing.Dict[str, typing.Any]
-    ) -> typing.Tuple[int, typing.Dict[str, typing.Any]]:
+    async def lock_using_pipenv(self, input_data: typing.Dict[str, typing.Any]) -> typing.Dict[str, typing.Any]:
         """Lock and install dependencies using pipenv."""
         kernel_name: str = input_data["kernel_name"]
         requirements: typing.Dict[str, typing.Any] = json.loads(input_data["requirements"])
         pipfile_string = Pipfile.from_dict(requirements).to_string()
 
-        returncode, result = lock_dependencies_with_pipenv(kernel_name=kernel_name, pipfile_string=pipfile_string)
+        _, result = lock_dependencies_with_pipenv(kernel_name=kernel_name, pipfile_string=pipfile_string)
 
-        return returncode, result
+        return result

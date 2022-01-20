@@ -16,11 +16,17 @@ export interface Requires {
     python_version: string
 }
 
+export interface ThothRequirements {
+    allow_prereleases: object,
+    disable_index_adjustment: boolean
+}
+
 export interface Requirements {
     packages: { [ name: string ]: string | { index: string, version: string } }
     requires: Requires
     sources: ( SourcesEntity )[] | null
-    "dev-packages"?: any
+    "dev-packages"?: any,
+    thoth?: ThothRequirements
 }
 
 // Requirements Lock
