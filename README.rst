@@ -212,7 +212,7 @@ The `jlpm` command is JupyterLab's pinned version of
 
 .. code-block:: console
 
-   pipenv install
+   pipenv install --dev
 
 5. Enter environment.
 
