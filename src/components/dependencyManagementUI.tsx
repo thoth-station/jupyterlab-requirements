@@ -189,6 +189,8 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       this.setRootDirectoryPath = this.setRootDirectoryPath.bind(this)
       this.setThothLabels = this.setThothLabels.bind(this)
       this.setResolutionEngine = this.setResolutionEngine.bind(this)
+      this.setDebugParameter = this.setDebugParameter.bind(this)
+      this.setForceParameter = this.setForceParameter.bind(this)
 
       this._model = new KernelModel ( this.props.panel.sessionContext )
     }
@@ -259,9 +261,10 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
      * Function: Change recommendation type for thamos advise
      */
 
-    changeRecommendationType(event: React .ChangeEvent<HTMLInputElement>) {
+    changeRecommendationType(event: React.ChangeEvent<HTMLSelectElement>) {
 
       const recommendation_type = event.target.value;
+
       this.setState(
         {
           recommendation_type: recommendation_type,
@@ -274,13 +277,8 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
      * Function: Set force for thamos advise
      */
 
-     setForceParameter(thoth_force: string) {
-        if (thoth_force == "true") {
-          var force = true
-        }
-        else {
-          var force = false
-        }
+     setForceParameter(event: React.ChangeEvent<HTMLSelectElement>) {
+      const force = event.target.value == "true";
 
         this.setState(
           {
@@ -294,17 +292,12 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
      * Function: Set debug for thamos advise
      */
 
-     setDebugParameter(thoth_debug: string) {
-      if (thoth_debug == "true") {
-        var debug = true
-      }
-      else {
-        var debug = false
-      }
+     setDebugParameter(event: React.ChangeEvent<HTMLSelectElement>) {
+      const debug_value = event.target.value == "true";
 
       this.setState(
         {
-          thoth_debug: debug
+          thoth_debug: debug_value
         }
       );
    }
@@ -414,7 +407,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
      * Function: Set Resolution engine
      */
 
-     setResolutionEngine(event: React.ChangeEvent<HTMLInputElement>) {
+     setResolutionEngine(event: React.ChangeEvent<HTMLSelectElement>) {
 
       var resolution_engine = event.target.value
 
@@ -1110,7 +1103,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       let resolutionEngineInput = <div className={INPUT_OPTIONS} >
                                     <label>
                                       Resolution Engine:
-                                      <select onChange={() => this.setResolutionEngine}>
+                                      <select onChange={this.setResolutionEngine}>
                                         title="Resolution engine."
                                         name="resolution_engine"
                                         value={this.state.resolution_engine}
@@ -1156,9 +1149,9 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                                           title="Recommendation Type."
                                           name="recommendation_type"
                                           id="changeRecommendationType"
-                                        >
-                                          onChange={() => this.changeRecommendationType}
+                                          onChange={this.changeRecommendationType}
                                           value={this.state.recommendation_type}
+                                        >
                                           <option value="latest">latest</option>
                                           <option value="performance">performance</option>
                                           <option value="security">security</option>
@@ -1251,10 +1244,10 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       let forceInput =  <div className={INPUT_OPTIONS} >
                           <label>
                             Thoth force:
-                            <select onChange={() => this.setForceParameter}>
-                              title="Thoth force parameter."
-                              name="thoth_force"
-                              value={this.state.thoth_force}
+                            <select onChange={this.setForceParameter}
+                                    title="Thoth force parameter."
+                                    name="thoth_force"
+                                    value={this.state.thoth_force ? "true" : "false"}>
                               <option value="false">False</option>
                               <option value="true">True</option>
                             </select>
@@ -1265,10 +1258,10 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       let debugInput =  <div className={INPUT_OPTIONS}>
                           <label>
                             Thoth debug:
-                            <select onChange={() => this.setDebugParameter}>
-                              title="Thoth debug parameter."
-                              name="thoth_debug"
-                              value={this.state.thoth_debug}
+                            <select onChange={this.setDebugParameter}
+                                    title="Thoth debug parameter."
+                                    name="thoth_debug"
+                                    value={this.state.thoth_debug ? "true" : "false"}>
                               <option value="false">False</option>
                               <option value="true">True</option>
                             </select>
