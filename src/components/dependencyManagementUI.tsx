@@ -105,7 +105,7 @@ export interface IDependencyManagementUIState {
   root_directory: string,
   thoth_resolution_error_msg: string,
   pipenv_resolution_error_msg: string,
-  labels: string
+  labels: string,
 }
 
 /**
@@ -148,7 +148,12 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
             python_version: "3.8",
             recommendation_type: "latest",
             base_image: "",
-            labels: {}
+            labels: "",
+            hardware: {
+              cpu_model: null,
+              cpu_family: null,
+              gpu_family: null,
+            }
           }]
         },
         error_msg: undefined,

@@ -47,13 +47,20 @@ export interface OperatingSystem {
     version: string,
 }
 
+export interface Hardware {
+    cpu_model?: number,
+    cpu_family?: number,
+    gpu_family?: string,
+}
+
 export interface RuntimeEnvironment {
     name: string,
     operating_system: OperatingSystem
     python_version: string,
     recommendation_type: string,
-    base_image: string,
-    labels: object
+    base_image?: string,
+    labels?: string,
+    hardware?: Hardware
 }
 
 export interface ThothConfig {
