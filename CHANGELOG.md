@@ -1,5 +1,18 @@
 # Changelog for Thoth's Template GitHub Project
 
+## Release 0.15.0 (2022-01-26T12:05:22)
+### Features
+* Update readme for development
+* Adjust UI inputs
+* Provide labels to thoth requests
+* Correct README links
+* Correct message provided to users
+### Bug Fixes
+* fixed onChange functions
+* Fix message provided when resolvers fail
+### Improvements
+* Add hardware part of thoth config in types
+
 ## Release 0.14.0 (2021-12-02T15:43:18)
 ### Features
 * Add docs for horus log command
