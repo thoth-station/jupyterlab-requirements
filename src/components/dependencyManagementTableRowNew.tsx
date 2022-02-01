@@ -11,6 +11,7 @@
 import * as React from 'react';
 
 import { addIcon, editIcon, deleteIcon, installedIcon, notInstalledIcon } from '../icons';
+import { DependencyManagementAutocomplete } from "./dependencyManagementAutocomplete";
 
 
 /**
@@ -40,6 +41,7 @@ export interface IState {
     isEditable: boolean;
     name: string;
     version: string;
+    nameFocus: boolean;
 }
 
 /**
@@ -52,7 +54,8 @@ export class DependencyManagementTableRowNew extends React.Component<IProps, ISt
             isAdded: false,
             isEditable: false,
             name: "",
-            version: "*"
+            version: "*",
+            nameFocus: false
         };
         this.handleItemAdded = this.handleItemAdded.bind(this);
         this.handleChange = this.handleChange.bind(this);
@@ -208,8 +211,11 @@ export class DependencyManagementTableRowNew extends React.Component<IProps, ISt
                         value={this.state.name}
                         className={THOTH_PACKAGE_NAME_INPUT}
                         onChange={this.handleChange}
+                        onFocus={() => this.setState({nameFocus: true})}
+                        onBlur={() => this.setState({nameFocus: false})}
                     >
                     </input>
+                    <DependencyManagementAutocomplete input={this.state.name} inputFocus={this.state.nameFocus} />
                 </td>
                 <td>
                     <input
