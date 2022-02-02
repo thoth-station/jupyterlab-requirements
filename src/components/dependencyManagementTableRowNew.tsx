@@ -64,6 +64,7 @@ export class DependencyManagementTableRowNew extends React.Component<IProps, ISt
         this.handleChange = this.handleChange.bind(this);
         this.handleItemDeleted = this.handleItemDeleted.bind(this);
         this.showIfInstalled = this.showIfInstalled.bind(this);
+        this.handleVersionChange = this.handleVersionChange.bind(this)
     }
 
     handleChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -75,6 +76,12 @@ export class DependencyManagementTableRowNew extends React.Component<IProps, ISt
             this.setState({
                 version: event.target.value
             });
+    }
+
+    handleVersionChange(version: string) {
+      this.setState({
+        version: version
+      });
     }
 
     handleItemAdded() {
@@ -221,15 +228,7 @@ export class DependencyManagementTableRowNew extends React.Component<IProps, ISt
                     <DependencyManagementAutocomplete input={this.state.name} inputFocus={this.state.nameFocus} />
                 </td>
                 <td>
-                    {/*<input*/}
-                    {/*    name='package_version'*/}
-                    {/*    type='text'*/}
-                    {/*    value={this.state.version}*/}
-                    {/*    className={THOTH_CONSTRAINT_INPUT}*/}
-                    {/*    onChange={this.handleChange}*/}
-                    {/*>*/}
-                    {/*</input>*/}
-                  <DependencyManagementConstraintPicker package_name={this.state.name}/>
+                  <DependencyManagementConstraintPicker package_name={this.state.name} onChange={this.handleVersionChange}/>
                 </td>
                 <td>
                     {context.showIfInstalled(this.props.installed)}

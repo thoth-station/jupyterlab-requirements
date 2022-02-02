@@ -30,13 +30,12 @@ const THOTH_CONSTRAINT_DROPDOWN_DEGREE_STATIC = "thoth-constraint-dropdown-degre
 const THOTH_CONSTRAINT_DROPDOWN_VERSION = "thoth-constraint-dropdown-version"
 
 
-
-
 /**
  * Class: Holds properties for DependencyManagementConstraintPicker.
  */
 export interface IProps {
   package_name: string;
+  onChange: Function;
 }
 
 interface Constraint {
@@ -48,33 +47,31 @@ interface Constraint {
 /**
  * A React Component for data autocomplete dropdown menu.
  */
-export const DependencyManagementConstraintPicker: React.FC<IProps> = ({package_name}) => {
+export const DependencyManagementConstraintPicker: React.FC<IProps> = ({package_name, onChange}) => {
   const [versions, setVersions] = React.useState<Array<string>>([])
-  const [pagination, setPagination] = React.useState<number>(0)
+  const [pagination, setPagination] = React.useState<number>(-1)
   const [validPackage, setValidPackage] = React.useState<boolean>(false)
   const [menuVisible, setMenuVisible] = React.useState<boolean>(false)
 
+  const [manualValue, setManualValue] = React.useState<string>("*")
   const [constraints, setConstraints] = React.useState<Map<string, Constraint>>(new Map())
 
 
   const debounced = React.useRef(debounce(name => {
     setVersions([])
     setConstraints(new Map())
-    setPagination(0)
+    setPagination(-1)
+    setManualValue("*")
+    setValidPackage(false)
 
-    if(name === "") {
-      setValidPackage(false)
-      return
-    }
+    if(name === "") { return }
     const url = `https://pypi.org/pypi/${name}/json`;
     axios
       .get(url)
       .then(() => {
         setValidPackage(true)
       })
-      .catch(() => {
-        setValidPackage(false)
-      })
+      .catch()
   }, 500));
 
 
@@ -104,14 +101,18 @@ export const DependencyManagementConstraintPicker: React.FC<IProps> = ({package_
         }
       })
       .then(({ data }) => {
-        if(data.versions.length > 0) {
-          const append_versions = new Set<string>();
-          data.versions.forEach((version: { package_version: string; }) => append_versions.add(version.package_version))
-          setVersions(versions.concat(...append_versions))
-          setPagination(pagination+1)
+        const append_versions = new Set<string>();
+        data.versions.reverse().forEach((version: { package_version: string; }) => append_versions.add(version.package_version))
+
+        if(append_versions.has(versions[0])) {
+          const cut = Array.from(append_versions.values());
+          cut.splice(cut.indexOf(versions[0]))
+          setVersions(versions.concat(cut))
+          setPagination(null)
         }
         else {
-          setPagination(null)
+          setVersions(versions.concat(...append_versions))
+          setPagination(pagination - 1)
         }
       })
       .catch(() => {
@@ -122,6 +123,15 @@ export const DependencyManagementConstraintPicker: React.FC<IProps> = ({package_
   const joinedConstraints = React.useMemo(() => {
     return Array.from(constraints.values()).map(constraint => constraint.specifier + constraint.version).join(",")
   }, [constraints])
+
+  React.useEffect(() => {
+    if(joinedConstraints !== "") {
+      onChange(joinedConstraints)
+    }
+    else {
+      onChange(manualValue)
+    }
+  }, [joinedConstraints, manualValue])
 
 
   const addConstraint = (version: string) => {
@@ -185,13 +195,20 @@ export const DependencyManagementConstraintPicker: React.FC<IProps> = ({package_
   return(
     <>
       <input
-        type='button'
-        value={joinedConstraints === "" ? "*" : joinedConstraints}
+        type={versions.length > 0 ? 'button' : "text"}
+        value={versions.length > 0 ? joinedConstraints === "" ? "*" : joinedConstraints : manualValue}
         className={THOTH_CONSTRAINT_INPUT}
-        onClick={() => setMenuVisible(!menuVisible)}
+        onClick={() => {
+          if(versions.length > 0) {
+            setMenuVisible(!menuVisible)
+          }
+        }}
+        onChange={event => {
+          setManualValue(event.target.value)
+        }}
       >
       </input>
-      {menuVisible
+      {menuVisible && validPackage
         ? <OutsideAlerter callback={() => setMenuVisible(false)}>
             <div className={THOTH_CONSTRAINT_DROPDOWN}>
           {constraints.size === 0
@@ -291,9 +308,6 @@ export const DependencyManagementConstraintPicker: React.FC<IProps> = ({package_
         </div>
           </OutsideAlerter>
         : undefined}
-
-
-
     </>
   )
 }

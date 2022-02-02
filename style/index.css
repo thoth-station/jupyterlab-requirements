@@ -229,18 +229,20 @@ table.thoth-table th {
 }
 
 .thoth-package-dropdown-option {
-white-space: nowrap;
-overflow: hidden;
-text-overflow: ellipsis;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
 }
 
 .thoth-package-dropdown-name {
-font-weight: bold;
+  font-weight: bold;
 }
 .thoth-package-dropdown-desc {
-font-size: smaller;
-color: grey;
-margin-top: 0.5rem;
+  font-size: smaller;
+  color: grey;
+  margin-top: 0.5rem;
 }
 
 .thoth-constraint-input {
