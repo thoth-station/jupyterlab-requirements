@@ -19,7 +19,6 @@ import { DependencyManagementConstraintPicker } from "./dependencyManagementCons
  * (CSS).
  */
 const THOTH_PACKAGE_NAME_INPUT = "thoth-package-name-input";
-// const THOTH_CONSTRAINT_INPUT = "thoth-constraint-input";
 const THOTH_ROW_BUTTON = "thoth-row-button";
 const THOTH_ROW_BUTTON_DEACTIVATED = "thoth-row-button-deactivated";
 
@@ -42,7 +41,6 @@ export interface IState {
     isEditable: boolean;
     name: string;
     version: string;
-    specifier: string;
     nameFocus: boolean;
 }
 
@@ -57,7 +55,6 @@ export class DependencyManagementTableRowNew extends React.Component<IProps, ISt
             isEditable: false,
             name: "",
             version: "*",
-            specifier: "",
             nameFocus: false
         };
         this.handleItemAdded = this.handleItemAdded.bind(this);
