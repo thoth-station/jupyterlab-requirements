@@ -12,13 +12,14 @@ import * as React from 'react';
 
 import { addIcon, editIcon, deleteIcon, installedIcon, notInstalledIcon } from '../icons';
 import { DependencyManagementAutocomplete } from "./dependencyManagementAutocomplete";
+import { DependencyManagementConstraintPicker } from "./dependencyManagementConstraintPicker";
 
 
 /**
  * (CSS).
  */
 const THOTH_PACKAGE_NAME_INPUT = "thoth-package-name-input";
-const THOTH_CONSTRAINT_INPUT = "thoth-constraint-input";
+// const THOTH_CONSTRAINT_INPUT = "thoth-constraint-input";
 const THOTH_ROW_BUTTON = "thoth-row-button";
 const THOTH_ROW_BUTTON_DEACTIVATED = "thoth-row-button-deactivated";
 
@@ -41,6 +42,7 @@ export interface IState {
     isEditable: boolean;
     name: string;
     version: string;
+    specifier: string;
     nameFocus: boolean;
 }
 
@@ -55,6 +57,7 @@ export class DependencyManagementTableRowNew extends React.Component<IProps, ISt
             isEditable: false,
             name: "",
             version: "*",
+            specifier: "",
             nameFocus: false
         };
         this.handleItemAdded = this.handleItemAdded.bind(this);
@@ -218,14 +221,15 @@ export class DependencyManagementTableRowNew extends React.Component<IProps, ISt
                     <DependencyManagementAutocomplete input={this.state.name} inputFocus={this.state.nameFocus} />
                 </td>
                 <td>
-                    <input
-                        name='package_version'
-                        type='text'
-                        value={this.state.version}
-                        className={THOTH_CONSTRAINT_INPUT}
-                        onChange={this.handleChange}
-                    >
-                    </input>
+                    {/*<input*/}
+                    {/*    name='package_version'*/}
+                    {/*    type='text'*/}
+                    {/*    value={this.state.version}*/}
+                    {/*    className={THOTH_CONSTRAINT_INPUT}*/}
+                    {/*    onChange={this.handleChange}*/}
+                    {/*>*/}
+                    {/*</input>*/}
+                  <DependencyManagementConstraintPicker package_name={this.state.name}/>
                 </td>
                 <td>
                     {context.showIfInstalled(this.props.installed)}

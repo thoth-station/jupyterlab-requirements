@@ -142,19 +142,105 @@ table.thoth-table th {
   flex-direction: row;
 }
 
+.thoth-constraint-dropdown {
+  background-color: rgb(255, 255, 255);
+  border-radius: 12px;
+  color: rgb(0, 0, 0);
+  padding: 10px 12px;
+  text-align: left;
+  border-style: solid;
+  border-width: 2px;
+  position: fixed;
+  width: 200px;
+  margin-top: 0.2rem;
+  border-color: #d8d8d8;
+  z-index: 1;
+  box-shadow: 2px 2px 5px #d8d8d8;
+  max-height: 400px;
+  overflow-y: scroll;
+}
+
+.thoth-constraint-dropdown-version-list-element {
+  font-size: medium;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  align-items: center;
+}
+
+
+.thoth-constraint-dropdown-version-list {
+  display: flex;
+  flex-direction: column;
+  padding-left: 0.25rem;
+}
+
+.thoth-constraint-dropdown-specifier {
+  background-color: rgb(255, 255, 255);
+  border-radius: 12px;
+  color: rgb(0, 0, 0);
+  padding: 5px 5px;
+  text-align: center;
+}
+
+.thoth-constraint-dropdown-degree {
+  background-color: rgb(255, 255, 255);
+  color: rgb(0, 0, 0);
+  padding: 5px 5px;
+  border-style: solid;
+  border-radius: 12px;
+  border-color: rgba(255, 255, 255, 0);
+  font-size: medium;
+}
+
+.thoth-constraint-dropdown-degree-static {
+  background-color: rgb(255, 255, 255);
+  color: rgb(0, 0, 0);
+  padding: 5px 5px;
+  border-style: solid;
+  border-radius: 12px;
+  border-color: rgba(255, 255, 255, 0);
+  font-size: medium;
+}
+
+.thoth-constraint-dropdown-degree:hover {
+  font-weight: bold;
+  border-color: #d8d8d8;
+}
+
+.thoth-constraint-dropdown-version {
+  display: flex;
+  flex-direction: row;
+}
+
+
+.thoth-constraint-dropdown-btn {
+  border-radius: 12px;
+  padding: 3px 20px;
+}
+
+.thoth-constraint-dropdown-add {
+  background-color: #39c5af;
+}
+
+.thoth-constraint-dropdown-remove {
+  background-color: #E21B1B;
+}
+
 .thoth-package-dropdown-option {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
 }
 
 .thoth-package-dropdown-name {
-  font-weight: bold;
+font-weight: bold;
 }
 .thoth-package-dropdown-desc {
-  font-size: smaller;
-  color: grey;
-  margin-top: 0.5rem;
+font-size: smaller;
+color: grey;
+margin-top: 0.5rem;
 }
 
 .thoth-constraint-input {
@@ -163,36 +249,37 @@ table.thoth-table th {
   color: rgb(0, 0, 0);
   padding: 10px 12px;
   text-align: center;
+  width: 200px;
 }
 
 .thoth-row-button {
-  background-color: rgb(200, 200, 200);
-  border-radius: 12px;
-  border: black;
-  color: rgb(2, 1, 1);
-  padding: 10px 16px;
-  text-align: center;
-  text-decoration: none;
-  font-size: 16px;
+background-color: rgb(200, 200, 200);
+border-radius: 12px;
+border: black;
+color: rgb(2, 1, 1);
+padding: 10px 16px;
+text-align: center;
+text-decoration: none;
+font-size: 16px;
 }
 
 .thoth-row-button:hover {
-  background-color: #444444;
-  color: white;
+background-color: #444444;
+color: white;
 }
 
 .thoth-row-button-deactivated {
-  background-color: rgb(109, 109, 109);
-  border-radius: 12px;
-  border: none;
-  color: rgb(245, 245, 245);
-  padding: 10px 16px;
-  text-align: center;
-  text-decoration: none;
-  font-size: 16px;
+background-color: rgb(109, 109, 109);
+border-radius: 12px;
+border: none;
+color: rgb(245, 245, 245);
+padding: 10px 16px;
+text-align: center;
+text-decoration: none;
+font-size: 16px;
 }
 
- /* Options */
+/* Options */
 
 .thoth-kernel-name-input {
   background-color: rgb(255, 255, 255);
