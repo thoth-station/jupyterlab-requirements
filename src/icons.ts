@@ -15,6 +15,7 @@ import editSvgstr from '../style/icons/edit.svg';
 import deleteSvgstr from '../style/icons/delete.svg';
 import installedSvgstr from '../style/icons/installed.svg';
 import notInstalledSvgstr from '../style/icons/not-installed.svg';
+import infoSvgstr from '../style/icons/info.svg'
 
 
 /**
@@ -55,4 +56,12 @@ export const installedIcon = new LabIcon({
 export const notInstalledIcon = new LabIcon({
     name: 'thoth:not-installed-icon',
     svgstr: notInstalledSvgstr
+});
+
+/**
+ * Class: info icon.
+ */
+export const infoIcon = new LabIcon({
+  name: 'thoth:info-icon',
+  svgstr: infoSvgstr
 });

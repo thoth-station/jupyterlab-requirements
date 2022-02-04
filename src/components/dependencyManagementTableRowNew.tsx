@@ -11,13 +11,14 @@
 import * as React from 'react';
 
 import { addIcon, editIcon, deleteIcon, installedIcon, notInstalledIcon } from '../icons';
+import { DependencyManagementAutocomplete } from "./dependencyManagementAutocomplete";
+import { DependencyManagementConstraintPicker } from "./dependencyManagementConstraintPicker";
 
 
 /**
  * (CSS).
  */
 const THOTH_PACKAGE_NAME_INPUT = "thoth-package-name-input";
-const THOTH_CONSTRAINT_INPUT = "thoth-constraint-input";
 const THOTH_ROW_BUTTON = "thoth-row-button";
 const THOTH_ROW_BUTTON_DEACTIVATED = "thoth-row-button-deactivated";
 
@@ -40,6 +41,7 @@ export interface IState {
     isEditable: boolean;
     name: string;
     version: string;
+    nameFocus: boolean;
 }
 
 /**
@@ -52,12 +54,14 @@ export class DependencyManagementTableRowNew extends React.Component<IProps, ISt
             isAdded: false,
             isEditable: false,
             name: "",
-            version: "*"
+            version: "*",
+            nameFocus: false
         };
         this.handleItemAdded = this.handleItemAdded.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.handleItemDeleted = this.handleItemDeleted.bind(this);
         this.showIfInstalled = this.showIfInstalled.bind(this);
+        this.handleVersionChange = this.handleVersionChange.bind(this)
     }
 
     handleChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -69,6 +73,12 @@ export class DependencyManagementTableRowNew extends React.Component<IProps, ISt
             this.setState({
                 version: event.target.value
             });
+    }
+
+    handleVersionChange(version: string) {
+      this.setState({
+        version: version
+      });
     }
 
     handleItemAdded() {
@@ -208,18 +218,14 @@ export class DependencyManagementTableRowNew extends React.Component<IProps, ISt
                         value={this.state.name}
                         className={THOTH_PACKAGE_NAME_INPUT}
                         onChange={this.handleChange}
+                        onFocus={() => this.setState({nameFocus: true})}
+                        onBlur={() => this.setState({nameFocus: false})}
                     >
                     </input>
+                    <DependencyManagementAutocomplete input={this.state.name} inputFocus={this.state.nameFocus} />
                 </td>
                 <td>
-                    <input
-                        name='package_version'
-                        type='text'
-                        value={this.state.version}
-                        className={THOTH_CONSTRAINT_INPUT}
-                        onChange={this.handleChange}
-                    >
-                    </input>
+                  <DependencyManagementConstraintPicker package_name={this.state.name} onChange={this.handleVersionChange}/>
                 </td>
                 <td>
                     {context.showIfInstalled(this.props.installed)}
