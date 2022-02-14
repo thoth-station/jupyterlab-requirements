@@ -300,7 +300,26 @@ font-size: 16px;
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  background-color: #e4e4e4;
+  /*background-color: #e4e4e4;*/
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-column-gap: 2rem;
+  grid-row-gap: 2rem;
+}
+
+.form-grid p {
+  color: rgba(0,0,0,.6);
+  margin-bottom: 1rem;
+}
+
+.form-stack {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  grid-column-gap: 2rem;
+  grid-row-gap: 2rem;
 }
 
  /* Inputs with options to select */
@@ -335,4 +354,195 @@ font-size: 16px;
   box-sizing: border-box;
   border: 2px solid #ccc;
   border-radius: 4px;
+}
+
+
+/* Stylized inputs with text */
+
+.stylized-inputs #container {
+  height: 56px;
+  display: inline-flex;
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.stylized-inputs #outline {
+  display: flex;
+  position: absolute;
+  right: 0;
+  left: 0;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  text-align: left;
+  pointer-events: none;
+}
+
+.stylized-inputs .notched {
+  box-sizing: border-box;
+  height: 100%;
+  color: rgba(0,0,0,.38);
+  border-top: 1px solid;
+  border-bottom: 1px solid;
+}
+
+.stylized-inputs .notched.left {
+  border-radius: 4px 0 0 4px;
+  border-left: 1px solid;
+  border-right: none;
+  width: 12px;
+}
+
+.stylized-inputs .notched.right {
+  border-radius: 0 4px 4px 0;
+  border-right: 1px solid;
+  border-left: none;
+  flex-grow: 1;
+}
+
+.stylized-inputs .notched.middle {
+  flex: 0 0 auto;
+  width: auto;
+  pointer-events: none;
+}
+
+.stylized-inputs .active .notched {
+  border-width: 2px;
+  border-color: rgba(174, 0, 255, .87);
+}
+
+.stylized-inputs .hover .notched {
+  color: rgba(0,0,0, 1);
+}
+
+.stylized-inputs .active .notched.middle,
+.stylized-inputs .notched.middle.not-empty {
+  border-top: none;
+}
+
+.stylized-inputs input{
+  display: flex;
+  padding: 12px 16px 14px;
+  border: none !important;
+  background-color: transparent;
+  z-index: 1;
+  width: 100%;
+  font-size: 1rem;
+}
+
+.stylized-inputs label{
+  display: inline-block;
+  position: relative;
+  max-width: 100%;
+  left: 4px;
+  right: initial;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1),color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  color: rgba(0,0,0,.6);
+  font-size: 1rem;
+}
+
+.stylized-inputs label.not-empty {
+  transform: translateY(-34.75px) scale(.85);
+  left: 0;
+}
+
+.stylized-inputs .active label {
+  color: rgba(174, 0, 255, .87);
+  transform: translateY(-34.75px) scale(.85);
+  left: 0;
+}
+
+.stylized-inputs .helper-text {
+  color: rgba(0,0,0,.6);
+  margin-left: 16px;
+}
+.stylized-inputs .suffix {
+  margin-right: 16px;
+  color: rgba(0,0,0,.6);
+  text-align: right;
+  position: relative;
+  max-width: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/*dropdown*/
+.stylized-inputs .dropdown {
+  transform-origin: center top;
+  left: 0;
+  top: 56px;
+  max-height: 336.219px;
+  box-shadow: 0 5px 5px -3px rgb(0 0 0 / 20%), 0 8px 10px 1px rgb(0 0 0 / 14%), 0 3px 14px 2px rgb(0 0 0 / 12%);
+  border-radius: 4px;
+  display: none;
+  width: 100%;
+}
+
+.stylized-inputs .dropdown ul {
+  padding: 0;
+}
+
+.stylized-inputs .dropdown li {
+  display: flex;
+  position: relative;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 16px;
+  overflow: hidden;
+  cursor: pointer;
+  height: 48px;
+  font-size: 1rem;
+}
+
+.stylized-inputs .dropdown li.selected {
+  background-color: rgba(174, 0, 255, .08) !important;
+}
+
+.stylized-inputs .dropdown li:hover {
+  background-color: rgba(0, 0, 0, .08);
+}
+
+.stylized-inputs .active .dropdown {
+  display: inline-block;
+  background-color: #fff;
+  z-index: 8;
+  position: absolute;
+}
+
+.stylized-inputs .selector {
+  width: 100%;
+  cursor: pointer;
+  padding: 12px 16px 14px;
+  border: none !important;
+  background-color: transparent;
+  z-index: 1;
+  font-size: 1rem;
+  display: flex;
+  align-self: center;
+}
+
+.stylized-inputs .selector:not(.not-empty) {
+  padding: 0;
+  height: 100%;
+}
+
+.stylized-inputs .icon {
+  left: auto;
+  right: 20px;
+  position: absolute;
+  bottom: 16px;
+  pointer-events: none;
+  color: rgba(0,0,0,.6);
+  font-size: 1rem;
+}
+
+.stylized-inputs .active .icon {
+  transform: rotate(180deg);
+  color: rgba(174, 0, 255, .87);
+  transition: transform .15s cubic-bezier(.4,0,.2,1);
 }

@@ -26,11 +26,11 @@ const useOutsideAlerter = (ref: React.MutableRefObject<any>, callback: Function)
 /**
  * Component that alerts if you click outside of it
  */
-const OutsideAlerter = (props: { callback: Function; children: any }) => {
+const OutsideAlerter = (props: { callback: Function; children: any;}) => {
   const wrapperRef = useRef(null);
   useOutsideAlerter(wrapperRef, props.callback);
 
-  return <div ref={wrapperRef}>{props.children}</div>
+  return <div ref={wrapperRef} {...props}>{props.children}</div>
 }
 
 OutsideAlerter.propTypes = {
