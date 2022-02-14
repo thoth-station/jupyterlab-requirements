@@ -690,7 +690,10 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       )
 
       if ( _.get(deleted_case, "action_required") == "relock" ) {
-        await this.lock()
+        // Go to saved state, so user can click install button
+        var ui_state = this.state
+        _.set(ui_state, "status", "saved")
+        await this.setNewState(ui_state);
         return
       }
 
@@ -938,10 +941,10 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
     async lock_using_pipenv () {
 
+      var ui_state = this.state
+
       _.set(ui_state, "status", "locking_requirements_using_pipenv")
       await this.setNewState(ui_state);
-
-      var ui_state = this.state
 
       const notebookMetadataRequirements = this.state.requirements;
       console.debug("Requirements for pipenv", JSON.stringify(notebookMetadataRequirements));
