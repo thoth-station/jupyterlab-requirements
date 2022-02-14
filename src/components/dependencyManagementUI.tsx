@@ -57,6 +57,8 @@ import {
   _handle_total_packages_case,
   _handle_thoth_config
 } from "../helpers";
+import StylizedTextInput from "./StylizedTextInput";
+import StylizedDropdown from "./StylizedDropdown";
 
 /**
  * The class name added to the new package button (CSS).
@@ -66,7 +68,7 @@ const CONTAINER_BUTTON = "thoth-container-button";
 const CONTAINER_BUTTON_CENTRE = "thoth-container-button-centre";
 const INPUT_FORM_BOX = "thoth-form-box";
 const INPUT_OPTIONS = "thoth-inputs-options";
-const INPUT_TEXT = "thoth-inputs-text";
+const FORM_GRID = "form-grid"
 
 /**
  * Class: Holds properties for DependenciesManagementDialog.
@@ -266,13 +268,10 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
      * Function: Change recommendation type for thamos advise
      */
 
-    changeRecommendationType(event: React.ChangeEvent<HTMLSelectElement>) {
-
-      const recommendation_type = event.target.value;
-
+    changeRecommendationType(selected: string) {
       this.setState(
         {
-          recommendation_type: recommendation_type,
+          recommendation_type: selected,
         }
       );
 
@@ -282,12 +281,10 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
      * Function: Set force for thamos advise
      */
 
-     setForceParameter(event: React.ChangeEvent<HTMLSelectElement>) {
-      const force = event.target.value == "true";
-
+     setForceParameter(event: React.ChangeEvent<HTMLInputElement>) {
         this.setState(
           {
-            thoth_force: force
+            thoth_force: event.target.checked
           }
         );
      }
@@ -297,12 +294,10 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
      * Function: Set debug for thamos advise
      */
 
-     setDebugParameter(event: React.ChangeEvent<HTMLSelectElement>) {
-      const debug_value = event.target.value == "true";
-
+     setDebugParameter(event: React.ChangeEvent<HTMLInputElement>) {
       this.setState(
         {
-          thoth_debug: debug_value
+          thoth_debug: event.target.checked
         }
       );
    }
@@ -412,13 +407,10 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
      * Function: Set Resolution engine
      */
 
-     setResolutionEngine(event: React.ChangeEvent<HTMLSelectElement>) {
-
-      var resolution_engine = event.target.value
-
+     setResolutionEngine(selected: string) {
       this.setState(
         {
-          resolution_engine: resolution_engine
+          resolution_engine: selected
         }
       );
 
@@ -1104,188 +1096,92 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                                       </div>
                                     </div>
 
+      let resolutionEngineInput = <StylizedDropdown label="Resolution Engine"
+                                                    value={this.state.resolution_engine}
+                                                    options={["thoth", "pipenv"]}
+                                                    onChange={this.setResolutionEngine}
+                                                    isRequired={true}
+                                                    style={{gridColumn: "span 4"}} />
 
-      let resolutionEngineInput = <div className={INPUT_OPTIONS} >
-                                    <label>
-                                      Resolution Engine:
-                                      <select onChange={this.setResolutionEngine}>
-                                        title="Resolution engine."
-                                        name="resolution_engine"
-                                        value={this.state.resolution_engine}
-                                        <option value="thoth">Thoth</option>
-                                        <option value="pipenv">Pipenv</option>
-                                      </select>
-                                    </label>
-                                    <br />
-                                  </div>
+      let kernelNameInput = <StylizedTextInput label="Kernel Name"
+                                               value={this.state.kernel_name}
+                                               onChange={this.setKernelName}
+                                               style={{gridColumn: "span 4"}} />
 
-      let kernelNameInput = <div className={INPUT_TEXT}>
-                              <label>
-                                Kernel name:
-                                <input
-                                  title="Kernel name."
-                                  type="text"
-                                  name="kernel_name"
-                                  value={this.state.kernel_name}
-                                  onChange={this.setKernelName}
-                                />
-                              </label>
-                              <br />
-                            </div>
+      let pathRootProjectInput =  <StylizedTextInput label="Path root project"
+                                                     value={this.state.root_directory}
+                                                     onChange={this.setRootDirectoryPath}
+                                                     style={{gridColumn: "span 4"}} />
 
-      let pathRootProjectInput =  <div className={INPUT_TEXT}>
-                                    <label>
-                                      Path root project:
-                                      <input
-                                        title="Path root project."
-                                        type="text"
-                                        name="root_directory"
-                                        value={this.state.root_directory}
-                                        onChange={this.setRootDirectoryPath}
-                                      />
-                                    </label>
-                                    <br />
-                                  </div>
+      let recommendationTypeInput = <StylizedDropdown label="Thoth Recommendation type"
+                                                      value={this.state.recommendation_type}
+                                                      options={["latest", "performance", "security", "stable"]}
+                                                      onChange={this.changeRecommendationType}
+                                                      style={{gridColumn: "span 2"}}/>
 
-      let recommendationTypeInput = <div className={INPUT_OPTIONS}>
-                                      <label>
-                                        Thoth Recommendation type:
-                                        <select
-                                          title="Recommendation Type."
-                                          name="recommendation_type"
-                                          id="changeRecommendationType"
-                                          onChange={this.changeRecommendationType}
-                                          value={this.state.recommendation_type}
-                                        >
-                                          <option value="latest">latest</option>
-                                          <option value="performance">performance</option>
-                                          <option value="security">security</option>
-                                          <option value="stable">stable</option>
-                                        </select>
-                                      </label>
-                                      <br />
-                                    </div>
-
+      let baseImageInput;
       if ( this.state.thoth_config ) {
-
           if ( this.state.thoth_config.runtime_environments[0].base_image ) {
-            var baseImageInput = <div className={INPUT_TEXT}>
-                                  <label>
-                                    Thoth base image:
-                                    <input
-                                      title="Thoth base image."
-                                      type="text"
-                                      name="thoth_base_image"
-                                      value={this.state.thoth_config.runtime_environments[0].base_image}
-                                      onChange={this.setBaseImage}
-                                    />
-                                  </label>
-                                  <br />
-                                </div>
+            baseImageInput = <StylizedTextInput label="Thoth base image"
+                                                value={this.state.thoth_config.runtime_environments[0].base_image}
+                                                onChange={this.setBaseImage}
+                                                style={{gridColumn: "span 2"}}/>
           }
-
-        else {
-          var baseImageInput = <div></div>
-        }
-
       }
 
-      let timeoutInput = <div className={INPUT_TEXT}>
-                            <label>
-                              Thoth timeout [s]:
-                              <input
-                                title="Thoth timeout."
-                                type="text"
-                                name="thoth_timeout"
-                                value={this.state.thoth_timeout}
-                                onChange={this.setTimeout}
-                              />
+      let timeoutInput = <StylizedTextInput label="Thoth timeout"
+                                            value={this.state.thoth_timeout}
+                                            onChange={this.setTimeout}
+                                            suffix="seconds"
+                                            helperText="0 - 300 seconds"
+                                            style={{gridColumn: "span 2"}} />
+
+      let pythonVersionInput = <StylizedTextInput label="Thoth Python Version"
+                                                  value={this.state.python_version}
+                                                  onChange={this.setPythonVersion}
+                                                  style={{gridColumn: "span 2"}}/>
+
+      let OSNameInput = <StylizedTextInput label="Thoth Operating System Name"
+                                           value={this.state.os_name}
+                                           onChange={this.setOSName}
+                                           style={{gridColumn: "span 2"}}/>
+
+      let OSVersionInput = <StylizedTextInput label="Thoth Operating System Version"
+                                              value={this.state.os_version}
+                                              onChange={this.setOSVersion}
+                                              style={{gridColumn: "span 2"}}/>
+
+      let forceInput =  <div className={INPUT_OPTIONS} style={{gridColumn: "span 1"}}>
+                          <label>
+                            Thoth force
+                            <input type="checkbox"
+                                   title="Thoth force parameter."
+                                   name="thoth_force"
+                                   id="thoth_force"
+                                   onChange={this.setForceParameter}
+                                   checked={this.state.thoth_force} />
                             </label>
-                            <br />
-                          </div>
+                          <br />
+                        </div>
 
-      let pythonVersionInput = <div className={INPUT_TEXT}>
-                                  <label>
-                                    Thoth Python Version:
-                                    <input
-                                      title="Thoth Python version."
-                                      type="text"
-                                      name="thoth_python_version"
-                                      value={this.state.python_version}
-                                      onChange={this.setPythonVersion}
-                                    />
-                                  </label>
-                                  <br />
-                                </div>
-
-      let OSNameInput = <div className={INPUT_TEXT}>
+      let debugInput =  <div className={INPUT_OPTIONS} style={{gridColumn: "span 1"}}>
                           <label>
-                            Thoth Operating System name:
-                            <input
-                              title="Thoth Operating System name."
-                              type="text"
-                              name="thoth_os_name"
-                              value={this.state.os_name}
-                              onChange={this.setOSName}
-                            />
+                            Thoth debug
+                            <input type="checkbox"
+                                   title="Thoth debug parameter."
+                                   name="thoth_debug"
+                                   id="thoth_debug"
+                                   onChange={this.setDebugParameter}
+                                   checked={this.state.thoth_debug} />
                           </label>
                           <br />
                         </div>
 
-      let OSVersionInput = <div className={INPUT_TEXT}>
-                            <label>
-                              Thoth Operating System version:
-                              <input
-                                title="Thoth Operating System version."
-                                type="text"
-                                name="thoth_os_version"
-                                value={this.state.os_version}
-                                onChange={this.setOSVersion}
-                              />
-                            </label>
-                            <br />
-                          </div>
-
-      let forceInput =  <div className={INPUT_OPTIONS} >
-                          <label>
-                            Thoth force:
-                            <select onChange={this.setForceParameter}
-                                    title="Thoth force parameter."
-                                    name="thoth_force"
-                                    value={this.state.thoth_force ? "true" : "false"}>
-                              <option value="false">False</option>
-                              <option value="true">True</option>
-                            </select>
-                          </label>
-                          <br />
-                        </div>
-
-      let debugInput =  <div className={INPUT_OPTIONS}>
-                          <label>
-                            Thoth debug:
-                            <select onChange={this.setDebugParameter}
-                                    title="Thoth debug parameter."
-                                    name="thoth_debug"
-                                    value={this.state.thoth_debug ? "true" : "false"}>
-                              <option value="false">False</option>
-                              <option value="true">True</option>
-                            </select>
-                          </label>
-                          <br />
-                        </div>
-
-      let labelsInput =  <div className={INPUT_TEXT}>
-        <label>
-          Labels:
-          <input
-            title="Comma separated labels."
-            type="text"
-            name="labels"
-            value={this.state.labels}
-            onChange={this.setThothLabels}
-          />
-        </label>
-      </div>
+      let labelsInput =  <StylizedTextInput label="Labels"
+                                            value={this.state.labels}
+                                            onChange={this.setThothLabels}
+                                            helperText="comma separated labels"
+                                            style={{gridColumn: "span 4"}}/>
 
       if ( this.state.resolution_engine == "thoth" ) {
 
@@ -1295,20 +1191,37 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                             </section>
 
                             <div className={INPUT_FORM_BOX}>
-                            <form>
-                              {resolutionEngineInput}
-                              {kernelNameInput}
-                              {pathRootProjectInput}
-                              {recommendationTypeInput}
-                              {forceInput}
-                              {debugInput}
-                              {pythonVersionInput}
-                              {OSNameInput}
-                              {OSVersionInput}
-                              {baseImageInput}
-                              {timeoutInput}
-                              {labelsInput}
-                            </form>
+                              <form className={FORM_GRID}>
+                                {resolutionEngineInput}
+                                {kernelNameInput}
+                                {pathRootProjectInput}
+                                <div style={{gridColumn: "span 2"}}>
+                                  <p>Python Settings</p>
+                                  <div className="form-stack">
+                                    {recommendationTypeInput}
+                                    {pythonVersionInput}
+                                  </div>
+                                </div>
+
+                                <div style={{gridColumn: "span 2"}}>
+                                  <p>Operating System Settings</p>
+                                  <div className="form-stack">
+                                    {OSNameInput}
+                                    {OSVersionInput}
+                                  </div>
+                                </div>
+
+                                <div style={{gridColumn: "span 4"}}>
+                                  <p>Thoth Advise Settings</p>
+                                  <div className="form-grid">
+                                    {timeoutInput}
+                                    {debugInput}
+                                    {forceInput}
+                                    {labelsInput}
+                                    {baseImageInput}
+                                  </div>
+                                </div>
+                              </form>
                             </div>
                           </div>
 
@@ -1322,7 +1235,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                           </section>
 
                           <div className={INPUT_FORM_BOX}>
-                          <form>
+                          <form className={FORM_GRID}>
                             {resolutionEngineInput}
                             {kernelNameInput}
                             {pathRootProjectInput}
