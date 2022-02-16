@@ -1,5 +1,23 @@
 # Changelog for Thoth's Template GitHub Project
 
+## Release 0.16.0 (2022-02-16T08:47:17)
+### Features
+* Prepare release v0.16.0
+* added new stylized form
+* Fix UI issue and relock behaviour
+* Update the pre-commit hooks
+* added version picker
+* update-maintainers
+* Fix version in package.json
+### Bug Fixes
+* fixed end of files
+* pre-commit fix
+### Improvements
+* updated pre-commit image
+* removed unneeded state var
+* reversed version order and allowed 4 rows for package description
+* added info dropdown for package name
+
 ## Release 0.15.0 (2022-01-26T12:05:22)
 ### Features
 * Update readme for development
