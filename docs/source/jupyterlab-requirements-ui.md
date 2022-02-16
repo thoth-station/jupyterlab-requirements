@@ -23,8 +23,8 @@ The extension checks in the notebook metadata in order to identify them every ti
 Moreover it verifies that the kernel you are using is matching your dependencies. If not it warns to use install button again to avoid weird behaviours.
 
 You can start adding your packages using the central add button, which will open a new package row to edit.
-1. First type out a pakcage. For packages that are avialable in PyPi, an informational popup will be shown to indciate that it is a valid package.
-2. Then choose a constraint. If the package is both valid and known by Thoth, clicking the dialog box will open a dropdown (explained in detail bellow). If the package is not known by Thoth, then you will have to manually type the constraints.
+1. First type out a package. For packages that are avialable in PyPI, an informational popup will be shown to indicate that it is a valid package.
+2. Then choose a constraint. If the package is both valid and known by Thoth, clicking the dialog box will open a dropdown (explained in detail below). If the package is not known by Thoth, then you will have to manually type the constraints.
 3. Once you have selected the package name and constraints, remember to add your package using the add button under the actions column, otherwise it won't be saved. (_This extra step will be removed in a later release._)
 
 The constraint dropdown must be opened after a package name is given. Any changes to the package name will reset the constraints without warning.
@@ -38,12 +38,12 @@ There are two sections in the constraints dropdown: the selected packages and th
 | number | component | description |
 | ------------- | ------------------ | ------------------ |
 | 1 | Version result text | The resulting version constraints use in the package resolver. |
-| 2 | Constraint picker | A dropdown menu of the types of constraints that can be used with the version on its right. Notice the parallel between compoent `1` and selected constraints in `2`. |
+| 2 | Constraint picker | A dropdown menu of the types of constraints that can be used with the version on its right. Notice the parallel between component `1` and selected constraints in `2`. |
 | 3 | Version filter | You can toggle any of the numbers in the version to convert it to a `*`. ex) `1.4.0rc0` -> `1.4.*`  |
-| 4 | Version text | This is a the version that is selected bellow in the version list (`7`). |
+| 4 | Version text | This is a the version that is selected below in the version list (`7`). |
 | 5 | Done button | This saves your selection and closes the form. |
-| 6 | Reset / Cancel button | This resets tyhe result text back to `*` |
-| 7 | Version selectors | You can add or remove any version from the selction. A selected version is defaulted to `==*` but can be customized with `2`,`3`, and `4` |
+| 6 | Reset / Cancel button | This resets the result text back to `*` |
+| 7 | Version selectors | You can add or remove any version from the selection. A selected version is defaulted to `==*` but can be customized with `2`,`3`, and `4` |
 
 ### Save dependencies added and install them in your customized kernel
 
