@@ -598,7 +598,7 @@ export async function _handle_deleted_packages_case(
       var emptyRequirements: Requirements = {
         packages: {},
         requires: ui_state.requirements.requires,
-        sources: ui_state.requirements.sources
+        source: ui_state.requirements.source
       }
 
       _.set(ui_state, "status", "initial" )
@@ -627,7 +627,7 @@ export async function _handle_total_packages_case(
           var sameRequirements: Requirements = {
             packages: total_packages ,
             requires: ui_state.requirements.requires,
-            sources: ui_state.requirements.sources
+            source: ui_state.requirements.source
           }
 
           // Set requirements in notebook;
@@ -649,7 +649,7 @@ export async function _handle_total_packages_case(
           var finalRequirements: Requirements = {
             packages: total_packages ,
             requires: ui_state.requirements.requires,
-            sources: ui_state.requirements.sources
+            source: ui_state.requirements.source
           }
 
           console.debug("Requirements before installing are: ", finalRequirements)
