@@ -24,7 +24,7 @@ export interface ThothRequirements {
 export interface Requirements {
     packages: { [ name: string ]: string | { index: string, version: string } }
     requires: Requires
-    sources: ( SourcesEntity )[] | null
+    source: ( SourcesEntity )[] | null
     "dev-packages"?: any,
     thoth?: ThothRequirements
 }

@@ -134,7 +134,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         requirements: {
           packages: {},
           requires: { python_version: get_python_version( this.props.panel ) },
-          sources: [{
+          source: [{
             name: "pypi",
             url: "https://pypi.org/simple",
             verify_ssl: true,
