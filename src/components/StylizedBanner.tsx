@@ -3,7 +3,7 @@ import * as React from "react";
 export type severity = "warning" | "error" | "success" | "info";
 
 export interface IStylizedBannerProps extends React.ComponentProps<'div'>{
-  label: string;
+  label: string | JSX.Element;
   linkLabel?: string;
   link?: string;
   severity?: severity;

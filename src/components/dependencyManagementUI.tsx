@@ -1253,36 +1253,36 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                                             helperText="comma separated labels"
                                             style={{gridColumn: "span 4"}}/>
 
+      let unknownWarnings = this.state.warnings.unknown.map(pkg => {
+        return (
+          <StylizedBanner key={pkg}
+                          label={<div>The package <b>{pkg}</b> does not exist on any index monitored by Thoth. If this is a mistake, open an issue with the Thoth team on GitHub.</div>}
+                          link="https://github.com/thoth-station/support/issues/new?assignees=&labels=bug%2Ctriage&template=package_request.yaml"
+                          linkLabel="open issue"
+                          severity="error"
+          />
+        )
+      })
+
+      let PyPIWarnings = this.state.warnings.inPyPI.map(pkg => {
+        return (
+          <StylizedBanner key={pkg}
+                          label={<div>The package <b>{pkg}</b> is not in Thoth's knowledge graph. Open a GitHub issue to request it be added.</div>}
+                          link="https://github.com/thoth-station/support/issues/new?assignees=&labels=bug%2Ctriage&template=package_request.yaml"
+                          linkLabel="open issue"
+                          severity="warning"
+          />
+        )
+      })
+
 
       if ( this.state.resolution_engine == "thoth" ) {
         var optionsForm = <div>
                             <section>
                               <h2>OPTIONS</h2>
                             </section>
-                            {
-                              this.state.warnings.unknown.map(pkg => {
-                                return (
-                                  <StylizedBanner key={pkg}
-                                                  label={`The package ${pkg} does not exist on any index monitored by Thoth. If this is a mistake, open an issue with the Thoth team on GitHub.`}
-                                                  link="https://github.com/thoth-station/support/issues/new?assignees=&labels=bug%2Ctriage&template=package_request.yaml"
-                                                  linkLabel="open issue"
-                                                  severity="error"
-                                  />
-                                )
-                              })
-                            }
-                            {
-                              this.state.warnings.inPyPI.map(pkg => {
-                                return (
-                                  <StylizedBanner key={pkg}
-                                                  label={`thr package ${pkg} is not in Thoth's knowledge graph. Open a GitHub issue to request it be added.`}
-                                                  link="https://github.com/thoth-station/support/issues/new?assignees=&labels=bug%2Ctriage&template=package_request.yaml"
-                                                  linkLabel="open issue"
-                                                  severity="warning"
-                                  />
-                                )
-                              })
-                            }
+                            {unknownWarnings}
+                            {PyPIWarnings}
                             <div className={INPUT_FORM_BOX}>
                               <form className={FORM_GRID}>
                                 {resolutionEngineInput}
@@ -1326,18 +1326,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                           <section>
                             <h2>OPTIONS</h2>
                           </section>
-                          {
-                            this.state.warnings.unknown.map(pkg => {
-                              return (
-                                <StylizedBanner key={pkg}
-                                                label={`The package ${pkg} does not exist on any index monitored by Thoth. If this is a mistake, open an issue with the Thoth team on GitHub.`}
-                                                link="https://github.com/thoth-station/support/issues/new?assignees=&labels=bug%2Ctriage&template=package_request.yaml"
-                                                linkLabel="open issue"
-                                                severity="error"
-                                />
-                              )
-                            })
-                          }
+                          {unknownWarnings}
                           <div className={INPUT_FORM_BOX}>
                           <form className={FORM_GRID}>
                             {resolutionEngineInput}
