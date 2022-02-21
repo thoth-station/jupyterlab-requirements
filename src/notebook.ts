@@ -101,7 +101,7 @@ export function get_requirements( notebook: NotebookPanel ):  Promise<Requiremen
                 var requirements: Requirements = {
                     packages: python_packages,
                     requires: requires,
-                    sources: [
+                    source: [
                         new Source()
                     ]
                 }
@@ -129,7 +129,7 @@ export function get_requirements( notebook: NotebookPanel ):  Promise<Requiremen
                 var requirements: Requirements = {
                     packages: python_packages,
                     requires: requires,
-                    sources: [
+                    source: [
                         new Source()
                     ]
                 }
