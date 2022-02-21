@@ -59,6 +59,8 @@ import {
 } from "../helpers";
 import StylizedTextInput from "./StylizedTextInput";
 import StylizedDropdown from "./StylizedDropdown";
+import axios from "axios";
+import StylizedBanner from "./StylizedBanner";
 
 /**
  * The class name added to the new package button (CSS).
@@ -108,6 +110,7 @@ export interface IDependencyManagementUIState {
   thoth_resolution_error_msg: string,
   pipenv_resolution_error_msg: string,
   labels: string,
+  warnings: {inPyPI: (string)[], unknown: (string)[]}
 }
 
 /**
@@ -169,7 +172,8 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         root_directory: "",
         thoth_resolution_error_msg: undefined,
         pipenv_resolution_error_msg: undefined,
-        labels: ""
+        labels: "",
+        warnings: {inPyPI: [], unknown: []}
       }
 
       this.onStart = this.onStart.bind(this),
@@ -198,6 +202,8 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       this.setResolutionEngine = this.setResolutionEngine.bind(this)
       this.setDebugParameter = this.setDebugParameter.bind(this)
       this.setForceParameter = this.setForceParameter.bind(this)
+      this.verifyPyPI = this.verifyPyPI.bind(this)
+      this.verifyPackages = this.verifyPackages.bind(this)
 
       this._model = new KernelModel ( this.props.panel.sessionContext )
     }
@@ -701,6 +707,10 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       )
 
       await this.setNewState(new_state);
+
+      let warnings = await this.verifyPackages()
+      this.setState({warnings: warnings})
+
       return
     }
 
@@ -1053,11 +1063,68 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       _.set(ui_on_start_state, "root_directory", root_directory)
 
       await this.setNewState(ui_on_start_state);
+
+      const warnings = await this.verifyPackages()
+      this.setState({warnings: warnings})
+
       return
     }
 
-    render(): React.ReactNode {
+    async verifyPyPI(package_name: string) {
+      const url = `https://pypi.org/pypi/${package_name}/json`;
+      return axios
+        .get(url)
+        .then(({ data }) => {
+          return true
+        })
+        .catch(() => {
+          return false
+        })
+    }
 
+    async verifyPackages() {
+      const pkgs: {
+        unknown: Array<string>;
+        inPyPI: Array<string>;
+      } = {
+        unknown: [],
+        inPyPI: []
+      }
+      for (const pkg of Object.keys(this.state.requirements.packages)) {
+        await axios
+          .get("https://khemenu.thoth-station.ninja/api/v1/python/package/versions", {
+            params: {
+              name: pkg,
+              page: 0,
+              per_page: 1
+            }
+          })
+          .then(async ({ data }) => {
+            if (data.versions.length === 0) {
+              const isInPyPI = await this.verifyPyPI(pkg);
+              if(isInPyPI) {
+                pkgs.inPyPI.push(pkg)
+              }
+              else {
+                pkgs.unknown.push(pkg)
+              }
+            }
+          })
+          .catch(async () => {
+            const isInPyPI = await this.verifyPyPI(pkg);
+            if(isInPyPI) {
+              pkgs.inPyPI.push(pkg)
+            }
+            else {
+              pkgs.unknown.push(pkg)
+            }
+          });
+      }
+
+      return pkgs;
+    }
+
+    render(): React.ReactNode {
       let dependencyManagementform = <div>
                                         <DependencyManagementForm
                                           loaded_packages={this.state.loaded_packages}
@@ -1186,13 +1253,36 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                                             helperText="comma separated labels"
                                             style={{gridColumn: "span 4"}}/>
 
-      if ( this.state.resolution_engine == "thoth" ) {
 
+      if ( this.state.resolution_engine == "thoth" ) {
         var optionsForm = <div>
                             <section>
                               <h2>OPTIONS</h2>
                             </section>
-
+                            {
+                              this.state.warnings.unknown.map(pkg => {
+                                return (
+                                  <StylizedBanner key={pkg}
+                                                  label={`The package ${pkg} does not exist on any index monitored by Thoth. If this is a mistake, open an issue with the Thoth team on GitHub.`}
+                                                  link="https://github.com/thoth-station/support/issues/new?assignees=&labels=bug%2Ctriage&template=package_request.yaml"
+                                                  linkLabel="open issue"
+                                                  severity="error"
+                                  />
+                                )
+                              })
+                            }
+                            {
+                              this.state.warnings.inPyPI.map(pkg => {
+                                return (
+                                  <StylizedBanner key={pkg}
+                                                  label={`thr package ${pkg} is not in Thoth's knowledge graph. Open a GitHub issue to request it be added.`}
+                                                  link="https://github.com/thoth-station/support/issues/new?assignees=&labels=bug%2Ctriage&template=package_request.yaml"
+                                                  linkLabel="open issue"
+                                                  severity="warning"
+                                  />
+                                )
+                              })
+                            }
                             <div className={INPUT_FORM_BOX}>
                               <form className={FORM_GRID}>
                                 {resolutionEngineInput}
@@ -1236,7 +1326,18 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                           <section>
                             <h2>OPTIONS</h2>
                           </section>
-
+                          {
+                            this.state.warnings.unknown.map(pkg => {
+                              return (
+                                <StylizedBanner key={pkg}
+                                                label={`The package ${pkg} does not exist on any index monitored by Thoth. If this is a mistake, open an issue with the Thoth team on GitHub.`}
+                                                link="https://github.com/thoth-station/support/issues/new?assignees=&labels=bug%2Ctriage&template=package_request.yaml"
+                                                linkLabel="open issue"
+                                                severity="error"
+                                />
+                              )
+                            })
+                          }
                           <div className={INPUT_FORM_BOX}>
                           <form className={FORM_GRID}>
                             {resolutionEngineInput}
