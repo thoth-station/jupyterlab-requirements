@@ -22,23 +22,35 @@ Initially, no dependencies are identified if you start a new notebook as metadat
 The extension checks in the notebook metadata in order to identify them every time you restart a notebook.
 Moreover it verifies that the kernel you are using is matching your dependencies. If not it warns to use install button again to avoid weird behaviours.
 
-You can start adding your packages using the central add button and once you select package name and version, remember to add your package using add button in action,
-otherwise it won't be saved (in the future this behaviour will not be necessary due to the autocompletion feature):
+You can start adding your packages using the central add button, which will open a new package row to edit.
+1. First type out a package. For packages that are avialable in PyPI, an informational popup will be shown to indicate that it is a valid package.
+2. Then choose a constraint. If the package is both valid and known by Thoth, clicking the dialog box will open a dropdown (explained in detail below). If the package is not known by Thoth, then you will have to manually type the constraints.
+3. Once you have selected the package name and constraints, remember to add your package using the add button under the actions column, otherwise it won't be saved. (_This extra step will be removed in a later release._)
 
-<div style="text-align:center">
-<img alt="Add Package" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/AddPackages.png">
-</div>
+The constraint dropdown must be opened after a package name is given. Any changes to the package name will reset the constraints without warning.
 
-NOTE: _The extra button in action will be removed in the future._
+![ezgif com-gif-maker](https://user-images.githubusercontent.com/12587674/154281326-7b392e03-5d99-4b95-b44b-42653fa7f375.gif)
 
-NOTE: _Autocompletion is planned in the future so that user can check which version are available on PyPI._
+There are two sections in the constraints dropdown: the selected packages and the package list. The selected package's constraints can be customized to fit any specification. Use the the selector dropdown (==, >, <, !=, ...) in combination with the `*` selector to formulate your constraint.
+
+![version_dropdown](https://user-images.githubusercontent.com/12587674/154273898-66ea7873-3444-432c-bc13-e71c9e40e733.png)
+
+| number | component | description |
+| ------------- | ------------------ | ------------------ |
+| 1 | Version result text | The resulting version constraints use in the package resolver. |
+| 2 | Constraint picker | A dropdown menu of the types of constraints that can be used with the version on its right. Notice the parallel between component `1` and selected constraints in `2`. |
+| 3 | Version filter | You can toggle any of the numbers in the version to convert it to a `*`. ex) `1.4.0rc0` -> `1.4.*`  |
+| 4 | Version text | This is a the version that is selected below in the version list (`7`). |
+| 5 | Done button | This saves your selection and closes the form. |
+| 6 | Reset / Cancel button | This resets the result text back to `*` |
+| 7 | Version selectors | You can add or remove any version from the selection. A selected version is defaulted to `==*` but can be customized with `2`,`3`, and `4` |
 
 ### Save dependencies added and install them in your customized kernel
 
 After saving the install button will appear so you can check before actually installing the dependencies:
 
 <div style="text-align:center">
-<img alt="Install" src="https://raw.githubusercontent.com/thoth-station/jupyterlab-requirements/master/docs/images/Install.png">
+<img alt="Install" src="https://user-images.githubusercontent.com/12587674/154145147-c6ad1b6a-336c-4922-95b1-5fc276b7f3a8.png">
 </div>
 
 The following table describes the parameters available in the UI before using the install button:
