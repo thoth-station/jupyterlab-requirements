@@ -102,6 +102,9 @@
 
 
  /* Table */
+table.thoth-table {
+  width: 100%;
+}
 
 table.thoth-table, th, tr {
   border-bottom: 1px solid black;
@@ -298,7 +301,7 @@ font-size: 16px;
 
 .thoth-form-box {
   box-sizing: border-box;
-  margin: 0;
+  margin-top: 2rem;
   padding: 0;
   /*background-color: #e4e4e4;*/
 }
@@ -545,4 +548,57 @@ font-size: 16px;
   transform: rotate(180deg);
   color: rgba(174, 0, 255, .87);
   transition: transform .15s cubic-bezier(.4,0,.2,1);
+}
+
+.stylized-banner {
+  display: flex;
+  border-radius: 4px;
+  border-width: 1px;
+  border-style: solid;
+  flex-grow: 1;
+  margin-bottom: 1rem;
+  padding: 8px 0 8px 0;
+  max-width: fit-content;
+}
+
+.stylized-banner.error {
+  color: #d32f2f;
+  background-color: #fdeded;
+}
+
+.stylized-banner.warning {
+  color: #ed6c02;
+  background-color: #fff4e5;
+}
+
+.stylized-banner.info {
+  color: #0288d1;
+  background-color: #e5f6fd;
+}
+
+.stylized-banner.success {
+  color: #2e7d32;
+  background-color: #edf7ed;
+}
+
+.stylized-banner .icon {
+  margin-left: 16px;
+  font-weight: bold;
+  font-size: xx-large;
+  min-width: 16px;
+  text-align: end;
+}
+
+.stylized-banner .label {
+  margin-right: 90px;
+  margin-left: 24px;
+  align-self: center;
+}
+
+.stylized-banner .link {
+  display: flex;
+  white-space: nowrap;
+  align-items: center;
+  margin-right: 16px;
+  font-weight: bold;
 }
