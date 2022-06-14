@@ -1,5 +1,19 @@
 # Changelog for Thoth's Template GitHub Project
 
+## Release 0.16.1 (2022-06-14T06:50:23)
+### Features
+* 88b3fa1 Update dependencies
+* 8b819de change spacing
+* b3aac30 pre-commit
+* ff0fde4 Remove codeowners
+* ab6fad7 Update jupyterlab-requirements-ui.md
+### Bug Fixes
+* c2fda4a fix typos
+### Improvements
+* dfd1d4d typos and clarity
+* 095f81d added warnings banner to form
+* 4c51f61 Fix creation of Pipfile source section
+
 ## Release 0.16.0 (2022-02-16T08:47:17)
 ### Features
 * Prepare release v0.16.0
