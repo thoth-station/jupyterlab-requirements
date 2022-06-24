@@ -86,4 +86,3 @@ export const notificationHandler = (notifications: {[key: string]: {type: TypeOp
   return {errorNotification, warningNotification, infoNotification, successNotification, inProgressNotification}
 
 }
-
