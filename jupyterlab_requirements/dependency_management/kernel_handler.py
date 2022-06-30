@@ -31,13 +31,13 @@ from .lib import horus_delete_kernel
 _LOGGER = logging.getLogger("jupyterlab_requirements.kernel_handler")
 
 
-class JupyterKernelHandler(APIHandler):  # type: ignore[misc]
+class JupyterKernelHandler(APIHandler):
     """Jupyter Kernel handler to create new kernel for notebooks."""
 
     @web.authenticated
     def post(self):  # type: ignore
         """POST request for JupyterKernelHandler."""
-        input_data = self.get_json_body()
+        input_data = self.get_json_body()  # type: ignore
 
         kernel_name: str = input_data["kernel_name"]
 
@@ -45,7 +45,7 @@ class JupyterKernelHandler(APIHandler):  # type: ignore[misc]
 
         create_kernel(kernel_name=kernel_name, kernels_path=kernels_path)
 
-        self.finish(json.dumps({"data": f"installed kernel {kernel_name} at {kernels_path}"}))
+        self.finish(json.dumps({"data": f"installed kernel {kernel_name} at {kernels_path}"}))  # type: ignore
 
     @web.authenticated
     def get(self):  # type: ignore
@@ -69,12 +69,12 @@ class JupyterKernelHandler(APIHandler):  # type: ignore[misc]
             if kernelspec != "python3":
                 kernels.append(kernelspec)
 
-        self.finish(json.dumps(kernels))
+        self.finish(json.dumps(kernels))  # type: ignore
 
     @web.authenticated
     def delete(self):  # type: ignore
         """Delete selected kernel."""
-        input_data = self.get_json_body()
+        input_data = self.get_json_body()  # type: ignore
 
         kernel_name: str = input_data["kernel_name"]
 
@@ -83,10 +83,12 @@ class JupyterKernelHandler(APIHandler):  # type: ignore[misc]
         command_output = horus_delete_kernel(kernel_name=kernel_name)
 
         if command_output.returncode == 0:
-            self.finish(json.dumps({"message": f"{kernel_name} kernel successfully deleted", "error": False}))
+            self.finish(
+                json.dumps({"message": f"{kernel_name} kernel successfully deleted", "error": False})
+            )  # type: ignore
         else:
             self.finish(
                 json.dumps(
                     {"message": f"{kernel_name} kernel could not be deleted, please check pod logs", "error": True}
                 )
-            )
+            )  # type: ignore

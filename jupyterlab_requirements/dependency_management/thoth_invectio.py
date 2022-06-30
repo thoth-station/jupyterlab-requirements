@@ -35,13 +35,13 @@ from .lib import verify_gathered_libraries
 _LOGGER = logging.getLogger("jupyterlab_requirements.thoth_invectio")
 
 
-class ThothInvectioHandler(APIHandler):  # type: ignore
+class ThothInvectioHandler(APIHandler):
     """Thoth invectio handler for user requirements."""
 
     @web.authenticated
     def post(self):  # type: ignore
         """Gather import libraries using invectio."""
-        input_data = self.get_json_body()
+        input_data = self.get_json_body()  # type: ignore
         notebook_content: str = input_data["notebook_content"]
 
         std_lib_path = Path(distutils.sysconfig.get_python_lib(standard_lib=True))
@@ -62,4 +62,4 @@ class ThothInvectioHandler(APIHandler):  # type: ignore
         verified_libraries = verify_gathered_libraries(gathered_libraries=gathered_libraries)
         packages = [package["package_name"] for package in verified_libraries]
 
-        self.finish(json.dumps(list(packages)))
+        self.finish(json.dumps(list(packages)))  # type: ignore

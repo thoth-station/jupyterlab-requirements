@@ -96,7 +96,7 @@ class AsyncTasks:
             task.cancel()
 
 
-class DependencyManagementBaseHandler(APIHandler):  # type: ignore[misc]
+class DependencyManagementBaseHandler(APIHandler):
     """Bsse Handler for dependency management."""
 
     _tasks = AsyncTasks()
@@ -125,14 +125,14 @@ class DependencyManagementBaseHandler(APIHandler):  # type: ignore[misc]
         else:
             if result is None:
                 self.set_status(202)
-                self.finish("{}")
+                self.finish("{}")  # type: ignore
             else:
                 # We port errors to the frontend to show them to the user.
                 self.set_status(200)
-                self.finish(json.dumps(result))
+                self.finish(json.dumps(result))  # type: ignore
 
     def redirect_to_task(self, task_index: int):  # type: ignore
         """Close a request by redirecting to a task."""
         self.set_status(202)
         self.set_header("Location", "/{}/tasks/{}".format(NAMESPACE, task_index))
-        self.finish("{}")
+        self.finish("{}")  # type: ignore

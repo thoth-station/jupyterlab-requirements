@@ -103,20 +103,22 @@ def _load_jupyter_server_extension(lab_app):  # type: ignore
             ),
             YamlSpecHandler,
         ),
-        (url_path_join(base_url, f"/{url_path}/thoth/config"), ThothConfigHandler),
-        (url_path_join(base_url, f"/{url_path}/thoth/resolution"), ThothAdviseHandler),
-        (url_path_join(base_url, f"/{url_path}/thoth/invectio"), ThothInvectioHandler),
-        (url_path_join(base_url, f"/{url_path}/pipenv"), PipenvHandler),
-        (url_path_join(base_url, f"/{url_path}/kernel/packages"), DependencyInstalledHandler),
-        (url_path_join(base_url, f"/{url_path}/kernel/install"), DependencyInstallHandler),
-        (url_path_join(base_url, f"/{url_path}/kernel/python"), PythonVersionHandler),
-        (url_path_join(base_url, f"/{url_path}/kernel/create"), JupyterKernelHandler),
-        (url_path_join(base_url, f"/{url_path}/file/directory"), RootPathHandler),
-        (url_path_join(base_url, f"/{url_path}/file/dependencies"), DependenciesFilesHandler),
-        (url_path_join(base_url, f"/{url_path}/file/stored"), DependenciesStoredHandler),
-        (url_path_join(base_url, f"/{url_path}/file/notebook_name"), DependenciesNotebookNameHandler),
+        (url_path_join(base_url, f"/{url_path}/thoth/config"), ThothConfigHandler),  # type: ignore
+        (url_path_join(base_url, f"/{url_path}/thoth/resolution"), ThothAdviseHandler),  # type: ignore
+        (url_path_join(base_url, f"/{url_path}/thoth/invectio"), ThothInvectioHandler),  # type: ignore
+        (url_path_join(base_url, f"/{url_path}/pipenv"), PipenvHandler),  # type: ignore
+        (url_path_join(base_url, f"/{url_path}/kernel/packages"), DependencyInstalledHandler),  # type: ignore
+        (url_path_join(base_url, f"/{url_path}/kernel/install"), DependencyInstallHandler),  # type: ignore
+        (url_path_join(base_url, f"/{url_path}/kernel/python"), PythonVersionHandler),  # type: ignore
+        (url_path_join(base_url, f"/{url_path}/kernel/create"), JupyterKernelHandler),  # type: ignore
+        (url_path_join(base_url, f"/{url_path}/file/directory"), RootPathHandler),  # type: ignore
+        (url_path_join(base_url, f"/{url_path}/file/dependencies"), DependenciesFilesHandler),  # type: ignore
+        (url_path_join(base_url, f"/{url_path}/file/stored"), DependenciesStoredHandler),  # type: ignore
+        (url_path_join(base_url, f"/{url_path}/file/notebook_name"), DependenciesNotebookNameHandler),  # type: ignore
         (
-            url_path_join(base_url, r"/jupyterlab_requirements/jupyterlab_requirements/tasks/%s" % r"(?P<index>\d+)"),
+            url_path_join(
+                base_url, r"/jupyterlab_requirements/jupyterlab_requirements/tasks/%s" % r"(?P<index>\d+)"
+            ),  # type: ignore
             DependencyManagementBaseHandler,
         ),  # GET / DELETE
     ]

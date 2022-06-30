@@ -32,22 +32,22 @@ from .lib import get_packages
 _LOGGER = logging.getLogger("jupyterlab_requirements.discover_handler")
 
 
-class DependencyInstalledHandler(APIHandler):  # type: ignore[misc]
+class DependencyInstalledHandler(APIHandler):
     """Dependency management handler to discover dependencies installed."""
 
     @web.authenticated
     def post(self):  # type: ignore
         """Discover list of packages installed."""
-        input_data = self.get_json_body()
+        input_data = self.get_json_body()  # type: ignore
 
         kernel_name: str = input_data["kernel_name"]
 
         packages = get_packages(kernel_name=kernel_name)
 
-        self.finish(json.dumps(packages))
+        self.finish(json.dumps(packages))  # type: ignore
 
 
-class PythonVersionHandler(APIHandler):  # type: ignore[misc]
+class PythonVersionHandler(APIHandler):
     """Dependency management handler to discover Python version present."""
 
     @web.authenticated
@@ -55,10 +55,10 @@ class PythonVersionHandler(APIHandler):  # type: ignore[misc]
         """Discover python version available."""
         python_version = discover_python_version()
 
-        self.finish(json.dumps(python_version))
+        self.finish(json.dumps(python_version))  # type: ignore
 
 
-class RootPathHandler(APIHandler):  # type: ignore[misc]
+class RootPathHandler(APIHandler):
     """Discover root for the project."""
 
     @web.authenticated
@@ -76,4 +76,4 @@ class RootPathHandler(APIHandler):  # type: ignore[misc]
             )
             complete_path = Path.home()
 
-        self.finish(json.dumps(complete_path.as_posix()))
+        self.finish(json.dumps(complete_path.as_posix()))  # type: ignore

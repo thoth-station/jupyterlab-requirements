@@ -33,13 +33,13 @@ from thamos.config import _Configuration
 _LOGGER = logging.getLogger("jupyterlab_requirements.thoth_config_handler")
 
 
-class ThothConfigHandler(APIHandler):  # type: ignore[misc]
+class ThothConfigHandler(APIHandler):
     """Thoth config handler for user requirements."""
 
     @web.authenticated
     def post(self):  # type: ignore
         """Retrieve or create Thoth config file."""
-        input_data = self.get_json_body()
+        input_data = self.get_json_body()  # type: ignore
         kernel_name: str = input_data["kernel_name"]
 
         config = get_thoth_config(kernel_name=kernel_name)
@@ -47,13 +47,13 @@ class ThothConfigHandler(APIHandler):  # type: ignore[misc]
         thoth_config = config.content
         _LOGGER.info("Thoth config: %r", thoth_config)
 
-        self.finish(json.dumps(thoth_config))
+        self.finish(json.dumps(thoth_config))  # type: ignore
 
     @web.authenticated
     def put(self):  # type: ignore
         """Update Thoth config file."""
         initial_path = Path.cwd()
-        input_data = self.get_json_body()
+        input_data = self.get_json_body()  # type: ignore
         new_runtime_environment: Dict[str, Any] = input_data["runtime_environment"]
         force: bool = input_data["force"]
         complete_path: str = input_data["complete_path"]
@@ -77,4 +77,4 @@ class ThothConfigHandler(APIHandler):  # type: ignore[misc]
         _LOGGER.info("Updated Thoth config: %r", configuration.content)
 
         os.chdir(initial_path)
-        self.finish(json.dumps({"message": f"Successfully updated thoth config at {initial_path}!"}))
+        self.finish(json.dumps({"message": f"Successfully updated thoth config at {initial_path}!"}))  # type: ignore
