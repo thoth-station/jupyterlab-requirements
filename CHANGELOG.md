@@ -1,5 +1,12 @@
 # Changelog for Thoth's Template GitHub Project
 
+## Release 0.16.2 (2022-07-01T13:39:00)
+### Features
+* c2a4902 :recycle: HouseKeeping: Updated OWNERS and pre-commit changes
+* 2135013 added message handler
+### Bug Fixes
+* dee17f3 fixed pre-commit error
+
 ## Release 0.16.1 (2022-06-14T06:50:23)
 ### Features
 * 88b3fa1 Update dependencies
