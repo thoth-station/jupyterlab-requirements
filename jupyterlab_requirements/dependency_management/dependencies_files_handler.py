@@ -31,14 +31,14 @@ from thoth.python import Project
 _LOGGER = logging.getLogger("jupyterlab_requirements.dependencies_files_handler")
 
 
-class DependenciesFilesHandler(APIHandler):  # type: ignore[misc]
+class DependenciesFilesHandler(APIHandler):
     """Dependencies files handler to store dependencies files."""
 
     @web.authenticated
     def post(self):  # type: ignore
         """Store requirements file to disk."""
         initial_path = Path.cwd()
-        input_data = self.get_json_body()
+        input_data = self.get_json_body()  # type: ignore
 
         # Path of the repo where we need to store
         path_to_store: str = input_data["path_to_store"]
@@ -72,16 +72,16 @@ class DependenciesFilesHandler(APIHandler):  # type: ignore[misc]
             project.to_files(pipfile_path=pipfile_path, pipfile_lock_path=pipfile_lock_path)
 
         os.chdir(initial_path)
-        self.finish(json.dumps({"message": f"Successfully stored requirements at {env_path}!"}))
+        self.finish(json.dumps({"message": f"Successfully stored requirements at {env_path}!"}))  # type: ignore
 
 
-class DependenciesNotebookNameHandler(APIHandler):  # type: ignore[misc]
+class DependenciesNotebookNameHandler(APIHandler):
     """Notebook name handler for notebook file name."""
 
     @web.authenticated
     def post(self):  # type: ignore
         """Store current notebook name handled."""
-        input_data = self.get_json_body()
+        input_data = self.get_json_body()  # type: ignore
 
         notebook_path: str = input_data["notebook_path"]
         notebook_name: str = Path(notebook_path).name
@@ -105,4 +105,4 @@ class DependenciesNotebookNameHandler(APIHandler):  # type: ignore[misc]
         with open(file_path, "w") as outfile:
             json.dump(data, outfile)
 
-        self.finish({"message": f"Successfully stored notebook tracker at {file_path}!"})
+        self.finish({"message": f"Successfully stored notebook tracker at {file_path}!"})  # type: ignore

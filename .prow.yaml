@@ -27,7 +27,7 @@ presubmits:
     context: aicoe-ci/prow/mypy
     spec:
       containers:
-        - image: quay.io/thoth-station/thoth-pytest-ubi8-py38:v0.13.0
+        - image: quay.io/thoth-station/thoth-pytest-ubi8-py38:v0.14.3
           command:
             - "/bin/run-mypy"
             - "."

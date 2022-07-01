@@ -1,12 +1,11 @@
 """jupyterlab-requirements setup."""
 import os
 import sys
-
-from pathlib import Path
-
-from jupyter_packaging import create_cmdclass, install_npm, ensure_targets, combine_commands
 import setuptools
 
+from pathlib import Path
+from jupyter_packaging import create_cmdclass, install_npm, ensure_targets, combine_commands
+from typing import Any, List
 from setuptools.command.test import test as TestCommand  # noqa
 
 HERE = Path(__file__).parent.resolve()
@@ -16,7 +15,7 @@ name = "jupyterlab_requirements"
 
 
 # Get version
-def _get_version(name):
+def _get_version(name: str) -> str:
     with open(os.path.join(name, "__init__.py")) as f:
         content = f.readlines()
 
@@ -69,13 +68,13 @@ cmdclass["jsdeps"] = combine_commands(
 README: str = Path(HERE, "README.rst").read_text()
 
 
-def _get_install_requires():
+def _get_install_requires() -> List[str]:
     with open("requirements.txt", "r") as requirements_file:
         res = requirements_file.readlines()
         return [req.split(" ", maxsplit=1)[0] for req in res if req]
 
 
-class Test(TestCommand):
+class Test(TestCommand):  # type: ignore
     """Introduce test command to run testsuite using pytest."""
 
     _IMPLICIT_PYTEST_ARGS = [
@@ -93,18 +92,18 @@ class Test(TestCommand):
 
     user_options = [("pytest-args=", "a", "Arguments to pass into py.test")]
 
-    def initialize_options(self):
+    def initialize_options(self) -> None:
         """Initialize command options."""
         super().initialize_options()
         self.pytest_args = None
 
-    def finalize_options(self):
+    def finalize_options(self) -> None:
         """Finalize command options."""
         super().finalize_options()
-        self.test_args = []
+        self.test_args: List[Any] = []
         self.test_suite = True
 
-    def run_tests(self):
+    def run_tests(self) -> None:
         """Run pytests."""
         import pytest
 
