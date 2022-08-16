@@ -93,8 +93,6 @@ export const DependencyManagementConstraintPicker: React.FC<IProps> = ({package_
       .get(url, {
         params: {
           name: package_name,
-          page: pagination,
-          per_page: 25,
           // os_name: ,
           // os_version: ,
           // python_version:

@@ -49,7 +49,7 @@ import { Advise } from "../types/thoth";
 
 import {
   parse_inputs_from_metadata,
-  create_config,
+  // create_config,
   set_notebook_metadata,
   store_dependencies_on_disk,
   _parse_packages_from_state,
@@ -105,6 +105,10 @@ export interface IDependencyManagementUIState {
   thoth_debug: boolean,
   os_name: string,
   os_version: string,
+  platform?: string,
+  cpu_family?: number,
+  cpu_model?: number,
+  gpu_model?: string
   python_version: string,
   root_directory: string,
   thoth_resolution_error_msg: string,
@@ -154,10 +158,11 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
             recommendation_type: "latest",
             base_image: "",
             labels: "",
+            platform: null,
             hardware: {
               cpu_model: null,
               cpu_family: null,
-              gpu_family: null,
+              gpu_model: null,
             }
           }]
         },
@@ -168,6 +173,10 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         thoth_debug: true,
         os_name: "ubi",
         os_version: "8",
+        cpu_family: undefined,
+        cpu_model: undefined,
+        gpu_model: undefined,
+        platform: undefined,
         python_version: "3.8",
         root_directory: "",
         thoth_resolution_error_msg: undefined,
@@ -197,6 +206,10 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       this.setPythonVersion = this.setPythonVersion.bind(this)
       this.setOSName = this.setOSName.bind(this)
       this.setOSVersion = this.setOSVersion.bind(this)
+      this.setPlatform = this.setPlatform.bind(this)
+      this.setGpuModel = this.setGpuModel.bind(this)
+      this.setCpuModel = this.setCpuModel.bind(this)
+      this.setCpuFamily = this.setCpuFamily.bind(this)
       this.setRootDirectoryPath = this.setRootDirectoryPath.bind(this)
       this.setThothLabels = this.setThothLabels.bind(this)
       this.setResolutionEngine = this.setResolutionEngine.bind(this)
@@ -318,7 +331,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
       var initial_thoth_config = this.state.thoth_config
 
-      _.set(initial_thoth_config, initial_thoth_config.runtime_environments[0].base_image, thoth_base_image)
+      initial_thoth_config.runtime_environments[0].base_image = thoth_base_image
 
       this.setState(
         {
@@ -337,7 +350,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
       var initial_thoth_config = this.state.thoth_config
 
-      _.set(initial_thoth_config, initial_thoth_config.runtime_environments[0].python_version, thoth_python_version)
+      initial_thoth_config.runtime_environments[0].python_version = thoth_python_version
 
       this.setState(
         {
@@ -357,7 +370,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
       var initial_thoth_config = this.state.thoth_config
 
-      _.set(initial_thoth_config, initial_thoth_config.runtime_environments[0].operating_system.name, thoth_os_name)
+      initial_thoth_config.runtime_environments[0].operating_system.name = thoth_os_name
 
       this.setState(
         {
@@ -377,7 +390,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
       var initial_thoth_config = this.state.thoth_config
 
-      _.set(initial_thoth_config, initial_thoth_config.runtime_environments[0].operating_system.version, thoth_os_version)
+      initial_thoth_config.runtime_environments[0].operating_system.version = thoth_os_version
 
       this.setState(
         {
@@ -386,6 +399,86 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         }
       );
     }
+
+  setCpuFamily(event: React.ChangeEvent<HTMLInputElement>) {
+
+      var thoth_cpu_family = null
+
+      if(typeof event.target.value === "number") {
+        thoth_cpu_family = Number(event.target.value)
+      }
+
+      var initial_thoth_config = this.state.thoth_config
+
+      initial_thoth_config.runtime_environments[0].hardware.cpu_family = thoth_cpu_family
+
+      this.setState(
+        {
+          thoth_config: initial_thoth_config,
+          cpu_family: thoth_cpu_family
+        }
+      );
+  }
+
+  setCpuModel(event: React.ChangeEvent<HTMLInputElement>) {
+
+    var thoth_cpu_model = null
+
+    if(typeof event.target.value === "number") {
+      thoth_cpu_model = Number(event.target.value)
+    }
+
+    var initial_thoth_config = this.state.thoth_config
+
+    initial_thoth_config.runtime_environments[0].hardware.cpu_model = thoth_cpu_model
+
+    this.setState(
+      {
+        thoth_config: initial_thoth_config,
+        cpu_model: thoth_cpu_model
+      }
+    );
+  }
+
+  setGpuModel(event: React.ChangeEvent<HTMLInputElement>) {
+
+    var thoth_gpu_model = null
+
+    if(event.target.value !== "") {
+      thoth_gpu_model = event.target.value
+    }
+
+    var initial_thoth_config = this.state.thoth_config
+
+    initial_thoth_config.runtime_environments[0].hardware.gpu_model = thoth_gpu_model
+
+    this.setState(
+      {
+        thoth_config: initial_thoth_config,
+        gpu_model: thoth_gpu_model
+      }
+    );
+  }
+
+  setPlatform(event: React.ChangeEvent<HTMLInputElement>) {
+
+    var thoth_platform = null
+
+    if(event.target.value !== "") {
+      thoth_platform = event.target.value
+    }
+
+    var initial_thoth_config = this.state.thoth_config
+
+    initial_thoth_config.runtime_environments[0].platform = thoth_platform
+
+    this.setState(
+      {
+        thoth_config: initial_thoth_config,
+        platform: thoth_platform
+      }
+    );
+  }
 
 
     /**
@@ -399,7 +492,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
       // Check labels inputs (comma separated) is done on the backend currently!
       var initial_thoth_config = this.state.thoth_config
 
-      _.set(initial_thoth_config, initial_thoth_config.runtime_environments[0].base_image, labels)
+      initial_thoth_config.runtime_environments[0].labels = labels
 
       this.setState(
         {
@@ -797,7 +890,7 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
 
       const notebook_content = await take_notebook_content( this.props.panel )
 
-      var thoth_config: ThothConfig = await create_config( this.state.kernel_name );
+      var thoth_config: ThothConfig = ui_state.thoth_config;
 
       if ( this.props.loaded_resolution_engine == "pipenv" ) {
         console.debug("thoth previously failed!")
@@ -1054,10 +1147,16 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
         this.props.loaded_resolution_engine
       )
 
+      console.log(ui_on_start_state)
+
       if ( _.has(ui_on_start_state.thoth_config, "runtime_environments") ) {
         _.set(ui_on_start_state, "os_name", ui_on_start_state.thoth_config.runtime_environments[0].operating_system.name)
         _.set(ui_on_start_state, "os_version", ui_on_start_state.thoth_config.runtime_environments[0].operating_system.version)
         _.set(ui_on_start_state, "python_version", ui_on_start_state.thoth_config.runtime_environments[0].python_version)
+        _.set(ui_on_start_state, "platform", ui_on_start_state.thoth_config.runtime_environments[0].platform)
+        _.set(ui_on_start_state, "cpu_family", ui_on_start_state.thoth_config.runtime_environments[0].hardware.cpu_family)
+        _.set(ui_on_start_state, "cpu_model", ui_on_start_state.thoth_config.runtime_environments[0].hardware.cpu_model)
+        _.set(ui_on_start_state, "gpu_model", ui_on_start_state.thoth_config.runtime_environments[0].hardware.gpu_model)
       }
 
       _.set(ui_on_start_state, "root_directory", root_directory)
@@ -1095,8 +1194,6 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
           .get("https://khemenu.thoth-station.ninja/api/v1/python/package/versions", {
             params: {
               name: pkg,
-              page: 0,
-              per_page: 1
             }
           })
           .then(async ({ data }) => {
@@ -1220,6 +1317,22 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                                               value={this.state.os_version}
                                               onChange={this.setOSVersion}
                                               style={{gridColumn: "span 2"}}/>
+      let PlatformInput = <StylizedTextInput label="Platform"
+                                              value={this.state.platform}
+                                              onChange={this.setPlatform}
+                                              style={{gridColumn: "span 2"}}/>
+      let GpuModelInput = <StylizedTextInput label="GPU Family"
+                                              value={this.state.gpu_model}
+                                              onChange={this.setGpuModel}
+                                              style={{gridColumn: "span 2"}}/>
+      let CpuFamilyInput = <StylizedTextInput label="CPU Family"
+                                              value={this.state.cpu_family}
+                                              onChange={this.setCpuFamily}
+                                              style={{gridColumn: "span 2"}}/>
+      let CpuModelInput = <StylizedTextInput label="CPU Model"
+                                              value={this.state.cpu_model}
+                                              onChange={this.setCpuModel}
+                                              style={{gridColumn: "span 2"}}/>
 
       let forceInput =  <div className={INPUT_OPTIONS} style={{gridColumn: "span 1"}}>
                           <label>
@@ -1301,6 +1414,16 @@ export class DependenciesManagementUI extends React.Component<IDependencyManagem
                                   <div className="form-stack">
                                     {OSNameInput}
                                     {OSVersionInput}
+                                  </div>
+                                </div>
+
+                                <div style={{gridColumn: "span 4"}}>
+                                  <p>Hardware Settings</p>
+                                  <div className="form-grid">
+                                    {PlatformInput}
+                                    {CpuFamilyInput}
+                                    {CpuModelInput}
+                                    {GpuModelInput}
                                   </div>
                                 </div>
 
