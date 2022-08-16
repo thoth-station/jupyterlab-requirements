@@ -3,7 +3,7 @@ default_language_version:
   python: python3.8
 repos:
   - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.2.0
+    rev: v1.3.1
     hooks:
       - id: remove-tabs
 
@@ -38,7 +38,7 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/psf/black
-    rev: 22.3.0
+    rev: 22.6.0
     hooks:
       - id: black
 
@@ -47,13 +47,13 @@ repos:
     hooks:
       - id: black-nb
 
-  # - repo: https://github.com/pre-commit/mirrors-mypy
-  #   rev: v0.910
-  #   hooks:
-  #     - id: mypy
-  #       exclude: '^(docs|tasks|tests)|setup\.py'
-  #       args: [--ignore-missing-imports]
-  #       additional_dependencies: [attrs~=19.3]
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.971
+    hooks:
+      - id: mypy
+        exclude: '^(docs|tasks|tests)|setup\.py'
+        args: [--ignore-missing-imports]
+        additional_dependencies: [attrs~=19.3, types-all]
 
   - repo: https://gitlab.com/PyCQA/flake8
     rev: "3.9.2"

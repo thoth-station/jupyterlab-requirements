@@ -22,7 +22,7 @@ from jupyter_server.base.handlers import APIHandler
 from tornado import web
 
 
-class BaseSpecHandler(web.StaticFileHandler, APIHandler):  # type: ignore[misc]
+class BaseSpecHandler(web.StaticFileHandler, APIHandler):
     """Base class handler."""
 
     @staticmethod

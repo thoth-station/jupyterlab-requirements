@@ -25,7 +25,6 @@ import {
 import { Kernel } from '@jupyterlab/services';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ICommandPalette } from '@jupyterlab/apputils';
-import { INotification } from "jupyterlab_toastify";
 
 // Customizations
 import { ManageDependenciesButtonExtension } from './dependencyManagementButton';
@@ -34,6 +33,8 @@ import { Requirements, RequirementsLock } from "./types/requirements";
 import { get_kernel_name } from "./notebook";
 import { retrieve_config_file } from "./thoth";
 import { get_dependencies, store_notebook_name } from "./kernel";
+
+import { notificationHandler } from "./notificationHandler";
 
 /**
  * The command IDs used by the console plugin.
@@ -78,6 +79,7 @@ async function activate(
     mainMenu: IMainMenu,
     notebookTracker: INotebookTracker
   ): Promise<void> {
+    const {errorNotification, infoNotification} = notificationHandler({})
     const { commands } = app;
 
     // Load automatically Horus magic commands when starting notebook
@@ -113,12 +115,12 @@ async function activate(
             // user is typing
             if (( notebookTracker.activeCell.editor.model.value.text == "!pip" ) || ( notebookTracker.activeCell.editor.model.value.text == "%pip" )) {
               track_change = true
-              INotification.error("Manage dependencies: please do not use direct pip commands. Use horus and/or the UI plugin instead.");
+              errorNotification("Manage dependencies: please do not use direct pip commands. Use horus and/or the UI plugin instead.")
             }
           })
 
           if ( (notebookTracker.activeCell.editor.model.value.text.startsWith( "!pip" ) || notebookTracker.activeCell.editor.model.value.text.startsWith( "%pip" ) ) && ( track_change == false) ) {
-            INotification.error("Manage dependencies: please do not use direct pip commands. Use `%horus convert` to convert your cells.");
+            errorNotification("Manage dependencies: please do not use direct pip commands. Use `%horus convert` to convert your cells.")
           }
 
         });
@@ -131,7 +133,7 @@ async function activate(
           // Do not allow users to run pip from notebook cells
           if ( cell.editor.model.value.text.startsWith( "!pip" ) || cell.editor.model.value.text.startsWith( "%pip" ) ) {
             nbPanel.sessionContext.session.kernel.interrupt().then( _ => {
-              INotification.error("Manage dependencies: please do not use direct pip commands. Use `%horus convert` to convert your cells.");
+              errorNotification("Manage dependencies: please do not use direct pip commands. Use `%horus convert` to convert your cells.")
             })
           }
         })
@@ -204,7 +206,7 @@ async function activate(
                     // Check if kernel name is already assigned to notebook and if yes, do nothing
                     const current_kernel = get_kernel_name( nbPanel, true )
                     if ( current_kernel == kernel_name ) {
-                      INotification.info("kernel name to be assigned " + kernel_name + " already set for the current notebook (" + current_kernel + "). Kernel won't be restarted.")
+                      infoNotification("kernel name to be assigned " + kernel_name + " already set for the current notebook (" + current_kernel + "). Kernel won't be restarted.")
                     }
                     else {
                       nbPanel.sessionContext.session.changeKernel({"name": kernel_name})
@@ -239,7 +241,7 @@ async function activate(
                 // Check if kernel name is already assigned to notebook and if yes, do nothing
                 const current_kernel = get_kernel_name( nbPanel, true )
                 if ( current_kernel == kernel_name ) {
-                  INotification.info("kernel name to be assigned " + kernel_name + " already set for the current notebook (" + current_kernel + "). Kernel won't be restarted.")
+                  infoNotification("kernel name to be assigned " + kernel_name + " already set for the current notebook (" + current_kernel + "). Kernel won't be restarted.")
 
                 }
 
@@ -357,9 +359,7 @@ async function activate(
               }
 
             });
-
-            INotification.info("Manage dependencies: Notebook cells using pip have been converted to cells with %horus commands.");
-
+            infoNotification("Manage dependencies: Notebook cells using pip have been converted to cells with %horus commands.")
           }
 
         });

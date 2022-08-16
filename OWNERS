@@ -1,10 +1,13 @@
 # See the OWNERS docs at https://go.k8s.io/owners
 
 approvers:
-  - pacospace
+  - Gkrumbach07
+  - harshad16
+  - goern
   - sesheta
   - sefkhet-abwy
-  - goern
 reviewers:
   - harshad16
   - Gkrumbach07
+emeritus_approvers:
+  - pacospace  # 2022 Mar

@@ -23,19 +23,18 @@ from pathlib import Path
 
 from jupyter_server.base.handlers import APIHandler
 from tornado import web
-
 from thoth.python import Project
 
 _LOGGER = logging.getLogger("jupyterlab_requirements.dependencies_files_handler")
 
 
-class DependenciesStoredHandler(APIHandler):  # type: ignore[misc]
+class DependenciesStoredHandler(APIHandler):
     """Dependencies files handler to retrieve dependencies files."""
 
     @web.authenticated
     def post(self):  # type: ignore
         """Get requirements file from disk."""
-        input_data = self.get_json_body()
+        input_data = self.get_json_body()  # type: ignore
 
         kernel_name: str = input_data["kernel_name"]
         home = Path.home()
@@ -57,4 +56,6 @@ class DependenciesStoredHandler(APIHandler):  # type: ignore[misc]
         requirements = project.pipfile.to_dict()
         requirements_locked = project.pipfile_lock.to_dict()
 
-        self.finish(json.dumps({"requirements": requirements, "requirements_lock": requirements_locked}))
+        self.finish(
+            json.dumps({"requirements": requirements, "requirements_lock": requirements_locked})
+        )  # type: ignore
