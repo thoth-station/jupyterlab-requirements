@@ -19,29 +19,6 @@ presubmits:
               memory: "1Gi"
               cpu: "1"
 
-
-  - name: thoth-mypy-py38
-    decorate: true
-    skip_report: false
-    always_run: true
-    context: aicoe-ci/prow/mypy
-    spec:
-      containers:
-        - image: quay.io/thoth-station/thoth-pytest-ubi8-py38:v0.14.3
-          command:
-            - "/bin/run-mypy"
-            - "."
-            - --ignore-missing-imports
-            - --exclude
-            - "docs/|tests/|setup.py"
-          resources:
-            requests:
-              memory: "1Gi"
-              cpu: "500m"
-            limits:
-              memory: "1Gi"
-              cpu: "1"
-
   # - name: thoth-pytest-py38
   #   decorate: true
   #   skip_report: false
