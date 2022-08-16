@@ -50,7 +50,7 @@ export interface OperatingSystem {
 export interface Hardware {
     cpu_model?: number,
     cpu_family?: number,
-    gpu_family?: string,
+    gpu_model?: string,
 }
 
 export interface RuntimeEnvironment {
@@ -60,6 +60,7 @@ export interface RuntimeEnvironment {
     recommendation_type: string,
     base_image?: string,
     labels?: string,
+    platform?: string
     hardware?: Hardware
 }
 
