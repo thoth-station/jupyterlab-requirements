@@ -54,10 +54,10 @@ _LOGGER = logging.getLogger("thoth.jupyterlab_requirements.magic_commands")
 
 
 class ArgumentParser(argparse.ArgumentParser):
-
-    """Custom exit function with no system exit"""
+    """Custom ArgumentParser."""
 
     def exit(self, status=0, message=None):
+        """Print a custom exit function with no system exit."""
         if message:
             self._print_message(message, sys.stderr)
 
