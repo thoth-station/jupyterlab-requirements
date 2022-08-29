@@ -56,6 +56,7 @@ _LOGGER = logging.getLogger("thoth.jupyterlab_requirements.magic_commands")
 class ArgumentParser(argparse.ArgumentParser):
 
     """Custom exit function with no system exit"""
+
     def exit(self, status=0, message=None):
         if message:
             self._print_message(message, sys.stderr)
@@ -72,7 +73,7 @@ class HorusMagics(Magics):  # type: ignore[misc]
         parser.add_argument("--verbose", help="increase output verbosity", action="store_true")
 
         subparsers = parser.add_subparsers(dest="command")
-         # command: help
+        # command: help
         _ = subparsers.add_parser("help", description="See all commands available in horus.")
 
         # command: check
