@@ -18,6 +18,7 @@
 """jupyterlab-requirements magic commands."""
 
 import os
+import sys
 import json
 import logging
 import argparse
@@ -52,6 +53,14 @@ from .lib import verify_gathered_libraries
 _LOGGER = logging.getLogger("thoth.jupyterlab_requirements.magic_commands")
 
 
+class ArgumentParser(argparse.ArgumentParser):
+
+    """Custom exit function with no system exit"""
+    def exit(self, status=0, message=None):
+        if message:
+            self._print_message(message, sys.stderr)
+
+
 @magics_class
 class HorusMagics(Magics):  # type: ignore[misc]
     """Horus jupyterlab-requirements CLI as magic commands."""
@@ -59,10 +68,13 @@ class HorusMagics(Magics):  # type: ignore[misc]
     @line_magic  # type: ignore[misc]
     def horus(self, line: str):  # type: ignore
         """Horus magic commands."""
-        parser = argparse.ArgumentParser(description="This is Horus: jupyterlab-requirements CLI.")
+        parser = ArgumentParser(description="This is Horus: jupyterlab-requirements CLI.")
         parser.add_argument("--verbose", help="increase output verbosity", action="store_true")
 
         subparsers = parser.add_subparsers(dest="command")
+         # command: help
+        _ = subparsers.add_parser("help", description="See all commands available in horus.")
+
         # command: check
         _ = subparsers.add_parser("check", description="Check dependencies in notebook metadata.")
 
@@ -228,7 +240,7 @@ class HorusMagics(Magics):  # type: ignore[misc]
 
         if any([opt in {"-h", "--help"} for opt in opts]):
             # print help and return
-            return ""
+            return None
 
         if args.verbose:
             _LOGGER.setLevel(logging.DEBUG)
@@ -266,6 +278,9 @@ class HorusMagics(Magics):  # type: ignore[misc]
                 )
 
         _LOGGER.info(f"Notebook path: {nb_path}")
+
+        if args.command == "help":
+            return parser.print_help()
 
         if args.command == "check":
             _LOGGER.info("Checking notebook content.")
